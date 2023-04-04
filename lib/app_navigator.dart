@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:r2park_flutter_dev/Managers/ExemptionRequestManager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_state.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/loading_view.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_view.dart';
+import 'package:r2park_flutter_dev/models/property.dart';
 import 'Managers/UserManager.dart';
 import 'Screens/Session/session_cubit.dart';
 import 'Screens/auth/login/login.dart';
@@ -11,6 +13,7 @@ import 'models/user.dart';
 
 class AppNavigator extends StatelessWidget {
   var userManager = UserManager();
+  var exemptionManager = ExemptionRequestManager();
 
   @override
   Widget build(BuildContext context) {
@@ -56,9 +59,33 @@ class AppNavigator extends StatelessWidget {
           //show session flow
           if (state is Authenticated)
             MaterialPage(
-                child: SessionView(
-                    user: state.user,
-                    sessionCubit: context.read<SessionCubit>())),
+                child: StreamBuilder(
+                    stream: Stream.fromFuture(exemptionManager.getProperties()),
+                    builder: (context, response) {
+                      if (!response.hasData) {
+                        print('no data!');
+                        return Center(
+                            child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [CircularProgressIndicator()]));
+                      } else if (response.hasError) {
+                        print(response.error);
+                        return Center(child: Text(response.error.toString()));
+                      } else {
+                        return MultiProvider(
+                          providers: [
+                            Provider<List<Property>>.value(
+                                value: response.data!)
+                          ],
+                          child: MaterialApp(
+                            home: SessionView(
+                              user: state.user,
+                              sessionCubit: context.read<SessionCubit>(),
+                            ),
+                          ),
+                        );
+                      }
+                    }))
         ],
         onPopPage: (route, result) => route.didPop(result),
       );

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:r2park_flutter_dev/Managers/ExemptionRequestManager.dart';
 import 'package:r2park_flutter_dev/Screens/auth/auth_utilities/auth_credentials.dart';
+import 'package:r2park_flutter_dev/models/property.dart';
 
 import '../../../Managers/UserManager.dart';
 import '../../../models/user.dart';
@@ -27,6 +29,11 @@ class _LoginState extends State<Login> {
 
   _LoginState({required this.sessionCubit});
 
+  @override
+  void initState() {
+    super.initState();
+  }
+
   void openDialog(BuildContext context, String dialogTitle, StringContent,
       String dialogContent) {
     showDialog(
@@ -47,13 +54,13 @@ class _LoginState extends State<Login> {
   }
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     users = Provider.of<List<User>>(context);
+    if (sessionCubit.users == null) {
+      sessionCubit.users = users;
+      sessionCubit.attemptAutoLogin();
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text('Login')),
       body: Padding(
@@ -119,7 +126,7 @@ class _LoginState extends State<Login> {
                       if (user.password == passwordController.text) {
                         //TO-DO: dismiss login page and go to session view
                         print('LOGIN EMAIL: ${user.email}');
-                        print(user.prefix);
+                        // print(user.prefix);
                         sessionCubit.showSession(user);
                         Navigator.of(context).pop(widget);
                       } else {

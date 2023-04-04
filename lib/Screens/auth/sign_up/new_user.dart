@@ -1,18 +1,27 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:r2park_flutter_dev/Managers/UserManager.dart';
+import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Utilities/helper_functions.dart';
 import 'package:uuid/uuid.dart';
 import '../../../models/user.dart';
 
 class NewUser extends StatefulWidget {
   User? user;
-  NewUser({this.user});
+  SessionCubit? sessionCubit;
+
+  NewUser({this.user, this.sessionCubit});
 
   @override
-  _NewUserState createState() => _NewUserState(loggedInUser: user);
+  _NewUserState createState() =>
+      _NewUserState(loggedInUser: user, sessionCubit: this.sessionCubit);
 }
 
 class _NewUserState extends State<NewUser> {
   User? loggedInUser;
+  SessionCubit? sessionCubit;
+  var userManager = UserManager();
 
   TextEditingController? _emailTextFieldController;
   TextEditingController? _firstNameTextFieldController;
@@ -43,7 +52,7 @@ class _NewUserState extends State<NewUser> {
     return false;
   }
 
-  _NewUserState({this.loggedInUser});
+  _NewUserState({this.loggedInUser, this.sessionCubit});
 
   @override
   void initState() {
@@ -294,6 +303,47 @@ class _NewUserState extends State<NewUser> {
     );
   }
 
+  void _showActionSheet(BuildContext context) {
+    // var userDeleted = false;
+
+    showCupertinoModalPopup<void>(
+        context: context,
+        builder: (BuildContext modalContext) => CupertinoActionSheet(
+              title: Text(
+                'Delete User?',
+                style: TextStyle(fontSize: 20, color: Colors.red),
+              ),
+              message: Text(
+                'Are you sure you want to delete your profile and logout?',
+                style: TextStyle(fontSize: 16),
+              ),
+              actions: [
+                CupertinoActionSheetAction(
+                  onPressed: () async {
+                    userManager.deleteUser(loggedInUser!);
+                    widget.user = null;
+                    Navigator.of(modalContext).pop();
+                    BlocProvider.of<SessionCubit>(context).signOut();
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Delete'),
+                  isDestructiveAction: true,
+                )
+              ],
+              cancelButton: CupertinoActionSheetAction(
+                onPressed: (() {
+                  Navigator.pop(modalContext);
+                }),
+                child: Text('Cancel'),
+              ),
+            ));
+    // if (userDeleted == true) {
+    //   print('✅ USER DELETED TRUE');
+    //   BlocProvider.of<SessionCubit>(context).signOut();
+    //   Navigator.of(context).pop();
+    // }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -301,6 +351,15 @@ class _NewUserState extends State<NewUser> {
         title: isDefault(widget.user ?? User.def())
             ? Text('Create an Account')
             : Text('Update User'),
+        actions: [
+          loggedInUser == null
+              ? SizedBox()
+              : IconButton(
+                  onPressed: () {
+                    _showActionSheet(context);
+                  },
+                  icon: Icon(Icons.delete_forever))
+        ],
       ),
       body: Center(child: _inputData(context)),
     );

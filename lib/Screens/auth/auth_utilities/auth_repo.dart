@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthRepo {
   Future<String> _getUserIdFromAttributes() async {
@@ -14,15 +15,9 @@ class AuthRepo {
   }
 
   Future<String?> attemptAutoLogin() async {
-    // try {
-    //   final session = await Amplify.Auth.fetchAuthSession();
-
-    //   return session.isSignedIn ? (await _getUserIdFromAttributes()) : null;
-    // } catch (e) {
-    //   print('auth repo attempt auto login $e');
-    //   throw e;
-    // }
-    return '';
+    print('✅ AttemptAutoLogin called from AuthRepo');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('email');
   }
 
   Future<String?> login() async {

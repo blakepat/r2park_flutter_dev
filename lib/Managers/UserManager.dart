@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/models/mysql.dart';
 import '../models/user.dart';
@@ -5,11 +7,11 @@ import '../models/user.dart';
 class UserManager {
   Mysql db;
 
-  UserManager() : db = new Mysql();
+  UserManager() : db = Mysql();
 
   Future<List<User>> getUsers() async {
     List<User> result = [];
-    db.getConnection().then((conn) {
+    await db.getConnection().then((conn) {
       String sql = 'SELECT * FROM users;';
       conn.query(sql).then((results) {
         for (var row in results) {
@@ -276,6 +278,18 @@ class UserManager {
         print('❌ Error creating user: $error');
       }).whenComplete(() {
         conn.close();
+      });
+    });
+  }
+
+  Future<void> deleteUser(User user) async {
+    db.getConnection().then((conn) {
+      //province = 10, otp = 20, enforceId = 30, about = 40, country = 50, homephome = 60, latitude = 70
+      String sql = 'Delete from users where user_id=?';
+      conn.query(sql, [user.id]).then((result) {
+        print('✅ Deleted User!');
+      }, onError: (error) {
+        print('❌ Error deleting user: $error');
       });
     });
   }
