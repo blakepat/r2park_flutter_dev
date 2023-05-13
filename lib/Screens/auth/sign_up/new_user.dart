@@ -297,7 +297,13 @@ class _NewUserState extends State<NewUser> {
               },
             ),
           ),
-          SizedBox(height: 12)
+          SizedBox(height: 12),
+          TextButton(
+              onPressed: () => _showActionSheet(context),
+              child: Text(
+                'Delete Profile',
+                style: TextStyle(color: Colors.red),
+              ))
         ],
       ),
     );
@@ -347,20 +353,22 @@ class _NewUserState extends State<NewUser> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: isDefault(widget.user ?? User.def())
-            ? Text('Create an Account')
-            : Text('Update User'),
-        actions: [
-          loggedInUser == null
-              ? SizedBox()
-              : IconButton(
-                  onPressed: () {
-                    _showActionSheet(context);
-                  },
-                  icon: Icon(Icons.delete_forever))
-        ],
-      ),
+      appBar: loggedInUser == null
+          ? AppBar(
+              title: isDefault(widget.user ?? User.def())
+                  ? Text('Create an Account')
+                  : Text('Update User'),
+              actions: [
+                // loggedInUser == null
+                //     ? SizedBox()
+                //     : IconButton(
+                //         onPressed: () {
+                //           _showActionSheet(context);
+                //         },
+                //         icon: Icon(Icons.delete_forever))
+              ],
+            )
+          : null,
       body: Center(child: _inputData(context)),
     );
   }

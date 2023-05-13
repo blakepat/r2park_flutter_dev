@@ -143,6 +143,7 @@ class UserManager {
         user.gender,
         user.joiningDate,
         user.dateOfBirth,
+
         user.address,
         user.salary,
         user.propertyType,

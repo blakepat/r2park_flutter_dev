@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/user.dart';
+import '../../models/visitor.dart';
 import '../auth/auth_utilities/auth_credentials.dart';
 import '../auth/auth_utilities/auth_repo.dart';
 import '../auth/data_repo.dart';
@@ -60,10 +61,53 @@ class SessionCubit extends Cubit<SessionState> {
     // await dataRepo.updateSavedLicensePlates(plates: plates, user: user);
   }
 
+  void saveVisitor(Visitor visitor) async {
+    final SharedPreferences _prefs = await prefs;
+
+    var previousVisitorList = _prefs.getStringList('visitors') ?? [];
+
+    String newVisitor =
+        '${visitor.firstName},${visitor.lastName},${visitor.plateNumber}';
+
+    previousVisitorList.add(newVisitor);
+
+    _prefs.setStringList('visitors', previousVisitorList);
+  }
+
+  Future<List<Visitor>> getVisitors() async {
+    final SharedPreferences _prefs = await prefs;
+
+    var visitors = _prefs.getStringList('visitors');
+
+    var savedVisitors = _prefs.getStringList('visitors') ?? [];
+    List<Visitor> visitorList = [];
+    for (var i = 0; i < savedVisitors.length; i++) {
+      var visitor = savedVisitors[i];
+      List<String> separatedVisitor = visitor.split(',');
+
+      visitorList.add(Visitor(
+          firstName: separatedVisitor[0],
+          lastName: separatedVisitor[1],
+          plateNumber: separatedVisitor[2]));
+    }
+    return visitorList;
+  }
+
   void addLocation(String locationID) async {
     final SharedPreferences _prefs = await prefs;
     var locations = _prefs.getStringList('locations') ?? [];
-    locations.add(locationID);
+    if (!locations.contains(locationID)) {
+      locations.add(locationID);
+    }
+    await _prefs.setStringList('locations', locations);
+  }
+
+  void removeLocation(String locationID) async {
+    final SharedPreferences _prefs = await prefs;
+    var locations = _prefs.getStringList('locations') ?? [];
+    locations.remove(locationID);
+    print(locationID);
+    print(locations);
     await _prefs.setStringList('locations', locations);
   }
 

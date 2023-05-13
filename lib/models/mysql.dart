@@ -4,7 +4,7 @@ class Mysql {
   static String host = 'localhost',
       user = 'root',
       // password = '1234',
-      db = 'parkinm2_r2p-flutter-dev2';
+      db = 'parkinm2_r2p-flutter-dev3';
 
   static int port = 3306;
 
