@@ -40,7 +40,7 @@ class AppNavigator extends StatelessWidget {
                 } else {
                   return MultiProvider(
                     providers: [
-                      Provider<List<User>>.value(value: response.data!)
+                      Provider<List<User>>.value(value: response.data!),
                     ],
                     child: MaterialApp(
                       title: 'Login Flutter',

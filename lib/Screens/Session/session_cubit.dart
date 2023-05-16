@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:r2park_flutter_dev/Managers/ExemptionRequestManager.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/user.dart';
@@ -112,7 +113,7 @@ class SessionCubit extends Cubit<SessionState> {
   }
 
   String? checkIfValidProperty(String city, String streetName) {
-    print(properties?.length);
+    print('🐤🐤${properties?.length}');
 
     Property? property;
     try {
@@ -132,9 +133,9 @@ class SessionCubit extends Cubit<SessionState> {
       property = null;
     }
 
-    print('${property?.propertyName}, ${property?.propertyID}');
+    print('${property?.propertyName}, ${property?.propertyID2}');
 
-    return property?.propertyID;
+    return property?.propertyID2;
   }
 
   Future<List<String>> getLicensePlates() async {

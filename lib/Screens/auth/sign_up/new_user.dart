@@ -1,10 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:r2park_flutter_dev/Managers/UserManager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Utilities/helper_functions.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+import '../../../Managers/ExemptionRequestManager.dart';
+import '../../../models/property.dart';
 import '../../../models/user.dart';
 
 class NewUser extends StatefulWidget {
@@ -22,16 +26,19 @@ class _NewUserState extends State<NewUser> {
   User? loggedInUser;
   SessionCubit? sessionCubit;
   var userManager = UserManager();
+  var exemptionManager = ExemptionRequestManager();
 
   TextEditingController? _emailTextFieldController;
   TextEditingController? _firstNameTextFieldController;
   TextEditingController? _lastNameTextFieldController;
   TextEditingController? _mobileNumberTextFieldController;
   TextEditingController? _address1TextFieldController;
-  TextEditingController? _address2TextFieldController;
+  TextEditingController? _unitNumberTextFieldController;
   TextEditingController? _cityTextFieldController;
   TextEditingController? _provinceTextFieldController;
   TextEditingController? _postalCodeTextFieldController;
+  TextEditingController? _companyAddressTextFieldController;
+  TextEditingController? _companyCityTextFieldController;
   TextEditingController? _passwordTextFieldController;
 
   bool emailValidate = true;
@@ -43,6 +50,8 @@ class _NewUserState extends State<NewUser> {
   bool cityValidate = true;
   bool provinceValidate = true;
   bool postalCodeValidate = true;
+  bool companyAddressValidate = true;
+  bool companyCityValidate = true;
   bool passwordValidate = true;
 
   isDefault(User user) {
@@ -76,8 +85,8 @@ class _NewUserState extends State<NewUser> {
     _address1TextFieldController = TextEditingController();
     _address1TextFieldController?.text = widget.user?.address1 ?? '';
 
-    _address2TextFieldController = TextEditingController();
-    _address2TextFieldController?.text = widget.user?.address2 ?? '';
+    _unitNumberTextFieldController = TextEditingController();
+    _unitNumberTextFieldController?.text = widget.user?.address2 ?? '';
 
     _cityTextFieldController = TextEditingController();
     _cityTextFieldController?.text = widget.user?.city ?? '';
@@ -87,6 +96,13 @@ class _NewUserState extends State<NewUser> {
 
     _postalCodeTextFieldController = TextEditingController();
     _postalCodeTextFieldController?.text = widget.user?.postalCode ?? '';
+
+    _companyAddressTextFieldController = TextEditingController();
+    _companyAddressTextFieldController?.text =
+        widget.user?.companyAddress ?? '';
+
+    _companyCityTextFieldController = TextEditingController();
+    _companyCityTextFieldController?.text = widget.user?.companyName ?? '';
 
     _passwordTextFieldController = TextEditingController();
     _passwordTextFieldController?.text = widget.user?.password ?? '';
@@ -101,10 +117,12 @@ class _NewUserState extends State<NewUser> {
     _lastNameTextFieldController?.dispose();
     _mobileNumberTextFieldController?.dispose();
     _address1TextFieldController?.dispose();
-    _address2TextFieldController?.dispose();
+    _unitNumberTextFieldController?.dispose();
     _cityTextFieldController?.dispose();
     _provinceTextFieldController?.dispose();
     _postalCodeTextFieldController?.dispose();
+    _companyAddressTextFieldController?.dispose();
+    _companyCityTextFieldController?.dispose();
     _passwordTextFieldController?.dispose();
   }
 
@@ -158,7 +176,7 @@ class _NewUserState extends State<NewUser> {
               SizedBox(
                 width: 80,
                 child: _textField(
-                    'Apt #', _address2TextFieldController, address2Validate),
+                    'Apt #', _unitNumberTextFieldController, address2Validate),
               ),
               SizedBox(width: 12),
               Expanded(
@@ -188,6 +206,24 @@ class _NewUserState extends State<NewUser> {
               )
             ],
           ),
+          Row(
+            children: [
+              Expanded(
+                  flex: 3,
+                  child: _textField(
+                      'Company Address',
+                      _companyAddressTextFieldController,
+                      companyAddressValidate)),
+              SizedBox(
+                width: 12,
+              ),
+              Expanded(
+                flex: 2,
+                child: _textField('Company City',
+                    _companyCityTextFieldController, companyCityValidate),
+              )
+            ],
+          ),
           SizedBox(
             height: 4,
           ),
@@ -209,7 +245,7 @@ class _NewUserState extends State<NewUser> {
                 String? lastName = _lastNameTextFieldController?.text;
                 String? mobileNumber = _mobileNumberTextFieldController?.text;
                 String? address1 = _address1TextFieldController?.text;
-                String? address2 = _address2TextFieldController?.text;
+                String? address2 = _unitNumberTextFieldController?.text;
                 String? city = _cityTextFieldController?.text;
                 String? province = _provinceTextFieldController?.text;
                 String? postalCode = _postalCodeTextFieldController?.text;
@@ -259,7 +295,7 @@ class _NewUserState extends State<NewUser> {
                     passwordValidate) {
                   final now = DateTime.now();
                   // final id = now.microsecondsSinceEpoch.toInt();
-
+                  var newUser = User.def();
                   if (loggedInUser != null) {
                     print('🥶${loggedInUser?.id}');
                     // loggedInUser?.id = id;
@@ -277,7 +313,7 @@ class _NewUserState extends State<NewUser> {
                     widget.user = loggedInUser;
                   } else {
                     print('😡${loggedInUser?.id}');
-                    var newUser = User.def();
+
                     // newUser.id = id;
                     newUser.email = email;
                     newUser.firstName = firstName;
@@ -292,6 +328,31 @@ class _NewUserState extends State<NewUser> {
 
                     widget.user = newUser;
                   }
+                  //if address matches property assign property ID to user
+
+                  print(_cityTextFieldController?.text);
+                  print(_address1TextFieldController?.text);
+
+                  var propertyID = sessionCubit?.checkIfValidProperty(
+                      _cityTextFieldController?.text.toLowerCase() ?? '',
+                      _address1TextFieldController?.text.toLowerCase() ?? '');
+
+                  var companyID = sessionCubit?.checkIfValidProperty(
+                      _companyCityTextFieldController?.text.toLowerCase() ?? '',
+                      _companyAddressTextFieldController?.text.toLowerCase() ??
+                          '');
+
+                  print(companyID);
+                  print(propertyID);
+
+                  if (propertyID != null) {
+                    print('✅✅ $propertyID PROPERTY valid!');
+                    newUser.clientDisplayName = propertyID;
+                  } else if (companyID != null) {
+                    print('✅✅ $propertyID COMPANY ADDRESS valid!');
+                    newUser.clientDisplayName = propertyID;
+                  }
+
                   Navigator.of(context).pop(widget.user);
                 }
               },

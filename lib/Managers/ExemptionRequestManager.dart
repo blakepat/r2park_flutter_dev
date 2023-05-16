@@ -10,6 +10,7 @@ class ExemptionRequestManager {
   ExemptionRequestManager() : db = Mysql();
 
   Future<List<Property>> getProperties() async {
+    print('🤡');
     List<Property> result = [];
     await db.getConnection().then((conn) {
       String sql = 'SELECT * FROM properties;';
@@ -48,7 +49,7 @@ class ExemptionRequestManager {
             ),
           );
 
-          print('${row[2]}, ${row[3]}');
+          // print('${row[2]}, ${row[3]}');
         }
       }, onError: (error) {
         print('Error getting properties: $error');
@@ -115,4 +116,8 @@ class ExemptionRequestManager {
       });
     });
   }
+
+  Future<List<Property>>? then(
+      Future<List<Property>> Function(ExemptionRequestManager exemptionManager)
+          param0) {}
 }

@@ -53,6 +53,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
   @override
   void initState() {
     super.initState();
+
     isResident = user.clientDisplayName != "";
     _tabController = TabController(length: isResident ? 3 : 2, vsync: this);
     licensePlates = sessionCubit.prefs.then((SharedPreferences _prefs) {
@@ -62,15 +63,17 @@ class VisitorSessionScreen extends State<VisitorSessionView>
       }
       return plates;
     });
-
-    previousProperties = sessionCubit.prefs.then((SharedPreferences _prefs) {
-      var locations = _prefs.getStringList('locations') ?? [];
-      if (locations.isNotEmpty) {
-        _selectedAddressID = locations[0];
-        _selectedproperty = sessionCubit.properties
-            ?.firstWhere((element) => element.propertyID == locations[0]);
-      }
-      return locations;
+    setState(() {
+      previousProperties = sessionCubit.prefs.then((SharedPreferences _prefs) {
+        var locations = _prefs.getStringList('locations') ?? [];
+        if (locations.isNotEmpty) {
+          _selectedAddressID = locations[0];
+          _selectedproperty = sessionCubit.properties
+              ?.firstWhere((element) => element.propertyID2 == locations[0]);
+        }
+        print(locations);
+        return locations;
+      });
     });
   }
 
@@ -87,11 +90,6 @@ class VisitorSessionScreen extends State<VisitorSessionView>
       }
     });
 
-    properties = Provider.of<List<Property>>(context);
-    if (sessionCubit.properties == null) {
-      sessionCubit.properties = properties;
-    }
-
     return Scaffold(
       backgroundColor: Colors.grey[850],
       appBar: _createAppBar(width),
@@ -105,16 +103,58 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                 padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                 child: Column(
                   children: [
-                    _licensePlateList(),
-                    _licencePlateForm(),
-                    _previousLocationList(),
+                    _addPlateTitle(),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                          width: MediaQuery.of(context).size.width - 16,
+                          decoration: BoxDecoration(
+                              color: Colors.black26,
+                              border: Border.all(color: Colors.green),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(8))),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              children: [
+                                _licensePlateList(),
+                                _licencePlateForm(),
+                              ],
+                            ),
+                          )),
+                    ),
                     _addLocationTitle(),
-                    Row(
-                      children: [_unitNumberInput(), _streetInput()],
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                          width: MediaQuery.of(context).size.width - 16,
+                          decoration: BoxDecoration(
+                              color: Colors.black26,
+                              border: Border.all(color: Colors.green),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(8))),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              children: [
+                                _previousLocationList(),
+                                Row(
+                                  children: [
+                                    _unitNumberInput(),
+                                    _streetInput()
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    _cityInput(),
+                                    _addLocationButton()
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )),
                     ),
-                    Row(
-                      children: [_cityInput(), _addLocationButton()],
-                    ),
+
                     _durationInput(),
                     _submitButton(),
                     // _footerView()
@@ -237,13 +277,28 @@ class VisitorSessionScreen extends State<VisitorSessionView>
     // }
   }
 
+  Widget _addPlateTitle() {
+    return SizedBox(
+      width: double.infinity,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 12, 4, 0),
+        child: Text(
+          'Licence Plates',
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              fontSize: 18, fontWeight: FontWeight.w400, color: Colors.white),
+        ),
+      ),
+    );
+  }
+
   Widget _licencePlateForm() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
       child: Row(
         children: [
           SizedBox(
-            width: MediaQuery.of(context).size.width - 90,
+            width: MediaQuery.of(context).size.width - 120,
             child: TextFormField(
                 style: TextStyle(color: Colors.white),
                 controller: plateController,
@@ -252,7 +307,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                     Icons.rectangle_rounded,
                     color: Colors.white,
                   ),
-                  hintText: 'Add New License Plate...',
+                  hintText: 'Add License Plate',
                   hintStyle: TextStyle(color: Colors.white),
                   labelStyle: TextStyle(color: Colors.white),
                   enabledBorder: UnderlineInputBorder(
@@ -335,8 +390,8 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                             child: Padding(
                               padding: const EdgeInsets.all(4.0),
                               child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green),
+                                style: ElevatedButton.styleFrom(),
+                                // backgroundColor: Colors.green),
                                 onPressed: () {},
                                 child: CheckboxListTile(
                                   title: Text(
@@ -362,26 +417,26 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                       .toList();
 
                   return Padding(
-                    padding: const EdgeInsets.all(12.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: Column(
                       children: [
+                        // SizedBox(
+                        //   width: double.infinity,
+                        //   child: Padding(
+                        //     padding: const EdgeInsets.all(4.0),
+                        //     child: Text(
+                        //       'License Plate:',
+                        //       // ${_selectedLicensePlate.toUpperCase().trim()}',
+                        //       textAlign: TextAlign.left,
+                        //       style: TextStyle(
+                        //           fontSize: 22,
+                        //           fontWeight: FontWeight.w400,
+                        //           color: Colors.white),
+                        //     ),
+                        //   ),
+                        // ),
                         SizedBox(
-                          width: double.infinity,
-                          child: Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Text(
-                              'License Plate:',
-                              // ${_selectedLicensePlate.toUpperCase().trim()}',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.white),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 100,
+                          height: 120,
                           child: ListView(children: listOfPlates),
                         ),
                       ],
@@ -399,12 +454,12 @@ class VisitorSessionScreen extends State<VisitorSessionView>
     return SizedBox(
       width: double.infinity,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(4, 12, 4, 0),
+        padding: const EdgeInsets.fromLTRB(8, 12, 4, 0),
         child: Text(
-          'Add New Location:',
+          'Locations',
           textAlign: TextAlign.left,
           style: TextStyle(
-              fontSize: 22, fontWeight: FontWeight.w400, color: Colors.white),
+              fontSize: 18, fontWeight: FontWeight.w400, color: Colors.white),
         ),
       ),
     );
@@ -417,7 +472,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: MediaQuery.of(context).size.width / 2 + 20,
+            width: MediaQuery.of(context).size.width / 2,
             child: TextFormField(
               style: TextStyle(color: Colors.white),
               controller: streetController,
@@ -475,7 +530,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: MediaQuery.of(context).size.width - 110,
+            width: MediaQuery.of(context).size.width - 130,
             child: TextFormField(
               style: TextStyle(color: Colors.white),
               controller: cityController,
@@ -515,7 +570,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                 if (locations.isNotEmpty) {
                   _selectedAddressID = locations[0];
                   _selectedproperty = sessionCubit.properties?.firstWhere(
-                      (element) => element.propertyID == locations[0]);
+                      (element) => element.propertyID2 == locations[0]);
                 }
                 return locations;
               });
@@ -553,91 +608,104 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                   final listOfaddressIds = snapshot.data;
                   List<Property>? listOfAddress;
                   try {
-                    listOfAddress = properties
+                    listOfAddress = sessionCubit.properties
                         ?.where((element) =>
-                            listOfaddressIds!.contains(element.propertyID))
+                            listOfaddressIds!.contains(element.propertyID2))
                         .toList();
                   } catch (e) {
                     print('error gettings list of address: $e');
                   }
 
                   if (listOfAddress != null) {
-                    var listOfAddressTiles = listOfAddress
-                        .map((address) => Dismissible(
-                              background: Container(color: Colors.red),
-                              key: Key(address.propertyName!),
-                              onDismissed: (direction) {
-                                setState(() {
-                                  snapshot.data!.removeWhere(
-                                      (element) => element == address);
-                                  properties?.remove(address);
+                    if (listOfAddress.isNotEmpty) {
+                      var listOfAddressTiles = listOfAddress
+                          .map((address) => Dismissible(
+                                background: Container(color: Colors.red),
+                                key: Key(address.propertyName!),
+                                onDismissed: (direction) {
+                                  setState(() {
+                                    snapshot.data!.removeWhere(
+                                        (element) => element == address);
+                                    properties?.remove(address);
 
-                                  sessionCubit
-                                      .removeLocation(address.propertyID!);
-                                });
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green),
-                                  onPressed: () {},
-                                  child: CheckboxListTile(
-                                    title: Text(
-                                      address.propertyAddress!,
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 18),
+                                    sessionCubit
+                                        .removeLocation(address.propertyID2!);
+                                  });
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(),
+                                    // backgroundColor: Colors.pu),
+                                    onPressed: () {},
+                                    child: CheckboxListTile(
+                                      title: Text(
+                                        address.propertyAddress!,
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 18),
+                                      ),
+                                      shape: RoundedRectangleBorder(),
+                                      value: _selectedAddressID ==
+                                          address.propertyID2,
+                                      onChanged: (newValue) {
+                                        if (newValue != null) {
+                                          newValue
+                                              ? setState(() {
+                                                  _selectedAddressID =
+                                                      address.propertyID2!;
+                                                  _selectedproperty = address;
+                                                })
+                                              : setState(() {
+                                                  _selectedAddressID = '';
+                                                  _selectedproperty = null;
+                                                });
+                                        }
+                                      },
                                     ),
-                                    shape: RoundedRectangleBorder(),
-                                    value: _selectedAddressID ==
-                                        address.propertyID,
-                                    onChanged: (newValue) {
-                                      if (newValue != null) {
-                                        newValue
-                                            ? setState(() {
-                                                _selectedAddressID =
-                                                    address.propertyID!;
-                                                _selectedproperty = address;
-                                              })
-                                            : setState(() {
-                                                _selectedAddressID = '';
-                                                _selectedproperty = null;
-                                              });
-                                      }
-                                    },
                                   ),
                                 ),
-                              ),
-                            ))
-                        .toList();
+                              ))
+                          .toList();
 
-                    return Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            width: double.infinity,
-                            child: Text(
-                              'Select Location:',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.white),
+                      return Padding(
+                        padding: const EdgeInsets.all(0.0),
+                        child: Column(
+                          children: [
+                            // SizedBox(
+                            //   width: double.infinity,
+                            //   child: Text(
+                            //     'Select Location:',
+                            //     textAlign: TextAlign.left,
+                            //     style: TextStyle(
+                            //         fontSize: 22,
+                            //         fontWeight: FontWeight.w400,
+                            //         color: Colors.white),
+                            //   ),
+                            // ),
+                            SizedBox(
+                              height: 120,
+                              child: ListView(children: listOfAddressTiles),
                             ),
-                          ),
-                          SizedBox(
-                            height: 110,
-                            child: ListView(children: listOfAddressTiles),
-                          ),
-                        ],
-                      ),
-                    );
+                          ],
+                        ),
+                      );
+                    } else {
+                      return Container(
+                        height: 120,
+                        child: Center(
+                          child: Text('No Locations Added.'),
+                        ),
+                      );
+                    }
                   } else {
-                    return SizedBox();
+                    return SizedBox(
+                      height: 120,
+                    );
                   }
                 } else {
-                  return SizedBox();
+                  return SizedBox(
+                    height: 120,
+                  );
                 }
               }
           }
@@ -679,7 +747,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                 'Days Requested:',
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 18,
                     fontWeight: FontWeight.w400,
                     color: Colors.white),
               ),

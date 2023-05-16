@@ -77,7 +77,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
       width: double.infinity,
       decoration: BoxDecoration(
           border: Border.all(color: Colors.green),
-          // color: Colors.green,
+          color: Colors.black26,
           borderRadius: BorderRadius.all(Radius.circular(8))),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -107,7 +107,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
         width: double.infinity,
         child: Text(
           'Visitor Information:',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
           textAlign: TextAlign.left,
         ),
       ),
@@ -150,11 +150,11 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700,
-                                      fontSize: 22),
+                                      fontSize: 16),
                                 ),
                                 subtitle: Text(
                                   '${visitor.plateNumber.toUpperCase()}',
-                                  style: TextStyle(fontSize: 16),
+                                  style: TextStyle(fontSize: 14),
                                 ),
                                 shape: RoundedRectangleBorder(),
                                 value: _selectedVisitor == visitor,
@@ -185,15 +185,23 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
                               // ${_selectedLicensePlate.toUpperCase().trim()}',
                               textAlign: TextAlign.left,
                               style: TextStyle(
-                                  fontSize: 22,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.w400,
                                   color: Colors.white),
                             ),
                           ),
                         ),
-                        SizedBox(
+                        Container(
+                          decoration: BoxDecoration(
+                              color: Colors.black26,
+                              border: Border.all(color: Colors.green),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(8))),
                           height: 120,
-                          child: ListView(children: listOfVisitors),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ListView(children: listOfVisitors),
+                          ),
                         ),
                       ],
                     ),
@@ -328,7 +336,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
                 'Days Requested:',
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 18,
                     fontWeight: FontWeight.w400,
                     color: Colors.white),
               ),

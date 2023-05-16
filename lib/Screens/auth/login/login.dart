@@ -158,7 +158,9 @@ class _LoginState extends State<Login> {
                       onPressed: () {
                         Navigator.of(context)
                             .push(MaterialPageRoute(
-                          builder: (context) => NewUser(),
+                          builder: (context) => NewUser(
+                            sessionCubit: sessionCubit,
+                          ),
                         ))
                             .then(
                           (obj) {
