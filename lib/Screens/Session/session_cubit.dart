@@ -143,6 +143,34 @@ class SessionCubit extends Cubit<SessionState> {
     return _prefs.getStringList('plates') ?? [];
   }
 
+  List<User> getResidentRequests({required String addressID}) {
+    var residents = users
+            ?.where((element) =>
+                element.clientDisplayName == addressID &&
+                element.authorityLevel == 5)
+            .toList() ??
+        [];
+
+    residents.sort((a, b) =>
+        (a.address2 ?? a.address1!).compareTo(b.address2 ?? b.address1!));
+
+    return residents;
+  }
+
+  List<User> getResidents({required String addressID}) {
+    var residents = users
+            ?.where((element) =>
+                element.clientDisplayName == addressID &&
+                element.authorityLevel == 12)
+            .toList() ??
+        [];
+
+    residents.sort((a, b) =>
+        (a.address2 ?? a.address1!).compareTo(b.address2 ?? b.address1!));
+
+    return residents;
+  }
+
   void showAuth() => emit(Unauthenticated());
 
   void showSession(User user) async {

@@ -12,6 +12,7 @@ import 'package:r2park_flutter_dev/models/self_registration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/user.dart';
 import '../auth/sign_up/new_user.dart';
+import 'manager_session_view.dart';
 
 class VisitorSessionView extends StatefulWidget {
   final User user;
@@ -31,6 +32,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
   late TabController _tabController;
   int _activeIndex = 0;
   bool isResident = false;
+  bool isManager = false;
 
   final plateController = TextEditingController();
   final cityController = TextEditingController();
@@ -54,8 +56,10 @@ class VisitorSessionScreen extends State<VisitorSessionView>
   void initState() {
     super.initState();
 
-    isResident = user.clientDisplayName != "";
-    _tabController = TabController(length: isResident ? 3 : 2, vsync: this);
+    isResident = user.clientDisplayName != '';
+    isManager = user.authorityLevel == 6 && user.clientDisplayName != '';
+    _tabController = TabController(
+        length: isResident ? (isManager ? 4 : 3) : 2, vsync: this);
     licensePlates = sessionCubit.prefs.then((SharedPreferences _prefs) {
       var plates = _prefs.getStringList('plates') ?? [];
       if (plates.isNotEmpty) {
@@ -110,7 +114,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                           width: MediaQuery.of(context).size.width - 16,
                           decoration: BoxDecoration(
                               color: Colors.black26,
-                              border: Border.all(color: Colors.green),
+                              border: Border.all(color: Colors.white30),
                               borderRadius:
                                   BorderRadius.all(Radius.circular(8))),
                           child: Padding(
@@ -130,7 +134,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                           width: MediaQuery.of(context).size.width - 16,
                           decoration: BoxDecoration(
                               color: Colors.black26,
-                              border: Border.all(color: Colors.green),
+                              border: Border.all(color: Colors.white30),
                               borderRadius:
                                   BorderRadius.all(Radius.circular(8))),
                           child: Padding(
@@ -169,6 +173,13 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                 child:
                     ResidentSessionView(user: user, sessionCubit: sessionCubit),
               )),
+            if (isManager)
+              Container(
+                  child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child:
+                    ManagerSessionView(user: user, sessionCubit: sessionCubit),
+              )),
             Container(
                 child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -186,8 +197,10 @@ class VisitorSessionScreen extends State<VisitorSessionView>
       if (_activeIndex == 0) {
         title = 'Register To Park';
       } else if (_activeIndex == 1) {
-        title = 'Register a Vistor';
+        title = isResident ? 'Register a Vistor' : 'Update Profile';
       } else if (_activeIndex == 2) {
+        title = isManager ? 'Manage Residents' : 'Update Profile';
+      } else {
         title = 'Update Profile';
       }
     });
@@ -196,7 +209,11 @@ class VisitorSessionScreen extends State<VisitorSessionView>
       bottom: TabBar(
           controller: _tabController,
           labelPadding: EdgeInsets.symmetric(
-              horizontal: isResident ? width / 6 - 15 : width / 4 - 15),
+              horizontal: isResident
+                  ? isManager
+                      ? width / 8 - 15
+                      : width / 6 - 15
+                  : width / 4 - 15),
           isScrollable: true,
           tabs: [
             Tab(
@@ -205,6 +222,13 @@ class VisitorSessionScreen extends State<VisitorSessionView>
             if (isResident)
               Tab(
                 icon: Icon(Icons.people, color: Colors.white),
+              ),
+            if (isManager)
+              Tab(
+                icon: Icon(
+                  Icons.perm_contact_cal_sharp,
+                  color: Colors.white,
+                ),
               ),
             Tab(
               icon: Icon(Icons.person, color: Colors.white),

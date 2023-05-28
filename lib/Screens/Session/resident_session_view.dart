@@ -60,8 +60,12 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
           _residenceSummary(),
           _previousVisitorsList(),
           _visitorSummary(),
-          _visitorFirstNameTextForm(),
-          _visitorLastNameTextForm(),
+          Row(
+            children: [
+              _visitorFirstNameTextForm(),
+              _visitorLastNameTextForm(),
+            ],
+          ),
           _visitorPlateTextForm(),
           _durationInput(),
           _submitButton()
@@ -76,7 +80,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-          border: Border.all(color: Colors.green),
+          border: Border.all(color: Colors.white30),
           color: Colors.black26,
           borderRadius: BorderRadius.all(Radius.circular(8))),
       child: Padding(
@@ -194,10 +198,10 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
                         Container(
                           decoration: BoxDecoration(
                               color: Colors.black26,
-                              border: Border.all(color: Colors.green),
+                              border: Border.all(color: Colors.white30),
                               borderRadius:
                                   BorderRadius.all(Radius.circular(8))),
-                          height: 120,
+                          height: 180,
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: ListView(children: listOfVisitors),
@@ -221,7 +225,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: MediaQuery.of(context).size.width - 64,
+            width: MediaQuery.of(context).size.width / 3 + 22,
             child: TextFormField(
               style: TextStyle(color: Colors.white),
               controller: firstNameController,
@@ -230,7 +234,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
                     Icons.person,
                     color: Colors.white,
                   ),
-                  hintText: 'First name...',
+                  hintText: 'First Name',
                   hintStyle: TextStyle(color: Colors.white),
                   labelStyle: TextStyle(color: Colors.white),
                   enabledBorder: UnderlineInputBorder(
@@ -250,16 +254,17 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: MediaQuery.of(context).size.width - 64,
+            width: MediaQuery.of(context).size.width / 3 + 36,
             child: TextFormField(
               style: TextStyle(color: Colors.white),
               controller: lastNameController,
               decoration: InputDecoration(
-                  icon: Icon(
-                    Icons.person_2_outlined,
-                    color: Colors.white,
-                  ),
-                  hintText: 'Last name...',
+                  //     icon: Icon(
+                  //       Icons.person_2_outlined,
+                  //       color: Colors.white,
+                  //     ),
+
+                  hintText: 'Last Name',
                   hintStyle: TextStyle(color: Colors.white),
                   labelStyle: TextStyle(color: Colors.white),
                   enabledBorder: UnderlineInputBorder(

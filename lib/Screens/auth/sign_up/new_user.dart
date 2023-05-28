@@ -54,7 +54,9 @@ class _NewUserState extends State<NewUser> {
   bool companyCityValidate = true;
   bool passwordValidate = true;
 
-  isDefault(User user) {
+  bool isNewUser = true;
+
+  checkifNewUser(User user) {
     if (user.firstName == '' && user.lastName == '') {
       return true;
     }
@@ -68,6 +70,8 @@ class _NewUserState extends State<NewUser> {
     super.initState();
 
     print('😈 ${loggedInUser?.prefix}');
+
+    isNewUser = checkifNewUser(widget.user ?? User.def());
 
     if (widget.user == null) widget.user = User.def();
     _emailTextFieldController = TextEditingController();
@@ -236,7 +240,7 @@ class _NewUserState extends State<NewUser> {
             height: 40,
             padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
             child: ElevatedButton(
-              child: isDefault(widget.user ?? User.def())
+              child: checkifNewUser(widget.user ?? User.def())
                   ? Text('Create')
                   : Text('Update'),
               onPressed: () {
@@ -347,13 +351,46 @@ class _NewUserState extends State<NewUser> {
 
                   if (propertyID != null) {
                     print('✅✅ $propertyID PROPERTY valid!');
-                    newUser.clientDisplayName = propertyID;
+                    widget.user?.clientDisplayName = propertyID;
+
+                    if (isNewUser) {
+                      openDialog(
+                          context,
+                          '✅ User Created!',
+                          "You can now login! Your address matches one of our properties, we have sent a request to your property manager to give you residence access!",
+                          "You can now login! Your address matches one of our properties, we have sent a request to your property manager to give you residence access!");
+                    }
                   } else if (companyID != null) {
                     print('✅✅ $propertyID COMPANY ADDRESS valid!');
-                    newUser.clientDisplayName = propertyID;
-                  }
+                    widget.user?.clientDisplayName = companyID;
 
-                  Navigator.of(context).pop(widget.user);
+                    if (isNewUser) {
+                      openDialog(
+                          context,
+                          '✅ User Created!',
+                          "You can now login! Your company address matches one of our properties, we have sent a request to your manager!",
+                          "You can now login! Your company address matches one of our properties, we have sent a request to your manager!");
+                    }
+                  } else {
+                    if (isNewUser) {
+                      openDialog(
+                          context,
+                          '✅ User Created!',
+                          "Thank you very using R2Park, sign in to register your vehicle!",
+                          "Thank you very using R2Park, sign in to register your vehicle!");
+                    } else {
+                      openDialog(
+                          context,
+                          'Success ✅',
+                          "Your account has been updated!",
+                          "Your account has been updated!");
+                    }
+                  }
+                  if (isNewUser) {
+                    Navigator.of(context).pop(widget.user);
+                  } else {
+                    userManager.updateUser(widget.user!);
+                  }
                 }
               },
             ),
@@ -411,12 +448,31 @@ class _NewUserState extends State<NewUser> {
     // }
   }
 
+  void openDialog(BuildContext context, String dialogTitle, StringContent,
+      String dialogContent) {
+    showDialog(
+        context: context,
+        builder: ((context) {
+          return AlertDialog(
+            title: Text(dialogTitle),
+            content: Text(dialogContent),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Back'))
+            ],
+          );
+        }));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: loggedInUser == null
           ? AppBar(
-              title: isDefault(widget.user ?? User.def())
+              title: checkifNewUser(widget.user ?? User.def())
                   ? Text('Create an Account')
                   : Text('Update User'),
               actions: [
