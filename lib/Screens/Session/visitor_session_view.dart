@@ -1,12 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import 'package:r2park_flutter_dev/Managers/ExemptionRequestManager.dart';
 import 'package:r2park_flutter_dev/Managers/UserManager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/resident_session_view.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
-import 'package:r2park_flutter_dev/models/exemption.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/self_registration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
