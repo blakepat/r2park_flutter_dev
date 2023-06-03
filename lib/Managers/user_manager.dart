@@ -1,6 +1,3 @@
-import 'dart:math';
-
-import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/models/mysql.dart';
 import '../models/user.dart';
 
@@ -95,7 +92,7 @@ class UserManager {
           // print('😈 ${row[3]} ${row[4]}');
         }
       }, onError: (error) {
-        print('$error');
+        // print('$error');
       }).whenComplete(() {
         conn.close();
       });
@@ -183,9 +180,9 @@ class UserManager {
         user.longitude,
         user.holidayRate
       ]).then((result) {
-        print('✅ Inserted user!');
+        // print('✅ Inserted user!');
       }, onError: (error) {
-        print('❌ Error creating user: $error');
+        // print('❌ Error creating user: $error');
       }).whenComplete(() {
         conn.close();
       });
@@ -193,8 +190,6 @@ class UserManager {
   }
 
   Future<void> updateUser(User user) async {
-    print('😀 ${user.id}');
-    print('😀 ${user.firstName}');
     db.getConnection().then((conn) {
       //province = 10, otp = 20, enforceId = 30, about = 40, country = 50, homephome = 60, latitude = 70
       String sql =
@@ -274,9 +269,9 @@ class UserManager {
         user.longitude,
         user.holidayRate,
       ]).then((result) {
-        print('✅ updated user!');
+        // print('✅ updated user!');
       }, onError: (error) {
-        print('❌ Error creating user: $error');
+        // print('❌ Error creating user: $error');
       }).whenComplete(() {
         conn.close();
       });
@@ -288,9 +283,9 @@ class UserManager {
       //province = 10, otp = 20, enforceId = 30, about = 40, country = 50, homephome = 60, latitude = 70
       String sql = 'Delete from users where user_id=?';
       conn.query(sql, [user.id]).then((result) {
-        print('✅ Deleted User!');
+        // print('✅ Deleted User!');
       }, onError: (error) {
-        print('❌ Error deleting user: $error');
+        // print('❌ Error deleting user: $error');
       });
     });
   }

@@ -1,21 +1,19 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthRepo {
-  Future<String> _getUserIdFromAttributes() async {
-    // try {
-    //   final user = await Amplify.Auth.getCurrentUser();
-    //   return user.userId;
-    // } catch (e) {
-    //   print(e);
-    //   throw e;
-    // }
-    return '';
-  }
+  // Future<String> _getUserIdFromAttributes() async {
+  //   // try {
+  //   //   final user = await Amplify.Auth.getCurrentUser();
+  //   //   return user.userId;
+  //   // } catch (e) {
+  //   //   print(e);
+  //   //   throw e;
+  //   // }
+  //   return '';
+  // }
 
   Future<String?> attemptAutoLogin() async {
-    print('✅ AttemptAutoLogin called from AuthRepo');
+    // print('✅ AttemptAutoLogin called from AuthRepo');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('email');
   }

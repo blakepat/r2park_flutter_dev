@@ -1,4 +1,3 @@
-import 'package:r2park_flutter_dev/models/exemption.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/self_registration.dart';
 
@@ -10,7 +9,6 @@ class ExemptionRequestManager {
   ExemptionRequestManager() : db = Mysql();
 
   Future<List<Property>> getProperties() async {
-    print('🤡');
     List<Property> result = [];
     await db.getConnection().then((conn) {
       String sql = 'SELECT * FROM properties;';
@@ -52,7 +50,7 @@ class ExemptionRequestManager {
           // print('${row[2]}, ${row[3]}');
         }
       }, onError: (error) {
-        print('Error getting properties: $error');
+        // print('Error getting properties: $error');
       }).whenComplete(() {
         conn.close();
       });
@@ -66,58 +64,59 @@ class ExemptionRequestManager {
           'insert into pp_self_reg (Reg_Date, fk_Plate_ID, fk_property_id, Start_Date, End_Date, Unit_No, Street_Name, fk_Zone_ID, email, Phone, Name, Make_Model, Days, Reason, Notes, Auth_By, IsArchived, street_number, street_suffix, address) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
       // String sql =
       // 'insert into municipal_exemptions (municipal_id, name, email, phone, street, street_name, street_exemption, street_name_exemption, reason, municipality, start_date, time_exemption, plateno, province, vehicle_type, requested_days, end_date, created) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-      conn.query(sql, [
-        // selfRegistration.registryID,
-        selfRegistration.regDate,
-        selfRegistration.plateID,
-        selfRegistration.propertyID,
-        selfRegistration.startDate,
-        selfRegistration.endDate,
-        selfRegistration.unitNumber,
-        selfRegistration.streetName,
-        selfRegistration.zoneID,
-        selfRegistration.email,
-        selfRegistration.phone,
-        selfRegistration.name,
-        selfRegistration.makeModel,
-        selfRegistration.numberOfDays,
-        selfRegistration.reason,
-        selfRegistration.notes,
-        selfRegistration.authBy,
-        selfRegistration.isArchived,
-        selfRegistration.streetNumber,
-        selfRegistration.streetSuffix,
-        selfRegistration.address
+      conn
+          .query(sql, [
+            // selfRegistration.registryID,
+            selfRegistration.regDate,
+            selfRegistration.plateID,
+            selfRegistration.propertyID,
+            selfRegistration.startDate,
+            selfRegistration.endDate,
+            selfRegistration.unitNumber,
+            selfRegistration.streetName,
+            selfRegistration.zoneID,
+            selfRegistration.email,
+            selfRegistration.phone,
+            selfRegistration.name,
+            selfRegistration.makeModel,
+            selfRegistration.numberOfDays,
+            selfRegistration.reason,
+            selfRegistration.notes,
+            selfRegistration.authBy,
+            selfRegistration.isArchived,
+            selfRegistration.streetNumber,
+            selfRegistration.streetSuffix,
+            selfRegistration.address
 
-        // exemption.municipal_id,
-        // exemption.name,
-        // exemption.email,
-        // exemption.phone,
-        // exemption.streetNumber,
-        // exemption.streetName,
-        // exemption.streetExemption,
-        // exemption.streetNameExemption,
-        // exemption.reason,
-        // exemption.municipality,
-        // exemption.startDate,
-        // exemption.timeExemption,
-        // exemption.plateNumber,
-        // exemption.province,
-        // exemption.vehicleType,
-        // exemption.requestedDays,
-        // exemption.endDate,
-        // exemption.created
-      ]).then((result) {
-        print('✅ created exemption!');
-      }, onError: (error) {
-        print('❌ Error creating exemption: $error');
-      }).whenComplete(() {
-        conn.close();
-      });
+            // exemption.municipal_id,
+            // exemption.name,
+            // exemption.email,
+            // exemption.phone,
+            // exemption.streetNumber,
+            // exemption.streetName,
+            // exemption.streetExemption,
+            // exemption.streetNameExemption,
+            // exemption.reason,
+            // exemption.municipality,
+            // exemption.startDate,
+            // exemption.timeExemption,
+            // exemption.plateNumber,
+            // exemption.province,
+            // exemption.vehicleType,
+            // exemption.requestedDays,
+            // exemption.endDate,
+            // exemption.created
+          ])
+          .then((result) {}, onError: (error) {})
+          .whenComplete(() {
+            conn.close();
+          });
     });
   }
 
   Future<List<Property>>? then(
       Future<List<Property>> Function(ExemptionRequestManager exemptionManager)
-          param0) {}
+          param0) {
+    return null;
+  }
 }

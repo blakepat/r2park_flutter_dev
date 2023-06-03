@@ -1,6 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:r2park_flutter_dev/Managers/UserManager.dart';
+import 'package:r2park_flutter_dev/Managers/user_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 
 import '../../models/user.dart';
@@ -10,9 +9,11 @@ class ManagerSessionView extends StatefulWidget {
   final User user;
   final SessionCubit sessionCubit;
 
-  ManagerSessionView({required this.user, required this.sessionCubit});
+  const ManagerSessionView(
+      {super.key, required this.user, required this.sessionCubit});
   @override
   State<StatefulWidget> createState() =>
+      // ignore: no_logic_in_create_state
       ManagerSessionScreen(user: user, sessionCubit: sessionCubit);
 }
 
@@ -173,7 +174,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                     Icons.check_box,
                     size: 40,
                     color: Colors.green,
-                    shadows: [
+                    shadows: const [
                       Shadow(
                           color: Colors.black,
                           blurRadius: 8,
@@ -199,7 +200,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                     Icons.indeterminate_check_box,
                     size: 40,
                     color: Colors.red,
-                    shadows: [
+                    shadows: const [
                       Shadow(
                           color: Colors.black,
                           blurRadius: 8,

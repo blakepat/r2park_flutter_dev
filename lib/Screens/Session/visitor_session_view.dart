@@ -1,8 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:r2park_flutter_dev/Managers/ExemptionRequestManager.dart';
-import 'package:r2park_flutter_dev/Managers/UserManager.dart';
+import 'package:r2park_flutter_dev/Managers/exemption_request_manager.dart';
+import 'package:r2park_flutter_dev/Managers/user_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/resident_session_view.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
@@ -16,9 +15,11 @@ class VisitorSessionView extends StatefulWidget {
   final User user;
   final SessionCubit sessionCubit;
 
-  VisitorSessionView({required this.user, required this.sessionCubit});
+  const VisitorSessionView(
+      {super.key, required this.user, required this.sessionCubit});
   @override
   State<StatefulWidget> createState() =>
+      // ignore: no_logic_in_create_state
       VisitorSessionScreen(user: user, sessionCubit: sessionCubit);
 }
 
@@ -58,22 +59,22 @@ class VisitorSessionScreen extends State<VisitorSessionView>
     isManager = user.authorityLevel == 6 && user.clientDisplayName != '';
     _tabController = TabController(
         length: isResident ? (isManager ? 4 : 3) : 2, vsync: this);
-    licensePlates = sessionCubit.prefs.then((SharedPreferences _prefs) {
-      var plates = _prefs.getStringList('plates') ?? [];
+    licensePlates = sessionCubit.preferences.then((SharedPreferences prefs) {
+      var plates = prefs.getStringList('plates') ?? [];
       if (plates.isNotEmpty) {
         _selectedLicensePlate = plates[0];
       }
       return plates;
     });
     setState(() {
-      previousProperties = sessionCubit.prefs.then((SharedPreferences _prefs) {
-        var locations = _prefs.getStringList('locations') ?? [];
+      previousProperties =
+          sessionCubit.preferences.then((SharedPreferences prefs) {
+        var locations = prefs.getStringList('locations') ?? [];
         if (locations.isNotEmpty) {
           _selectedAddressID = locations[0];
           _selectedproperty = sessionCubit.properties
               ?.firstWhere((element) => element.propertyID2 == locations[0]);
         }
-        print(locations);
         return locations;
       });
     });
@@ -95,7 +96,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
     return Scaffold(
       backgroundColor: Colors.grey[850],
       appBar: _createAppBar(width),
-      body: Container(
+      body: SizedBox(
         width: width,
         child: TabBarView(
           controller: _tabController,
@@ -165,24 +166,21 @@ class VisitorSessionScreen extends State<VisitorSessionView>
               ),
             ),
             if (isResident)
-              Container(
-                  child: Padding(
+              Padding(
                 padding: const EdgeInsets.all(8.0),
                 child:
                     ResidentSessionView(user: user, sessionCubit: sessionCubit),
-              )),
+              ),
             if (isManager)
-              Container(
-                  child: Padding(
+              Padding(
                 padding: const EdgeInsets.all(8.0),
                 child:
                     ManagerSessionView(user: user, sessionCubit: sessionCubit),
-              )),
-            Container(
-                child: Padding(
+              ),
+            Padding(
               padding: const EdgeInsets.all(8.0),
               child: NewUser(user: user, sessionCubit: sessionCubit),
-            )),
+            ),
           ],
         ),
       ),
@@ -232,7 +230,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
               icon: Icon(Icons.person, color: Colors.white),
             ),
           ]),
-      actions: [
+      actions: const [
         // IconButton(
         //   icon: Icon(Icons.person),
         //   onPressed: () {
@@ -258,46 +256,46 @@ class VisitorSessionScreen extends State<VisitorSessionView>
     );
   }
 
-  void _showActionSheet(BuildContext context) {
-    // var userDeleted = false;
+  // void _showActionSheet(BuildContext context) {
+  //   // var userDeleted = false;
 
-    showCupertinoModalPopup<void>(
-        context: context,
-        builder: (BuildContext modalContext) => CupertinoActionSheet(
-              title: Text(
-                'Delete User?',
-                style: TextStyle(fontSize: 20, color: Colors.red),
-              ),
-              message: Text(
-                'Are you sure you want to delete your profile and logout?',
-                style: TextStyle(fontSize: 16),
-              ),
-              actions: [
-                CupertinoActionSheetAction(
-                  onPressed: () async {
-                    userManager.deleteUser(user);
-                    // user = null;
-                    Navigator.of(modalContext).pop();
-                    BlocProvider.of<SessionCubit>(context).signOut();
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Delete'),
-                  isDestructiveAction: true,
-                )
-              ],
-              cancelButton: CupertinoActionSheetAction(
-                onPressed: (() {
-                  Navigator.pop(modalContext);
-                }),
-                child: Text('Cancel'),
-              ),
-            ));
-    // if (userDeleted == true) {
-    //   print('✅ USER DELETED TRUE');
-    //   BlocProvider.of<SessionCubit>(context).signOut();
-    //   Navigator.of(context).pop();
-    // }
-  }
+  //   showCupertinoModalPopup<void>(
+  //       context: context,
+  //       builder: (BuildContext modalContext) => CupertinoActionSheet(
+  //             title: Text(
+  //               'Delete User?',
+  //               style: TextStyle(fontSize: 20, color: Colors.red),
+  //             ),
+  //             message: Text(
+  //               'Are you sure you want to delete your profile and logout?',
+  //               style: TextStyle(fontSize: 16),
+  //             ),
+  //             actions: [
+  //               CupertinoActionSheetAction(
+  //                 onPressed: () async {
+  //                   userManager.deleteUser(user);
+  //                   // user = null;
+  //                   Navigator.of(modalContext).pop();
+  //                   BlocProvider.of<SessionCubit>(context).signOut();
+  //                   Navigator.of(context).pop();
+  //                 },
+  //                 isDestructiveAction: true,
+  //                 child: Text('Delete'),
+  //               )
+  //             ],
+  //             cancelButton: CupertinoActionSheetAction(
+  //               onPressed: (() {
+  //                 Navigator.pop(modalContext);
+  //               }),
+  //               child: Text('Cancel'),
+  //             ),
+  //           ));
+  //   // if (userDeleted == true) {
+  //   //   print('✅ USER DELETED TRUE');
+  //   //   BlocProvider.of<SessionCubit>(context).signOut();
+  //   //   Navigator.of(context).pop();
+  //   // }
+  // }
 
   Widget _addPlateTitle() {
     return SizedBox(
@@ -356,8 +354,8 @@ class VisitorSessionScreen extends State<VisitorSessionView>
     //validate plate
     if (plate.isNotEmpty) {
       // updatedPlates.addAll(licensePlates);
-      await sessionCubit.prefs.then((SharedPreferences _prefs) {
-        updatedPlates = _prefs.getStringList('plates') ?? [];
+      await sessionCubit.preferences.then((SharedPreferences prefs) {
+        updatedPlates = prefs.getStringList('plates') ?? [];
       });
 
       if (updatedPlates.contains(plate)) {
@@ -378,8 +376,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
 
       setState(() {});
     } else {
-      //show alert
-      print('plate not valid');
+      //TODO: show alert
     }
   }
 
@@ -583,12 +580,11 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                 streetController.text.toLowerCase());
 
             if (propertyID != null) {
-              print('✅ $propertyID property valid!');
               sessionCubit.addLocation(propertyID);
 
               previousProperties =
-                  sessionCubit.prefs.then((SharedPreferences _prefs) {
-                var locations = _prefs.getStringList('locations') ?? [];
+                  sessionCubit.preferences.then((SharedPreferences prefs) {
+                var locations = prefs.getStringList('locations') ?? [];
                 if (locations.isNotEmpty) {
                   _selectedAddressID = locations[0];
                   _selectedproperty = sessionCubit.properties?.firstWhere(
@@ -635,6 +631,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                             listOfaddressIds!.contains(element.propertyID2))
                         .toList();
                   } catch (e) {
+                    // ignore: avoid_print
                     print('error gettings list of address: $e');
                   }
 
@@ -647,7 +644,8 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                                 onDismissed: (direction) {
                                   setState(() {
                                     snapshot.data!.removeWhere(
-                                        (element) => element == address);
+                                        // ignore: unrelated_type_equality_checks
+                                        (element) => element == address.id);
                                     properties?.remove(address);
 
                                     sessionCubit
@@ -712,7 +710,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                         ),
                       );
                     } else {
-                      return Container(
+                      return SizedBox(
                         height: 120,
                         child: Center(
                           child: Text('No Locations Added.'),
@@ -737,7 +735,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
   Widget _durationInput() {
     final durationsList = [1, 2, 3, 4]
         .map(
-          (duration) => Container(
+          (duration) => SizedBox(
             height: 64,
             width: MediaQuery.of(context).size.width / 4 - 10,
             child: CheckboxListTile(
@@ -841,7 +839,6 @@ class VisitorSessionScreen extends State<VisitorSessionView>
     //     cityController.text.toLowerCase(), streetController.text.toLowerCase());
 
     if (_selectedAddressID != '' && _selectedLicensePlate != '') {
-      print('✅ $_selectedAddressID, $_selectedLicensePlate submit pressed!');
       exemptionManager.createExemptionRequest(exemption);
 
       openDialog(
@@ -856,12 +853,9 @@ class VisitorSessionScreen extends State<VisitorSessionView>
           'Please ensure you have selected an address and licence plate',
           'Please ensure you have selected an address and licence plate');
     }
-
-    print(
-        '\nLicense Plate: $_selectedLicensePlate \nCity Name: ${cityController.text} \n Address: ${unitController.text} ${streetController.text} \n Duration: $_selectedDuration \n');
   }
 
-  void openDialog(BuildContext context, String dialogTitle, StringContent,
+  void openDialog(BuildContext context, String dialogTitle, stringContent,
       String dialogContent) {
     showDialog(
         context: context,
@@ -880,6 +874,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
         }));
   }
 
+  // ignore: unused_element
   Widget _footerView() {
     return Padding(
       padding: const EdgeInsets.all(4.0),

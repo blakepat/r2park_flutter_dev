@@ -37,7 +37,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         //   userId: userId,
         // ));
       } catch (e) {
-        print('error on login bloc: $e');
+        // print('error on login bloc: $e');
         emit(state.copyWith(formStatus: SubmissionFailed(exception: e)));
       }
     }

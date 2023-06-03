@@ -1,28 +1,26 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
-import 'package:r2park_flutter_dev/Managers/UserManager.dart';
+import 'package:r2park_flutter_dev/Managers/user_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
-import 'package:r2park_flutter_dev/Utilities/helper_functions.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
-import '../../../Managers/ExemptionRequestManager.dart';
-import '../../../models/property.dart';
+import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
+import '../../../Managers/exemption_request_manager.dart';
 import '../../../models/user.dart';
 
+// ignore: must_be_immutable
 class NewUser extends StatefulWidget {
   User? user;
   SessionCubit? sessionCubit;
 
-  NewUser({this.user, this.sessionCubit});
+  NewUser({super.key, this.user, this.sessionCubit});
 
   @override
-  _NewUserState createState() =>
-      _NewUserState(loggedInUser: user, sessionCubit: this.sessionCubit);
+  NewUserState createState() =>
+      // ignore: no_logic_in_create_state
+      NewUserState(loggedInUser: user, sessionCubit: sessionCubit);
 }
 
-class _NewUserState extends State<NewUser> {
+class NewUserState extends State<NewUser> {
   User? loggedInUser;
   SessionCubit? sessionCubit;
   var userManager = UserManager();
@@ -63,17 +61,15 @@ class _NewUserState extends State<NewUser> {
     return false;
   }
 
-  _NewUserState({this.loggedInUser, this.sessionCubit});
+  NewUserState({this.loggedInUser, this.sessionCubit});
 
   @override
   void initState() {
     super.initState();
 
-    print('😈 ${loggedInUser?.prefix}');
-
     isNewUser = checkifNewUser(widget.user ?? User.def());
 
-    if (widget.user == null) widget.user = User.def();
+    widget.user ??= User.def();
     _emailTextFieldController = TextEditingController();
     _emailTextFieldController?.text = widget.user?.email ?? '';
 
@@ -297,11 +293,9 @@ class _NewUserState extends State<NewUser> {
                     provinceValidate &&
                     postalCodeValidate &&
                     passwordValidate) {
-                  final now = DateTime.now();
-                  // final id = now.microsecondsSinceEpoch.toInt();
                   var newUser = User.def();
                   if (loggedInUser != null) {
-                    print('🥶${loggedInUser?.id}');
+                    // print('🥶${loggedInUser?.id}');
                     // loggedInUser?.id = id;
                     loggedInUser?.email = email;
                     loggedInUser?.firstName = firstName;
@@ -316,8 +310,6 @@ class _NewUserState extends State<NewUser> {
 
                     widget.user = loggedInUser;
                   } else {
-                    print('😡${loggedInUser?.id}');
-
                     // newUser.id = id;
                     newUser.email = email;
                     newUser.firstName = firstName;
@@ -333,10 +325,6 @@ class _NewUserState extends State<NewUser> {
                     widget.user = newUser;
                   }
                   //if address matches property assign property ID to user
-
-                  print(_cityTextFieldController?.text);
-                  print(_address1TextFieldController?.text);
-
                   var propertyID = sessionCubit?.checkIfValidProperty(
                       _cityTextFieldController?.text.toLowerCase() ?? '',
                       _address1TextFieldController?.text.toLowerCase() ?? '');
@@ -346,11 +334,7 @@ class _NewUserState extends State<NewUser> {
                       _companyAddressTextFieldController?.text.toLowerCase() ??
                           '');
 
-                  print(companyID);
-                  print(propertyID);
-
                   if (propertyID != null) {
-                    print('✅✅ $propertyID PROPERTY valid!');
                     widget.user?.clientDisplayName = propertyID;
 
                     if (isNewUser) {
@@ -361,7 +345,6 @@ class _NewUserState extends State<NewUser> {
                           "You can now login! Your address matches one of our properties, we have sent a request to your property manager to give you residence access!");
                     }
                   } else if (companyID != null) {
-                    print('✅✅ $propertyID COMPANY ADDRESS valid!');
                     widget.user?.clientDisplayName = companyID;
 
                     if (isNewUser) {
@@ -430,8 +413,8 @@ class _NewUserState extends State<NewUser> {
                     BlocProvider.of<SessionCubit>(context).signOut();
                     Navigator.of(context).pop();
                   },
-                  child: Text('Delete'),
                   isDestructiveAction: true,
+                  child: Text('Delete'),
                 )
               ],
               cancelButton: CupertinoActionSheetAction(
@@ -448,7 +431,7 @@ class _NewUserState extends State<NewUser> {
     // }
   }
 
-  void openDialog(BuildContext context, String dialogTitle, StringContent,
+  void openDialog(BuildContext context, String dialogTitle, stringContent,
       String dialogContent) {
     showDialog(
         context: context,
@@ -475,7 +458,7 @@ class _NewUserState extends State<NewUser> {
               title: checkifNewUser(widget.user ?? User.def())
                   ? Text('Create an Account')
                   : Text('Update User'),
-              actions: [
+              actions: const [
                 // loggedInUser == null
                 //     ? SizedBox()
                 //     : IconButton(

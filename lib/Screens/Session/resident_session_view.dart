@@ -1,11 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/visitor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../Managers/ExemptionRequestManager.dart';
+import '../../Managers/exemption_request_manager.dart';
 import '../../models/self_registration.dart';
 import '../../models/user.dart';
 
@@ -13,9 +12,11 @@ class ResidentSessionView extends StatefulWidget {
   final User user;
   final SessionCubit sessionCubit;
 
-  ResidentSessionView({required this.user, required this.sessionCubit});
+  const ResidentSessionView(
+      {super.key, required this.user, required this.sessionCubit});
   @override
   State<StatefulWidget> createState() =>
+      // ignore: no_logic_in_create_state
       ResidentSessionScreen(user: user, sessionCubit: sessionCubit);
 }
 
@@ -45,7 +46,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
     residence = sessionCubit.properties?.firstWhere(
         (element) => element.propertyID2 == user.clientDisplayName);
 
-    visitors = sessionCubit.prefs.then((SharedPreferences _prefs) {
+    visitors = sessionCubit.preferences.then((SharedPreferences prefs) {
       return sessionCubit.getVisitors();
     });
   }
@@ -107,7 +108,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
   Widget _visitorSummary() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
-      child: Container(
+      child: SizedBox(
         width: double.infinity,
         child: Text(
           'Visitor Information:',
@@ -157,7 +158,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
                                       fontSize: 16),
                                 ),
                                 subtitle: Text(
-                                  '${visitor.plateNumber.toUpperCase()}',
+                                  visitor.plateNumber.toUpperCase(),
                                   style: TextStyle(fontSize: 14),
                                 ),
                                 shape: RoundedRectangleBorder(),
@@ -309,7 +310,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
   Widget _durationInput() {
     final durationsList = [1, 2, 3, 4]
         .map(
-          (duration) => Container(
+          (duration) => SizedBox(
             height: 64,
             width: (MediaQuery.of(context).size.width / 4) - 12,
             child: CheckboxListTile(
@@ -425,8 +426,8 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
         sessionCubit.saveVisitor(visitor);
       }
 
-      print(
-          '✅ ${residence!.propertyID2}, ${plateController.text} submit pressed!');
+      // print(
+      //     '✅ ${residence!.propertyID2}, ${plateController.text} submit pressed!');
       exemptionManager.createExemptionRequest(exemption);
     } else {
       openDialog(
@@ -437,7 +438,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
     }
   }
 
-  void openDialog(BuildContext context, String dialogTitle, StringContent,
+  void openDialog(BuildContext context, String dialogTitle, stringContent,
       String dialogContent) {
     showDialog(
         context: context,

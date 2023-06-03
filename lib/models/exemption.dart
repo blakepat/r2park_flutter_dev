@@ -1,6 +1,6 @@
 class Exemption {
   int? id;
-  int? municipal_id;
+  int? municipalId;
   String? name;
   String? email;
   String? phone;
@@ -21,7 +21,7 @@ class Exemption {
 
   Exemption(
       {required this.id,
-      this.municipal_id,
+      this.municipalId,
       this.name,
       this.email,
       this.phone,
@@ -42,7 +42,7 @@ class Exemption {
 
   Exemption.def() {
     id = null;
-    municipal_id = 0;
+    municipalId = 0;
     streetName = '';
     email = '';
     phone = '';

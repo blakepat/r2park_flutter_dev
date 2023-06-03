@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:r2park_flutter_dev/Managers/ExemptionRequestManager.dart';
-import 'package:r2park_flutter_dev/Screens/auth/auth_utilities/auth_credentials.dart';
-import 'package:r2park_flutter_dev/models/property.dart';
 
-import '../../../Managers/UserManager.dart';
+import '../../../Managers/user_manager.dart';
 import '../../../models/user.dart';
 import '../../Session/session_cubit.dart';
 import '../sign_up/new_user.dart';
@@ -13,12 +10,13 @@ class Login extends StatefulWidget {
   final SessionCubit sessionCubit;
   // List<User> allUsers;
   @override
-  _LoginState createState() => _LoginState(sessionCubit: sessionCubit);
+  // ignore: no_logic_in_create_state
+  LoginState createState() => LoginState(sessionCubit: sessionCubit);
 
-  Login({required this.sessionCubit});
+  const Login({super.key, required this.sessionCubit});
 }
 
-class _LoginState extends State<Login> {
+class LoginState extends State<Login> {
   final SessionCubit sessionCubit;
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -27,14 +25,14 @@ class _LoginState extends State<Login> {
   List<User>? users;
   User? loggedInUser;
 
-  _LoginState({required this.sessionCubit});
+  LoginState({required this.sessionCubit});
 
   @override
   void initState() {
     super.initState();
   }
 
-  void openDialog(BuildContext context, String dialogTitle, StringContent,
+  void openDialog(BuildContext context, String dialogTitle, stringContent,
       String dialogContent) {
     showDialog(
         context: context,
@@ -124,8 +122,8 @@ class _LoginState extends State<Login> {
                       User user = users!.firstWhere((element) =>
                           element.email == usernameController.text);
                       if (user.password == passwordController.text) {
-                        //TO-DO: dismiss login page and go to session view
-                        print('LOGIN EMAIL: ${user.email}');
+                        //TODO: dismiss login page and go to session view
+                        // print('LOGIN EMAIL: ${user.email}');
                         // print(user.prefix);
                         sessionCubit.showSession(user);
                         Navigator.of(context).pop(widget);
@@ -144,50 +142,48 @@ class _LoginState extends State<Login> {
                 },
               ),
             ),
-            Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Don\'t have an account?'),
-                  InkWell(
-                    child: TextButton(
-                      child: Text(
-                        'Sign up!',
-                        style: TextStyle(fontSize: 20, color: Colors.blue),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context)
-                            .push(MaterialPageRoute(
-                          builder: (context) => NewUser(
-                            sessionCubit: sessionCubit,
-                          ),
-                        ))
-                            .then(
-                          (obj) {
-                            if (obj != null) {
-                              userManager.createNewUser(obj);
-                              if (obj.id == null) {
-                                final now = DateTime.now();
-                                int id = now.microsecondsSinceEpoch.toInt();
-                                obj.id = id;
-                                setState(() {
-                                  users?.add(obj as User);
-                                });
-                              } else {
-                                setState(() {
-                                  users?.removeWhere(
-                                      (element) => element.id == obj.id);
-                                  users?.add(obj as User);
-                                });
-                              }
-                            }
-                          },
-                        );
-                      },
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Don\'t have an account?'),
+                InkWell(
+                  child: TextButton(
+                    child: Text(
+                      'Sign up!',
+                      style: TextStyle(fontSize: 20, color: Colors.blue),
                     ),
-                  )
-                ],
-              ),
+                    onPressed: () {
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(
+                        builder: (context) => NewUser(
+                          sessionCubit: sessionCubit,
+                        ),
+                      ))
+                          .then(
+                        (obj) {
+                          if (obj != null) {
+                            userManager.createNewUser(obj);
+                            if (obj.id == null) {
+                              final now = DateTime.now();
+                              int id = now.microsecondsSinceEpoch.toInt();
+                              obj.id = id;
+                              setState(() {
+                                users?.add(obj as User);
+                              });
+                            } else {
+                              setState(() {
+                                users?.removeWhere(
+                                    (element) => element.id == obj.id);
+                                users?.add(obj as User);
+                              });
+                            }
+                          }
+                        },
+                      );
+                    },
+                  ),
+                )
+              ],
             )
           ],
         ),
@@ -197,8 +193,8 @@ class _LoginState extends State<Login> {
 
   Widget _createLogoView() {
     return Padding(
-      child: Image.asset('assets/images/r2parkLogo.png'),
       padding: EdgeInsets.symmetric(vertical: 12),
+      child: Image.asset('assets/images/r2parkLogo.png'),
     );
   }
 }
