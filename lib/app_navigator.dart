@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:r2park_flutter_dev/Managers/exemption_request_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_state.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/loading_view.dart';
-import 'package:r2park_flutter_dev/Screens/Session/visitor_session_view.dart';
+import 'package:r2park_flutter_dev/Screens/Session/tab_session_view.dart';
+import 'package:r2park_flutter_dev/main.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'Managers/user_manager.dart';
 import 'Screens/Session/session_cubit.dart';
@@ -46,8 +47,9 @@ class AppNavigator extends StatelessWidget {
                     child: MaterialApp(
                       title: 'Login Flutter',
                       theme: ThemeData(
+                          appBarTheme: AppBarTheme(color: primaryColor),
                           brightness: Brightness.dark,
-                          primaryColor: Colors.blue,
+                          primaryColor: primaryColor,
                           colorScheme: ColorScheme.dark()),
                       home: Login(
                         sessionCubit: context.read<SessionCubit>(),
@@ -79,10 +81,11 @@ class AppNavigator extends StatelessWidget {
                           ],
                           child: MaterialApp(
                             theme: ThemeData(
+                                appBarTheme: AppBarTheme(color: primaryColor),
                                 brightness: Brightness.dark,
-                                primaryColor: Colors.blue,
+                                primaryColor: primaryColor,
                                 colorScheme: ColorScheme.dark()),
-                            home: VisitorSessionView(
+                            home: TabSessionView(
                               user: state.user,
                               sessionCubit: context.read<SessionCubit>(),
                             ),

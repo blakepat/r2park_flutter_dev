@@ -103,7 +103,7 @@ class LoginState extends State<Login> {
                 onPressed: () {},
                 child: Text(
                   'Forgot Password',
-                  style: TextStyle(color: Colors.blue),
+                  style: TextStyle(color: Colors.blue, fontSize: 16),
                 ),
               ),
             ),
@@ -111,9 +111,11 @@ class LoginState extends State<Login> {
               height: 50,
               padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green[900]),
                 child: Text(
                   'Login',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.white, fontSize: 18),
                 ),
                 onPressed: () {
                   if (users != null) {
@@ -145,12 +147,12 @@ class LoginState extends State<Login> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Don\'t have an account?'),
+                Text('Don\'t have an account?', style: TextStyle(fontSize: 18)),
                 InkWell(
                   child: TextButton(
                     child: Text(
                       'Sign up!',
-                      style: TextStyle(fontSize: 20, color: Colors.blue),
+                      style: TextStyle(fontSize: 18, color: Colors.blue),
                     ),
                     onPressed: () {
                       Navigator.of(context)

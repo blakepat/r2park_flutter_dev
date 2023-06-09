@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:r2park_flutter_dev/Managers/user_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
+import 'package:r2park_flutter_dev/main.dart';
 import '../../../Managers/exemption_request_manager.dart';
 import '../../../models/user.dart';
 
@@ -236,9 +237,10 @@ class NewUserState extends State<NewUser> {
             height: 40,
             padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: secondaryColor),
               child: checkifNewUser(widget.user ?? User.def())
-                  ? Text('Create')
-                  : Text('Update'),
+                  ? Text('Create', style: TextStyle(color: Colors.white))
+                  : Text('Update', style: TextStyle(color: Colors.white)),
               onPressed: () {
                 String? email = _emailTextFieldController?.text;
                 String? firstName = _firstNameTextFieldController?.text;

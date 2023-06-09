@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:r2park_flutter_dev/Managers/exemption_request_manager.dart';
 import 'package:r2park_flutter_dev/Managers/user_manager.dart';
-import 'package:r2park_flutter_dev/Screens/Session/resident_session_view.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/self_registration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../main.dart';
 import '../../models/user.dart';
-import '../auth/sign_up/new_user.dart';
-import 'manager_session_view.dart';
 
 class VisitorSessionView extends StatefulWidget {
   final User user;
@@ -27,11 +24,6 @@ class VisitorSessionScreen extends State<VisitorSessionView>
     with SingleTickerProviderStateMixin {
   final User user;
   final SessionCubit sessionCubit;
-
-  late TabController _tabController;
-  int _activeIndex = 0;
-  bool isResident = false;
-  bool isManager = false;
 
   final plateController = TextEditingController();
   final cityController = TextEditingController();
@@ -55,10 +47,6 @@ class VisitorSessionScreen extends State<VisitorSessionView>
   void initState() {
     super.initState();
 
-    isResident = user.clientDisplayName != '';
-    isManager = user.authorityLevel == 6 && user.clientDisplayName != '';
-    _tabController = TabController(
-        length: isResident ? (isManager ? 4 : 3) : 2, vsync: this);
     licensePlates = sessionCubit.preferences.then((SharedPreferences prefs) {
       var plates = prefs.getStringList('plates') ?? [];
       if (plates.isNotEmpty) {
@@ -84,218 +72,26 @@ class VisitorSessionScreen extends State<VisitorSessionView>
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    _tabController.addListener(() {
-      if (_tabController.indexIsChanging) {
-        setState(() {
-          _activeIndex = _tabController.index;
-        });
-      }
-    });
-
     return Scaffold(
-      backgroundColor: Colors.grey[850],
-      appBar: _createAppBar(width),
-      body: SizedBox(
-        width: width,
-        child: TabBarView(
-          controller: _tabController,
-          children: [
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                child: Column(
-                  children: [
-                    _addPlateTitle(),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                          width: MediaQuery.of(context).size.width - 16,
-                          decoration: BoxDecoration(
-                              color: Colors.black26,
-                              border: Border.all(color: Colors.white30),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8))),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              children: [
-                                _licensePlateList(),
-                                _licencePlateForm(),
-                              ],
-                            ),
-                          )),
-                    ),
-                    _addLocationTitle(),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                          width: MediaQuery.of(context).size.width - 16,
-                          decoration: BoxDecoration(
-                              color: Colors.black26,
-                              border: Border.all(color: Colors.white30),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8))),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              children: [
-                                _previousLocationList(),
-                                Row(
-                                  children: [
-                                    _unitNumberInput(),
-                                    _streetInput()
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    _cityInput(),
-                                    _addLocationButton()
-                                  ],
-                                ),
-                              ],
-                            ),
-                          )),
-                    ),
-
-                    _durationInput(),
-                    _submitButton(),
-                    // _footerView()
-                  ],
-                ),
-              ),
-            ),
-            if (isResident)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child:
-                    ResidentSessionView(user: user, sessionCubit: sessionCubit),
-              ),
-            if (isManager)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child:
-                    ManagerSessionView(user: user, sessionCubit: sessionCubit),
-              ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: NewUser(user: user, sessionCubit: sessionCubit),
-            ),
-          ],
+        body: SingleChildScrollView(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+          child: Column(
+            children: [
+              _addPlateTitle(),
+              _licencePlateSeciton(),
+              _addLocationTitle(),
+              _locationSection(),
+              _durationInput(),
+              _submitButton(),
+              // _footerView()
+            ],
+          ),
         ),
       ),
-    );
+    ));
   }
-
-  AppBar _createAppBar(double width) {
-    String title = '';
-    setState(() {
-      if (_activeIndex == 0) {
-        title = 'Register To Park';
-      } else if (_activeIndex == 1) {
-        title = isResident ? 'Register a Vistor' : 'Update Profile';
-      } else if (_activeIndex == 2) {
-        title = isManager ? 'Manage Residents' : 'Update Profile';
-      } else {
-        title = 'Update Profile';
-      }
-    });
-
-    return AppBar(
-      bottom: TabBar(
-          controller: _tabController,
-          labelPadding: EdgeInsets.symmetric(
-              horizontal: isResident
-                  ? isManager
-                      ? width / 8 - 15
-                      : width / 6 - 15
-                  : width / 4 - 15),
-          isScrollable: true,
-          tabs: [
-            Tab(
-              icon: Icon(Icons.create_rounded, color: Colors.white),
-            ),
-            if (isResident)
-              Tab(
-                icon: Icon(Icons.people, color: Colors.white),
-              ),
-            if (isManager)
-              Tab(
-                icon: Icon(
-                  Icons.perm_contact_cal_sharp,
-                  color: Colors.white,
-                ),
-              ),
-            Tab(
-              icon: Icon(Icons.person, color: Colors.white),
-            ),
-          ]),
-      actions: const [
-        // IconButton(
-        //   icon: Icon(Icons.person),
-        //   onPressed: () {
-        //     Navigator.of(context)
-        //         .push(MaterialPageRoute(
-        //             builder: (context) =>
-        //                 NewUser(user: user, sessionCubit: sessionCubit)))
-        //         .then((obj) {
-        //       if (obj != null) {
-        //         userManager.updateUser(obj);
-        //       }
-        //     });
-        //   },
-        // )
-      ],
-      leading: IconButton(
-        icon: Icon(Icons.logout),
-        onPressed: () => BlocProvider.of<SessionCubit>(context).signOut(),
-      ),
-      backgroundColor: Colors.blue,
-      title: Text(title),
-      shadowColor: Colors.black54,
-    );
-  }
-
-  // void _showActionSheet(BuildContext context) {
-  //   // var userDeleted = false;
-
-  //   showCupertinoModalPopup<void>(
-  //       context: context,
-  //       builder: (BuildContext modalContext) => CupertinoActionSheet(
-  //             title: Text(
-  //               'Delete User?',
-  //               style: TextStyle(fontSize: 20, color: Colors.red),
-  //             ),
-  //             message: Text(
-  //               'Are you sure you want to delete your profile and logout?',
-  //               style: TextStyle(fontSize: 16),
-  //             ),
-  //             actions: [
-  //               CupertinoActionSheetAction(
-  //                 onPressed: () async {
-  //                   userManager.deleteUser(user);
-  //                   // user = null;
-  //                   Navigator.of(modalContext).pop();
-  //                   BlocProvider.of<SessionCubit>(context).signOut();
-  //                   Navigator.of(context).pop();
-  //                 },
-  //                 isDestructiveAction: true,
-  //                 child: Text('Delete'),
-  //               )
-  //             ],
-  //             cancelButton: CupertinoActionSheetAction(
-  //               onPressed: (() {
-  //                 Navigator.pop(modalContext);
-  //               }),
-  //               child: Text('Cancel'),
-  //             ),
-  //           ));
-  //   // if (userDeleted == true) {
-  //   //   print('✅ USER DELETED TRUE');
-  //   //   BlocProvider.of<SessionCubit>(context).signOut();
-  //   //   Navigator.of(context).pop();
-  //   // }
-  // }
 
   Widget _addPlateTitle() {
     return SizedBox(
@@ -309,6 +105,27 @@ class VisitorSessionScreen extends State<VisitorSessionView>
               fontSize: 18, fontWeight: FontWeight.w400, color: Colors.white),
         ),
       ),
+    );
+  }
+
+  Widget _licencePlateSeciton() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+          width: MediaQuery.of(context).size.width - 16,
+          decoration: BoxDecoration(
+              color: Colors.black26,
+              border: Border.all(color: Colors.white30),
+              borderRadius: BorderRadius.all(Radius.circular(8))),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                _licensePlateList(),
+                _licencePlateForm(),
+              ],
+            ),
+          )),
     );
   }
 
@@ -409,7 +226,8 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                             child: Padding(
                               padding: const EdgeInsets.all(4.0),
                               child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(),
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: secondaryColor),
                                 // backgroundColor: Colors.green),
                                 onPressed: () {},
                                 child: CheckboxListTile(
@@ -481,6 +299,32 @@ class VisitorSessionScreen extends State<VisitorSessionView>
               fontSize: 18, fontWeight: FontWeight.w400, color: Colors.white),
         ),
       ),
+    );
+  }
+
+  Widget _locationSection() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+          width: MediaQuery.of(context).size.width - 16,
+          decoration: BoxDecoration(
+              color: Colors.black26,
+              border: Border.all(color: Colors.white30),
+              borderRadius: BorderRadius.all(Radius.circular(8))),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                _previousLocationList(),
+                Row(
+                  children: [_unitNumberInput(), _streetInput()],
+                ),
+                Row(
+                  children: [_cityInput(), _addLocationButton()],
+                ),
+              ],
+            ),
+          )),
     );
   }
 
@@ -655,7 +499,8 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                                 child: Padding(
                                   padding: const EdgeInsets.all(4.0),
                                   child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(),
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: secondaryColor),
                                     // backgroundColor: Colors.pu),
                                     onPressed: () {},
                                     child: CheckboxListTile(
@@ -781,6 +626,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
 
   Widget _submitButton() {
     return ElevatedButton(
+      style: ElevatedButton.styleFrom(backgroundColor: secondaryColor),
       onPressed: () => _submitPressed(),
       child: Text(
         '  Submit  ',

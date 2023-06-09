@@ -5,6 +5,7 @@ import 'package:r2park_flutter_dev/models/visitor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Managers/exemption_request_manager.dart';
+import '../../main.dart';
 import '../../models/self_registration.dart';
 import '../../models/user.dart';
 
@@ -54,23 +55,25 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          _residenceSummary(),
-          _previousVisitorsList(),
-          _visitorSummary(),
-          Row(
-            children: [
-              _visitorFirstNameTextForm(),
-              _visitorLastNameTextForm(),
-            ],
-          ),
-          _visitorPlateTextForm(),
-          _durationInput(),
-          _submitButton()
-        ],
+        body: SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            _residenceSummary(),
+            _previousVisitorsList(),
+            _visitorSummary(),
+            Row(
+              children: [
+                _visitorFirstNameTextForm(),
+                _visitorLastNameTextForm(),
+              ],
+            ),
+            _visitorPlateTextForm(),
+            _durationInput(),
+            _submitButton()
+          ],
+        ),
       ),
     ));
   }
@@ -147,7 +150,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
                             },
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green),
+                                  backgroundColor: secondaryColor),
                               onPressed: () {},
                               child: CheckboxListTile(
                                 title: Text(
@@ -356,6 +359,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
 
   Widget _submitButton() {
     return ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: secondaryColor),
         onPressed: () => _submitPressed(),
         child: Text(
           '  Submit  ',
