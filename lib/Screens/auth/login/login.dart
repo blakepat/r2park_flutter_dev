@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:r2park_flutter_dev/Screens/auth/sign_up/forgot_password.dart';
 
 import '../../../Managers/user_manager.dart';
 import '../../../models/user.dart';
@@ -100,7 +101,10 @@ class LoginState extends State<Login> {
             ),
             InkWell(
               child: TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ForgotPassword()));
+                },
                 child: Text(
                   'Forgot Password',
                   style: TextStyle(color: Colors.blue, fontSize: 16),
@@ -195,8 +199,8 @@ class LoginState extends State<Login> {
 
   Widget _createLogoView() {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 12),
-      child: Image.asset('assets/images/r2parkLogo.png'),
+      padding: EdgeInsets.fromLTRB(0, 12, 20, 12),
+      child: Image.asset('assets/images/3DLogo.png'),
     );
   }
 }
