@@ -77,7 +77,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
   PreferredSizeWidget _addSearchBar() {
     return EasySearchBar(
       title: const Text('Search'),
-      onSearch: (value) => setState(() => searchValue = value),
+      onSearch: (value) => setState(() => searchValue = value.toLowerCase()),
       suggestions: residentNames,
       backgroundColor: Colors.black26,
     );

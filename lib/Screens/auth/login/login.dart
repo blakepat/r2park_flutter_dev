@@ -23,6 +23,8 @@ class LoginState extends State<Login> {
   TextEditingController passwordController = TextEditingController();
   var userManager = UserManager();
   bool hidePassword = true;
+  String? newPassword;
+  String? newEmail;
   List<User>? users;
   User? loggedInUser;
 
@@ -102,8 +104,10 @@ class LoginState extends State<Login> {
             InkWell(
               child: TextButton(
                 onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => ForgotPassword()));
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(
+                          builder: (context) => ForgotPassword()))
+                      .then((value) {});
                 },
                 child: Text(
                   'Forgot Password',

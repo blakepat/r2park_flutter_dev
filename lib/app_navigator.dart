@@ -30,7 +30,7 @@ class AppNavigator extends StatelessWidget {
           if (state is Unauthenticated)
             MaterialPage(
                 child: StreamBuilder(
-              stream: Stream.fromFuture(userManager.getUsers()),
+              stream: Stream.fromFuture(userManager.getUsers2()),
               builder: (context, response) {
                 if (!response.hasData) {
                   return Center(

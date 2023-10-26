@@ -15,10 +15,9 @@
 
     if($count != 0) {
 
-        $url = 'http://'.$_SERVER['SERVER_NAME'].'/changepass.php?user_id='.$idData.'&email='.$userData;
+        $url = 'http://'.$_SERVER['SERVER_NAME'].'/resetcode.php?user_id='.$idData.'&email='.$userData;
         
         echo json_encode($url);
     } else {
-        
-        echo json_encode("INVALIDUSER");
+        echo json_encode('INVALIDUSER');
     }
