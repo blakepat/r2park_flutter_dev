@@ -1,10 +1,14 @@
+import 'dart:convert';
+import 'dart:math';
+import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:r2park_flutter_dev/Managers/user_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
+import 'package:r2park_flutter_dev/Screens/auth/sign_up/confirm_email.dart';
 import 'package:r2park_flutter_dev/main.dart';
+import 'package:toast/toast.dart';
 import '../../../Managers/exemption_request_manager.dart';
 import '../../../models/user.dart';
 
@@ -24,7 +28,6 @@ class NewUser extends StatefulWidget {
 class NewUserState extends State<NewUser> {
   User? loggedInUser;
   SessionCubit? sessionCubit;
-  var userManager = UserManager();
   var exemptionManager = ExemptionRequestManager();
 
   TextEditingController? _emailTextFieldController;
@@ -38,7 +41,8 @@ class NewUserState extends State<NewUser> {
   TextEditingController? _postalCodeTextFieldController;
   TextEditingController? _companyAddressTextFieldController;
   TextEditingController? _companyCityTextFieldController;
-  TextEditingController? _passwordTextFieldController;
+  TextEditingController? _password1TextFieldController;
+  TextEditingController? _password2TextFieldController;
 
   bool emailValidate = true;
   bool firstNameValidate = true;
@@ -51,12 +55,15 @@ class NewUserState extends State<NewUser> {
   bool postalCodeValidate = true;
   bool companyAddressValidate = true;
   bool companyCityValidate = true;
-  bool passwordValidate = true;
+  bool password1Validate = true;
+  bool password2Validate = true;
 
   bool isNewUser = true;
 
+  String newPass = '0';
+
   checkifNewUser(User user) {
-    if (user.firstName == '' && user.lastName == '') {
+    if (user.fullName == '') {
       return true;
     }
     return false;
@@ -75,25 +82,23 @@ class NewUserState extends State<NewUser> {
     _emailTextFieldController?.text = widget.user?.email ?? '';
 
     _firstNameTextFieldController = TextEditingController();
-    _firstNameTextFieldController?.text = widget.user?.firstName ?? '';
-
-    _lastNameTextFieldController = TextEditingController();
-    _lastNameTextFieldController?.text = widget.user?.lastName ?? '';
+    _firstNameTextFieldController?.text = widget.user?.fullName ?? '';
 
     _mobileNumberTextFieldController = TextEditingController();
     _mobileNumberTextFieldController?.text = widget.user?.mobileNumber ?? '';
 
     _address1TextFieldController = TextEditingController();
-    _address1TextFieldController?.text = widget.user?.address1 ?? '';
+    _address1TextFieldController?.text = widget.user?.address ?? '';
 
     _unitNumberTextFieldController = TextEditingController();
-    _unitNumberTextFieldController?.text = widget.user?.address2 ?? '';
+    _unitNumberTextFieldController?.text = widget.user?.unitNumber ?? '';
 
     _cityTextFieldController = TextEditingController();
     _cityTextFieldController?.text = widget.user?.city ?? '';
 
     _provinceTextFieldController = TextEditingController();
-    _provinceTextFieldController?.text = widget.user?.province ?? '';
+    _provinceTextFieldController?.text =
+        widget.user?.province?.toUpperCase() ?? '';
 
     _postalCodeTextFieldController = TextEditingController();
     _postalCodeTextFieldController?.text = widget.user?.postalCode ?? '';
@@ -103,10 +108,13 @@ class NewUserState extends State<NewUser> {
         widget.user?.companyAddress ?? '';
 
     _companyCityTextFieldController = TextEditingController();
-    _companyCityTextFieldController?.text = widget.user?.companyName ?? '';
+    _companyCityTextFieldController?.text = widget.user?.companyId ?? '';
 
-    _passwordTextFieldController = TextEditingController();
-    _passwordTextFieldController?.text = widget.user?.password ?? '';
+    _password1TextFieldController = TextEditingController();
+    _password1TextFieldController?.text = widget.user?.password ?? '';
+
+    _password2TextFieldController = TextEditingController();
+    _password2TextFieldController?.text = widget.user?.password ?? '';
   }
 
   @override
@@ -124,17 +132,22 @@ class NewUserState extends State<NewUser> {
     _postalCodeTextFieldController?.dispose();
     _companyAddressTextFieldController?.dispose();
     _companyCityTextFieldController?.dispose();
-    _passwordTextFieldController?.dispose();
+    _password1TextFieldController?.dispose();
+    _password2TextFieldController?.dispose();
   }
 
   Widget _textField(
       String labelText, TextEditingController? controller, bool validate,
-      {bool hideText = false}) {
+      {bool passwordConfirmField = false, bool hideText = false}) {
     return TextField(
       obscureText: hideText,
       decoration: InputDecoration(
         labelText: labelText,
-        errorText: validate ? null : 'Field Can\'t be empty',
+        errorText: validate
+            ? null
+            : passwordConfirmField
+                ? "Passwords do not match"
+                : 'Field Can\'t be empty',
       ),
       controller: controller,
     );
@@ -147,7 +160,15 @@ class NewUserState extends State<NewUser> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _textField('Email', _emailTextFieldController, emailValidate),
+          isNewUser
+              ? _textField('Email', _emailTextFieldController, emailValidate)
+              : Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+                  child: Text(
+                    '${widget.user?.email}',
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 22),
+                  ),
+                ),
           SizedBox(
             height: 4,
           ),
@@ -228,8 +249,17 @@ class NewUserState extends State<NewUser> {
           SizedBox(
             height: 4,
           ),
-          _textField('Password', _passwordTextFieldController, passwordValidate,
+          _textField(
+              'Password', _password1TextFieldController, password1Validate,
               hideText: true),
+          SizedBox(
+            height: 4,
+          ),
+          checkifNewUser(widget.user ?? User.def())
+              ? _textField('Confirm Password', _password2TextFieldController,
+                  password2Validate,
+                  passwordConfirmField: true, hideText: true)
+              : SizedBox(height: 2),
           SizedBox(
             height: 30,
           ),
@@ -251,7 +281,7 @@ class NewUserState extends State<NewUser> {
                 String? city = _cityTextFieldController?.text;
                 String? province = _provinceTextFieldController?.text;
                 String? postalCode = _postalCodeTextFieldController?.text;
-                String? password = _passwordTextFieldController?.text;
+                String? password = _password1TextFieldController?.text;
 
                 setState(() {
                   isNullOrEmpty(email)
@@ -282,8 +312,14 @@ class NewUserState extends State<NewUser> {
                       ? postalCodeValidate = false
                       : postalCodeValidate = true;
                   isNullOrEmpty(password)
-                      ? passwordValidate = false
-                      : passwordValidate = true;
+                      ? password1Validate = false
+                      : password1Validate = true;
+                  if (checkifNewUser(widget.user ?? User.def())) {
+                    _password1TextFieldController?.text ==
+                            _password2TextFieldController?.text
+                        ? password2Validate = true
+                        : password2Validate = false;
+                  }
                 });
                 if (emailValidate &&
                     firstNameValidate &&
@@ -294,17 +330,17 @@ class NewUserState extends State<NewUser> {
                     cityValidate &&
                     provinceValidate &&
                     postalCodeValidate &&
-                    passwordValidate) {
+                    password1Validate &&
+                    password2Validate) {
                   var newUser = User.def();
                   if (loggedInUser != null) {
                     // print('🥶${loggedInUser?.id}');
                     // loggedInUser?.id = id;
                     loggedInUser?.email = email;
-                    loggedInUser?.firstName = firstName;
-                    loggedInUser?.lastName = lastName;
+                    loggedInUser?.fullName = firstName;
                     loggedInUser?.mobileNumber = mobileNumber;
-                    loggedInUser?.address1 = address1;
-                    loggedInUser?.address2 = address2;
+                    loggedInUser?.address = address1;
+                    loggedInUser?.unitNumber = address2;
                     loggedInUser?.city = city;
                     loggedInUser?.province = province;
                     loggedInUser?.postalCode = postalCode;
@@ -314,11 +350,10 @@ class NewUserState extends State<NewUser> {
                   } else {
                     // newUser.id = id;
                     newUser.email = email;
-                    newUser.firstName = firstName;
-                    newUser.lastName = lastName;
+                    newUser.fullName = firstName;
                     newUser.mobileNumber = mobileNumber;
-                    newUser.address1 = address1;
-                    newUser.address2 = address2;
+                    newUser.address = address1;
+                    newUser.unitNumber = address2;
                     newUser.city = city;
                     newUser.province = province;
                     newUser.postalCode = postalCode;
@@ -337,7 +372,7 @@ class NewUserState extends State<NewUser> {
                           '');
 
                   if (propertyID != null) {
-                    widget.user?.clientDisplayName = propertyID;
+                    widget.user?.propertyId = propertyID;
 
                     if (isNewUser) {
                       openDialog(
@@ -347,7 +382,7 @@ class NewUserState extends State<NewUser> {
                           "You can now login! Your address matches one of our properties, we have sent a request to your property manager to give you residence access!");
                     }
                   } else if (companyID != null) {
-                    widget.user?.clientDisplayName = companyID;
+                    widget.user?.companyId = companyID;
 
                     if (isNewUser) {
                       openDialog(
@@ -372,21 +407,35 @@ class NewUserState extends State<NewUser> {
                     }
                   }
                   if (isNewUser) {
-                    Navigator.of(context).pop(widget.user);
+                    if (widget.user?.email != null) {
+                      setState(() {
+                        sendEmail(email: _emailTextFieldController!.text);
+                      });
+
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(
+                              builder: (context) => ConfirmEmail(
+                                    email: _emailTextFieldController!.text,
+                                    newPass: newPass,
+                                  )))
+                          .then((value) =>
+                              Navigator.of(context).pop(widget.user));
+                    }
                   } else {
-                    userManager.updateUser(widget.user!);
+                    // userManager.updateUser(widget.user!);
                   }
                 }
               },
             ),
           ),
           SizedBox(height: 12),
-          TextButton(
-              onPressed: () => _showActionSheet(context),
-              child: Text(
-                'Delete Profile',
-                style: TextStyle(color: Colors.red),
-              ))
+          if (isNewUser == false)
+            TextButton(
+                onPressed: () => _showActionSheet(context),
+                child: Text(
+                  'Delete Profile',
+                  style: TextStyle(color: Colors.red),
+                ))
         ],
       ),
     );
@@ -409,7 +458,7 @@ class NewUserState extends State<NewUser> {
               actions: [
                 CupertinoActionSheetAction(
                   onPressed: () async {
-                    userManager.deleteUser(loggedInUser!);
+                    // userManager.deleteUser(loggedInUser!);
                     widget.user = null;
                     Navigator.of(modalContext).pop();
                     BlocProvider.of<SessionCubit>(context).signOut();
@@ -433,6 +482,68 @@ class NewUserState extends State<NewUser> {
     // }
   }
 
+  final _random = Random();
+  String randomIntString(int min, int max) =>
+      '${min + _random.nextInt(max - min)}';
+
+  // Future verfiyAndGetCode(String changePassLink, String accountEmail) async {
+  //   var url = Uri.parse(changePassLink);
+  //   var response = await http.post(url);
+  //   print(response.body);
+  //   var link = json.decode(response.body);
+  //   print(link);
+  //   setState(() {
+  //     int min = 111111, max = 999999;
+  //     newPass = next(min, max);
+
+  //     sendEmail(email: accountEmail);
+  //   });
+  //   showToast(
+  //       'Your password reset email has been sent, please check your email',
+  //       duration: 3,
+  //       gravity: Toast.bottom);
+  // }
+
+  showToast(String msg, {required int duration, required int gravity}) {
+    Toast.show(msg, duration: duration, gravity: gravity);
+  }
+
+  sendEmail({
+    required String email,
+  }) async {
+    int min = 111111, max = 999999;
+    newPass = randomIntString(min, max);
+
+    const subject = 'Password Reset for R2Park';
+    final message =
+        'Thank you for using R2Park!\n\n the code to confirm your email is: $newPass \n\n';
+
+    const serviceId = 'service_r92qfro';
+    const templateId = 'template_3bcglw2';
+    const userId = 'O3E-2XbChA0kAiyXd';
+
+    final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
+    final _ = await http.post(url,
+        headers: {
+          'origin': 'http://localhost',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'service_id': serviceId,
+          'template_id': templateId,
+          'user_id': userId,
+          'template_params': {
+            // 'user_name': name,
+            'user_email': email,
+            // 'to_email': email,
+            'user_subject': subject,
+            'user_message': message,
+          }
+        }));
+
+    // print(response.body);
+  }
+
   void openDialog(BuildContext context, String dialogTitle, stringContent,
       String dialogContent) {
     showDialog(
@@ -451,6 +562,29 @@ class NewUserState extends State<NewUser> {
           );
         }));
   }
+
+  //   @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //       body: SingleChildScrollView(
+  //     child: Center(
+  //       child: Padding(
+  //         padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+  //         child: Column(
+  //           children: [
+  //             _addPlateTitle(),
+  //             _licencePlateSeciton(),
+  //             _addLocationTitle(),
+  //             _locationSection(),
+  //             _durationInput(),
+  //             _submitButton(),
+  //             // _footerView()
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   ));
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -471,7 +605,9 @@ class NewUserState extends State<NewUser> {
               ],
             )
           : null,
-      body: Center(child: _inputData(context)),
+      body: SingleChildScrollView(child: Center(child: _inputData(context))),
     );
   }
 }
+
+void openDialog(BuildContext context, String s, String t, String u) {}

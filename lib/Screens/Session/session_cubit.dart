@@ -122,13 +122,13 @@ class SessionCubit extends Cubit<SessionState> {
   List<User> getResidentRequests({required String addressID}) {
     var residents = users
             ?.where((element) =>
-                element.clientDisplayName == addressID &&
-                element.authorityLevel == 5)
+                element.propertyId == addressID &&
+                element.userType == "Resident")
             .toList() ??
         [];
 
     residents.sort((a, b) =>
-        (a.address2 ?? a.address1!).compareTo(b.address2 ?? b.address1!));
+        (a.address ?? a.unitNumber!).compareTo(b.address ?? b.unitNumber!));
 
     return residents;
   }
@@ -136,13 +136,13 @@ class SessionCubit extends Cubit<SessionState> {
   List<User> getResidents({required String addressID}) {
     var residents = users
             ?.where((element) =>
-                element.clientDisplayName == addressID &&
-                element.authorityLevel == 12)
+                element.propertyId == addressID &&
+                element.userType == "Visitor")
             .toList() ??
         [];
 
     residents.sort((a, b) =>
-        (a.address2 ?? a.address1!).compareTo(b.address2 ?? b.address1!));
+        (a.unitNumber ?? a.address!).compareTo(b.unitNumber ?? b.address!));
 
     return residents;
   }

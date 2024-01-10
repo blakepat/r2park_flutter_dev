@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/Managers/exemption_request_manager.dart';
-import 'package:r2park_flutter_dev/Managers/user_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/self_registration.dart';
@@ -40,7 +39,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
   int _selectedDuration = 1;
   final Future<SharedPreferences> prefs = SharedPreferences.getInstance();
 
-  var userManager = UserManager();
+  // var userManager = UserManager();
   var exemptionManager = ExemptionRequestManager();
 
   @override
@@ -76,7 +75,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
         body: SingleChildScrollView(
       child: Center(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
           child: Column(
             children: [
               _addPlateTitle(),
@@ -85,6 +84,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
               _locationSection(),
               _durationInput(),
               _submitButton(),
+
               // _footerView()
             ],
           ),
@@ -192,8 +192,6 @@ class VisitorSessionScreen extends State<VisitorSessionView>
       });
 
       setState(() {});
-    } else {
-      //TODO: show alert
     }
   }
 
@@ -225,29 +223,27 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(4.0),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: secondaryColor),
-                                // backgroundColor: Colors.green),
-                                onPressed: () {},
-                                child: CheckboxListTile(
-                                  title: Text(
-                                    plate,
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 20),
-                                  ),
-                                  shape: RoundedRectangleBorder(),
-                                  value: _selectedLicensePlate == plate,
-                                  onChanged: (newValue) {
-                                    if (newValue != null) {
-                                      newValue
-                                          ? setState(() =>
-                                              _selectedLicensePlate = plate)
-                                          : setState(
-                                              () => _selectedLicensePlate = '');
-                                    }
-                                  },
+                              child: CheckboxListTile(
+                                tileColor: secondaryColor,
+                                checkboxShape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                                title: Text(
+                                  plate,
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20),
                                 ),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                                value: _selectedLicensePlate == plate,
+                                onChanged: (newValue) {
+                                  if (newValue != null) {
+                                    newValue
+                                        ? setState(
+                                            () => _selectedLicensePlate = plate)
+                                        : setState(
+                                            () => _selectedLicensePlate = '');
+                                  }
+                                },
                               ),
                             ),
                           ))
@@ -498,35 +494,33 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.all(4.0),
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                        backgroundColor: secondaryColor),
-                                    // backgroundColor: Colors.pu),
-                                    onPressed: () {},
-                                    child: CheckboxListTile(
-                                      title: Text(
-                                        address.propertyAddress!,
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 18),
-                                      ),
-                                      shape: RoundedRectangleBorder(),
-                                      value: _selectedAddressID ==
-                                          address.propertyID2,
-                                      onChanged: (newValue) {
-                                        if (newValue != null) {
-                                          newValue
-                                              ? setState(() {
-                                                  _selectedAddressID =
-                                                      address.propertyID2!;
-                                                  _selectedproperty = address;
-                                                })
-                                              : setState(() {
-                                                  _selectedAddressID = '';
-                                                  _selectedproperty = null;
-                                                });
-                                        }
-                                      },
+                                  child: CheckboxListTile(
+                                    tileColor: secondaryColor,
+                                    checkboxShape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8)),
+                                    title: Text(
+                                      address.propertyAddress!,
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 18),
                                     ),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8)),
+                                    value: _selectedAddressID ==
+                                        address.propertyID2,
+                                    onChanged: (newValue) {
+                                      if (newValue != null) {
+                                        newValue
+                                            ? setState(() {
+                                                _selectedAddressID =
+                                                    address.propertyID2!;
+                                                _selectedproperty = address;
+                                              })
+                                            : setState(() {
+                                                _selectedAddressID = '';
+                                                _selectedproperty = null;
+                                              });
+                                      }
+                                    },
                                   ),
                                 ),
                               ))
@@ -643,10 +637,10 @@ class VisitorSessionScreen extends State<VisitorSessionView>
     selfRegistration.startDate = DateTime.now().toUtc();
     selfRegistration.endDate =
         DateTime.now().add(Duration(days: _selectedDuration)).toUtc();
-    selfRegistration.unitNumber = ''; //TODO
+    selfRegistration.unitNumber = '';
     selfRegistration.email = user.email;
-    selfRegistration.phone = user.homePhone;
-    selfRegistration.name = '${user.firstName} ${user.lastName}';
+    selfRegistration.phone = user.mobileNumber;
+    selfRegistration.name = '${user.fullName}';
     selfRegistration.makeModel = '';
     selfRegistration.numberOfDays = '$_selectedDuration';
     selfRegistration.reason = 'guests';
@@ -658,7 +652,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
 
     selfRegistration.streetNumber = splitAddress?[0] ?? '0';
     selfRegistration.streetName = 'test';
-    selfRegistration.streetSuffix = ''; //TODO
+    selfRegistration.streetSuffix = '';
     selfRegistration.address =
         _selectedproperty?.propertyAddress ?? 'Error getting addresss';
 

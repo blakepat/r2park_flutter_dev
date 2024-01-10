@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:r2park_flutter_dev/Managers/user_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:easy_search_bar/easy_search_bar.dart';
 import 'package:r2park_flutter_dev/main.dart';
@@ -21,7 +20,7 @@ class ManagerSessionView extends StatefulWidget {
 class ManagerSessionScreen extends State<ManagerSessionView> {
   final User user;
   final SessionCubit sessionCubit;
-  final userManager = UserManager();
+  // final userManager = UserManager();
 
   List<User>? residentRequests;
   List<User>? residents;
@@ -36,14 +35,12 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
     super.initState();
 
     setState(() {
-      residentRequests = sessionCubit.getResidentRequests(
-          addressID: user.clientDisplayName ?? '');
+      residentRequests =
+          sessionCubit.getResidentRequests(addressID: user.propertyId ?? '');
 
-      residents =
-          sessionCubit.getResidents(addressID: user.clientDisplayName ?? '');
+      residents = sessionCubit.getResidents(addressID: user.propertyId ?? '');
 
-      residentNames =
-          residents?.map((e) => '${e.firstName} ${e.lastName}').toList();
+      residentNames = residents?.map((e) => '${e.fullName}').toList();
     });
   }
 
@@ -63,20 +60,20 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
     );
   }
 
-  Future<List<User>?> _fetchSuggestions(String searchValue) async {
-    await Future.delayed(const Duration(milliseconds: 750));
+  // Future<List<User>?> _fetchSuggestions(String searchValue) async {
+  //   await Future.delayed(const Duration(milliseconds: 750));
 
-    return residents?.where((element) {
-      return element.firstName
-              ?.toLowerCase()
-              .contains(searchValue.toLowerCase()) ??
-          false;
-    }).toList();
-  }
+  //   return residents?.where((element) {
+  //     return element.fullName
+  //             ?.toLowerCase()
+  //             .contains(searchValue.toLowerCase()) ??
+  //         false;
+  //   }).toList();
+  // }
 
   PreferredSizeWidget _addSearchBar() {
     return EasySearchBar(
-      title: const Text('Search'),
+      title: const Text('Search residents'),
       onSearch: (value) => setState(() => searchValue = value.toLowerCase()),
       suggestions: residentNames,
       backgroundColor: Colors.black26,
@@ -148,7 +145,10 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
       return Padding(
           padding: const EdgeInsets.fromLTRB(2, 4, 2, 4),
           child: ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: secondaryColor),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: (secondaryColor.withAlpha(150)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8))),
               onPressed: () {
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => Scaffold(
@@ -182,9 +182,9 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                                     color: Colors.white, fontSize: 14),
                               ),
                               Text(
-                                e.address2 == null
+                                e.unitNumber == null
                                     ? e.address ?? ''
-                                    : e.address2 ?? '',
+                                    : e.unitNumber ?? '',
                                 style: TextStyle(
                                     color: Colors.white, fontSize: 32),
                               ),
@@ -201,16 +201,16 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                       Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${e.firstName?.toUpperCase() ?? ''} ',
+                            Text('${e.fullName?.toUpperCase() ?? ''} ',
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold)),
-                            Text(e.lastName?.toUpperCase() ?? '',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold))
+                            // Text(e.lastName?.toUpperCase() ?? '',
+                            //     style: TextStyle(
+                            //         color: Colors.white,
+                            //         fontSize: 16,
+                            //         fontWeight: FontWeight.bold))
                           ]),
                       Text(e.mobileNumber ?? '',
                           style: TextStyle(color: Colors.white60, fontSize: 14))
@@ -223,10 +223,13 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                       onPressed: () {
                         //TO:DO - change user authority level so its accepted / isConfirmed Variable
                         setState(() {
-                          e.authorityLevel = 12;
-                          userManager.updateUser(e);
-                          residentRequests
-                              ?.removeWhere((element) => element.id == e.id);
+                          e.userType = "Resident";
+                          // userManager.updateUser(e);
+                          sessionCubit.users?.removeWhere(
+                              (element) => element.userId == e.userId);
+                          sessionCubit.users?.add(e);
+                          residentRequests?.removeWhere(
+                              (element) => element.userId == e.userId);
                           residents?.add(e);
                         });
                       },
@@ -248,11 +251,14 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                     child: IconButton(
                       onPressed: () {
                         setState(() {
-                          e.clientDisplayName == '';
-                          e.authorityLevel = 12;
-                          userManager.updateUser(e);
-                          residentRequests
-                              ?.removeWhere((element) => element.id == e.id);
+                          e.propertyId == '';
+                          e.userType = "Visitor";
+                          // userManager.updateUser(e);
+                          sessionCubit.users?.removeWhere(
+                              (element) => element.userId == e.userId);
+                          sessionCubit.users?.add(e);
+                          residentRequests?.removeWhere(
+                              (element) => element.userId == e.userId);
                         });
                         //TO:DO - change user authority level so its accepted / isConfirmed Variable
                       },
@@ -294,14 +300,20 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
 
   List<Widget> createResidentCells() {
     final filteredResidents = residents?.where((element) =>
-        (element.firstName?.toLowerCase().contains(searchValue) ?? false) ||
-        (element.lastName?.toLowerCase().contains(searchValue) ?? false) ||
-        (element.address2.toString().toLowerCase().contains(searchValue)));
+        fullNameTrimmed(element).contains(searchValue.replaceAll(' ', '')) ||
+        // (element.firstName?.toLowerCase().contains(searchValue.trim()) ??
+        //     false) ||
+        // (element.lastName?.toLowerCase().contains(searchValue.trim()) ??
+        //     false) ||
+        (element.address.toString().toLowerCase().contains(searchValue)));
     var listOfResidents = filteredResidents?.map((e) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(2, 4, 2, 4),
         child: ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: secondaryColor),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: (secondaryColor.withAlpha(150)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8))),
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => Scaffold(
@@ -335,9 +347,9 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                                   TextStyle(color: Colors.white, fontSize: 14),
                             ),
                             Text(
-                              e.address2 == null
+                              e.unitNumber == null
                                   ? e.address ?? ''
-                                  : e.address2 ?? '',
+                                  : e.unitNumber ?? '',
                               style:
                                   TextStyle(color: Colors.white, fontSize: 32),
                             ),
@@ -354,16 +366,16 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                     Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${e.firstName?.toUpperCase() ?? ''} ',
+                          Text('${e.fullName?.toUpperCase() ?? ''} ',
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold)),
-                          Text(e.lastName?.toUpperCase() ?? '',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold))
+                          // Text(e.lastName?.toUpperCase() ?? '',
+                          //     style: TextStyle(
+                          //         color: Colors.white,
+                          //         fontSize: 16,
+                          //         fontWeight: FontWeight.bold))
                         ]),
                     Text(e.mobileNumber ?? '',
                         style: TextStyle(color: Colors.white60, fontSize: 14))
@@ -381,5 +393,9 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
     } else {
       return [SizedBox(height: 100)];
     }
+  }
+
+  String fullNameTrimmed(User user) {
+    return '${user.fullName?.toLowerCase()}';
   }
 }

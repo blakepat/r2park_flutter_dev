@@ -36,8 +36,8 @@ class TabSessionScreen extends State<TabSessionView>
   void initState() {
     super.initState();
 
-    isResident = user.clientDisplayName != '';
-    isManager = user.authorityLevel == 6 && user.clientDisplayName != '';
+    isResident = user.propertyId != '';
+    isManager = user.userType == "Manager" && user.propertyId != '';
     _tabController = TabController(
         length: isResident ? (isManager ? 4 : 3) : 2, vsync: this);
   }
@@ -67,18 +67,18 @@ class TabSessionScreen extends State<TabSessionView>
             ),
             if (isResident)
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(0.0),
                 child:
                     ResidentSessionView(user: user, sessionCubit: sessionCubit),
               ),
             if (isManager)
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(0.0),
                 child:
                     ManagerSessionView(user: user, sessionCubit: sessionCubit),
               ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(0.0),
               child: NewUser(user: user, sessionCubit: sessionCubit),
             ),
           ],
@@ -105,6 +105,7 @@ class TabSessionScreen extends State<TabSessionView>
       surfaceTintColor: Colors.green[900],
       bottom: TabBar(
           controller: _tabController,
+          tabAlignment: TabAlignment.center,
           labelPadding: EdgeInsets.symmetric(
               horizontal: isResident
                   ? isManager

@@ -23,12 +23,11 @@ class ForgotPasswordScreen extends State<ForgotPassword> {
   bool showNewPasswordTextField = false;
   Future checkUser() async {
     // var url = Uri.http('localhost', 'check.php');
-    var url = Uri.parse('http://192.168.68.102/check.php');
+    var url = Uri.parse('http://localhost/check.php');
     var response = await http.post(url, body: {
       'email': userEmailTextField.text,
     });
     var link = json.decode(response.body);
-    print(link);
     if (link == 'INVALIDUSER') {
       showToast('This user does not exist, please double check and try again!',
           duration: 3, gravity: Toast.bottom);
@@ -48,11 +47,10 @@ class ForgotPasswordScreen extends State<ForgotPassword> {
   Future verfiyAndGetCode(String changePassLink) async {
     var url = Uri.parse(changePassLink);
     var response = await http.post(url);
-    print(response.body);
     var link = json.decode(response.body);
-    print(link);
     setState(() {
       newPass = link;
+      accountEmail = userEmailTextField.text;
       sendEmail(email: userEmailTextField.text);
     });
 
@@ -64,19 +62,19 @@ class ForgotPasswordScreen extends State<ForgotPassword> {
 
   Future changePassword() async {
     // var url = Uri.http('localhost', 'check.php');
-    var url = Uri.parse('http://192.168.68.102/changepass.php');
+    var url = Uri.parse('http://localhost/changepass.php');
     var response = await http.post(url, body: {
       'email': userEmailTextField.text,
       'newPassword': newPasswordTextField.text
     });
     var link = json.decode(response.body);
-    print(link);
     if (link == 'COUNT3') {
       showToast('This user does not exist, please double check and try again!',
           duration: 3, gravity: Toast.bottom);
     } else {
       setState(() {
-        Navigator.of(context).pop();
+        Navigator.of(context)
+            .pop(([userEmailTextField.text, newPasswordTextField.text]));
       });
       //   showToast('Click Verify Button to Reset Password',
       //       duration: 3, gravity: Toast.bottom);
@@ -95,7 +93,7 @@ class ForgotPasswordScreen extends State<ForgotPassword> {
     const userId = 'O3E-2XbChA0kAiyXd';
 
     final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
-    final response = await http.post(url,
+    final _ = await http.post(url,
         headers: {
           'origin': 'http://localhost',
           'Content-Type': 'application/json',
@@ -158,14 +156,23 @@ class ForgotPasswordScreen extends State<ForgotPassword> {
                       alignment: Alignment.center,
                       child: _createLogoView(),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                          controller: userEmailTextField,
-                          decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: 'User Email')),
-                    ),
+                    showCodeTextField
+                        ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              accountEmail ?? '',
+                              style: TextStyle(
+                                  fontSize: 24, fontWeight: FontWeight.w600),
+                            ),
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextField(
+                                controller: userEmailTextField,
+                                decoration: InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    hintText: 'User Email')),
+                          ),
                     showCodeTextField
                         ? Padding(
                             padding: const EdgeInsets.fromLTRB(80, 8, 80, 8),
@@ -196,8 +203,7 @@ class ForgotPasswordScreen extends State<ForgotPassword> {
                               color: secondaryColor,
                               onPressed: () {
                                 //show change password screen
-                                if ('$newPass' ==
-                                    resetCodeTextField.text.trim()) {
+                                if (newPass == resetCodeTextField.text.trim()) {
                                   setState(() {
                                     showNewPasswordTextField = true;
                                   });

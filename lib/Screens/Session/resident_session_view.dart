@@ -44,8 +44,8 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
   @override
   void initState() {
     super.initState();
-    residence = sessionCubit.properties?.firstWhere(
-        (element) => element.propertyID2 == user.clientDisplayName);
+    residence = sessionCubit.properties
+        ?.firstWhere((element) => element.propertyID == user.propertyId);
 
     visitors = sessionCubit.preferences.then((SharedPreferences prefs) {
       return sessionCubit.getVisitors();
@@ -148,34 +148,29 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
                                 //     plates: snapshot.data!, user: user);
                               });
                             },
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: secondaryColor),
-                              onPressed: () {},
-                              child: CheckboxListTile(
-                                title: Text(
-                                  '${visitor.firstName.toUpperCase()} ${visitor.lastName.toUpperCase()}',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 16),
-                                ),
-                                subtitle: Text(
-                                  visitor.plateNumber.toUpperCase(),
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                                shape: RoundedRectangleBorder(),
-                                value: _selectedVisitor == visitor,
-                                onChanged: (newValue) {
-                                  if (newValue != null) {
-                                    newValue
-                                        ? setState(
-                                            () => _selectedVisitor = visitor)
-                                        : setState(
-                                            () => _selectedVisitor = null);
-                                  }
-                                },
+                            child: CheckboxListTile(
+                              tileColor: secondaryColor,
+                              title: Text(
+                                '${visitor.firstName.toUpperCase()} ${visitor.lastName.toUpperCase()}',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 16),
                               ),
+                              subtitle: Text(
+                                visitor.plateNumber.toUpperCase(),
+                                style: TextStyle(fontSize: 14),
+                              ),
+                              shape: RoundedRectangleBorder(),
+                              value: _selectedVisitor == visitor,
+                              onChanged: (newValue) {
+                                if (newValue != null) {
+                                  newValue
+                                      ? setState(
+                                          () => _selectedVisitor = visitor)
+                                      : setState(() => _selectedVisitor = null);
+                                }
+                              },
                             ),
                           ))
                       .toList();
@@ -377,14 +372,14 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
     selfRegistration.startDate = DateTime.now().toUtc();
     selfRegistration.endDate =
         DateTime.now().add(Duration(days: _selectedDuration)).toUtc();
-    selfRegistration.unitNumber = ''; //TODO
+    selfRegistration.unitNumber = '';
     selfRegistration.email = user.email;
-    selfRegistration.phone = user.homePhone;
+    selfRegistration.phone = user.mobileNumber;
     selfRegistration.name =
         '${firstNameController.text} ${lastNameController.text}';
     selfRegistration.makeModel = '';
     selfRegistration.numberOfDays = '$_selectedDuration';
-    selfRegistration.reason = 'Visiting: ${user.firstName} ${user.lastName}';
+    selfRegistration.reason = 'Visiting: ${user.fullName}';
     selfRegistration.notes = '';
     selfRegistration.authBy = '';
     selfRegistration.isArchived = '';
@@ -393,7 +388,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
 
     selfRegistration.streetNumber = splitAddress?[0] ?? '0';
     selfRegistration.streetName = 'test';
-    selfRegistration.streetSuffix = ''; //TODO
+    selfRegistration.streetSuffix = '';
     selfRegistration.address =
         residence?.propertyAddress ?? 'Error getting addresss';
 

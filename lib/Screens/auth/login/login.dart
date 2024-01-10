@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:r2park_flutter_dev/Screens/auth/sign_up/forgot_password.dart';
-
-import '../../../Managers/user_manager.dart';
 import '../../../models/user.dart';
 import '../../Session/session_cubit.dart';
 import '../sign_up/new_user.dart';
@@ -21,7 +18,6 @@ class LoginState extends State<Login> {
   final SessionCubit sessionCubit;
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  var userManager = UserManager();
   bool hidePassword = true;
   String? newPassword;
   String? newEmail;
@@ -56,7 +52,7 @@ class LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    users = Provider.of<List<User>>(context);
+    users = sessionCubit.users;
     if (sessionCubit.users == null) {
       sessionCubit.users = users;
       sessionCubit.attemptAutoLogin();
@@ -107,7 +103,20 @@ class LoginState extends State<Login> {
                   Navigator.of(context)
                       .push(MaterialPageRoute(
                           builder: (context) => ForgotPassword()))
-                      .then((value) {});
+                      .then(
+                    (obj) {
+                      if (obj != null) {
+                        //get user
+                        final user = users
+                            ?.firstWhere((element) => element.email == obj[0]);
+                        if (user != null && users != null) {
+                          user.password = obj[1];
+                          users![users!.indexWhere(
+                              (element) => element.email == user.email)] = user;
+                        }
+                      }
+                    },
+                  );
                 },
                 child: Text(
                   'Forgot Password',
@@ -132,9 +141,6 @@ class LoginState extends State<Login> {
                       User user = users!.firstWhere((element) =>
                           element.email == usernameController.text);
                       if (user.password == passwordController.text) {
-                        //TODO: dismiss login page and go to session view
-                        // print('LOGIN EMAIL: ${user.email}');
-                        // print(user.prefix);
                         sessionCubit.showSession(user);
                         Navigator.of(context).pop(widget);
                       } else {
@@ -172,7 +178,7 @@ class LoginState extends State<Login> {
                           .then(
                         (obj) {
                           if (obj != null) {
-                            userManager.createNewUser(obj);
+                            // userManager.createNewUser(obj);
                             if (obj.id == null) {
                               final now = DateTime.now();
                               int id = now.microsecondsSinceEpoch.toInt();
@@ -183,7 +189,7 @@ class LoginState extends State<Login> {
                             } else {
                               setState(() {
                                 users?.removeWhere(
-                                    (element) => element.id == obj.id);
+                                    (element) => element.userId == obj.id);
                                 users?.add(obj as User);
                               });
                             }
