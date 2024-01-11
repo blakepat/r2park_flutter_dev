@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Screens/auth/sign_up/forgot_password.dart';
 import '../../../models/user.dart';
 import '../../Session/session_cubit.dart';
@@ -16,6 +17,8 @@ class Login extends StatefulWidget {
 
 class LoginState extends State<Login> {
   final SessionCubit sessionCubit;
+  var databaseManager = DatabaseManager();
+
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool hidePassword = true;
@@ -178,18 +181,18 @@ class LoginState extends State<Login> {
                           .then(
                         (obj) {
                           if (obj != null) {
-                            // userManager.createNewUser(obj);
-                            if (obj.id == null) {
+                            databaseManager.createUser(obj);
+                            if (obj.userId == null) {
                               final now = DateTime.now();
                               int id = now.microsecondsSinceEpoch.toInt();
-                              obj.id = id;
+                              obj.userId = id.toString();
                               setState(() {
                                 users?.add(obj as User);
                               });
                             } else {
                               setState(() {
                                 users?.removeWhere(
-                                    (element) => element.userId == obj.id);
+                                    (element) => element.userId == obj.userId);
                                 users?.add(obj as User);
                               });
                             }

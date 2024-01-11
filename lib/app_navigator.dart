@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:r2park_flutter_dev/Managers/exemption_request_manager.dart';
+import 'package:r2park_flutter_dev/Old_Files/exemption_request_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Initial/initial.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_state.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/loading_view.dart';
@@ -9,9 +9,6 @@ import 'package:r2park_flutter_dev/main.dart';
 import 'Screens/Session/session_cubit.dart';
 
 class AppNavigator extends StatelessWidget {
-  // final userManager = UserManager();
-  final exemptionManager = ExemptionRequestManager();
-
   AppNavigator({super.key});
 
   @override

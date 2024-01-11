@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../auth_utilities/auth_cubit.dart';
+import '../../../Old_Files/auth_cubit.dart';
 import '../auth_utilities/auth_repo.dart';
 import '../form_submission_state.dart';
 import 'login_event.dart';
@@ -7,10 +7,8 @@ import 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final AuthRepo authRepo;
-  final AuthCubit authCubit;
 
-  LoginBloc({required this.authRepo, required this.authCubit})
-      : super(LoginState()) {
+  LoginBloc({required this.authRepo}) : super(LoginState()) {
     on<LoginEvent>(_onEvent);
   }
 

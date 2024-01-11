@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:r2park_flutter_dev/Managers/exemption_request_manager.dart';
+import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/app_navigator.dart';
 import 'package:r2park_flutter_dev/models/user.dart';
 import 'Screens/Session/session_cubit.dart';
@@ -25,36 +23,16 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  var exemptionManager = ExemptionRequestManager();
+  var databaseManager = DatabaseManager();
 
   List<User> _users = [];
   List<Property> _properties = [];
-
-  Future<void> getUsersFromJson() async {
-    final String response =
-        await rootBundle.loadString('assets/r2park_table.json');
-    final data = await json.decode(response);
-    setState(() {
-      List jsonUsers = data["users"];
-      List jsonProperties = data["properties"];
-
-      if (_users.isEmpty) {
-        _users = jsonUsers.map((entry) => User.convertFromJson(entry)).toList();
-      }
-
-      if (_properties.isEmpty) {
-        _properties = jsonProperties
-            .map((entry) => Property.convertFromJson(entry))
-            .toList();
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         home: StreamBuilder(
-            stream: Stream.fromFuture(getUsersFromJson()),
+            stream: Stream.fromFuture(getData()),
             builder: (context, snapshot) {
               if (_users.isEmpty) {
                 return Center(
@@ -78,5 +56,22 @@ class _MyAppState extends State<MyApp> {
                 );
               }
             }));
+  }
+
+  Future<void> getData() async {
+    var users = await databaseManager.getUsersFromJson();
+    var properties = await databaseManager.getPropertiesFromJson();
+
+    if (_users.isEmpty) {
+      setState(() {
+        _users = users;
+      });
+    }
+
+    if (_properties.isEmpty) {
+      setState(() {
+        _properties = properties;
+      });
+    }
   }
 }

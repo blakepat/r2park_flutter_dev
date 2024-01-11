@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:r2park_flutter_dev/Managers/exemption_request_manager.dart';
+import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Screens/auth/login/login.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
-import 'package:r2park_flutter_dev/models/self_registration.dart';
+import 'package:r2park_flutter_dev/models/exemption.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Initial extends StatefulWidget {
@@ -28,10 +28,9 @@ class InitialState extends State<Initial> {
 
   final secondaryColor = Colors.green[900]!;
   int _selectedDuration = 1;
-  Property? _selectedproperty;
-  late Future<List<String>> previousProperties;
+  Property? _exemptionRequestProperty;
 
-  var exemptionManager = ExemptionRequestManager();
+  var databaseManager = DatabaseManager();
 
   InitialState({required this.sessionCubit});
 
@@ -249,11 +248,11 @@ class InitialState extends State<Initial> {
     ));
   }
 
-  SelfRegistration createExemption() {
-    var selfRegistration = SelfRegistration.def();
+  Exemption createExemption() {
+    var selfRegistration = Exemption.def();
     selfRegistration.regDate = DateTime.now().toUtc();
     selfRegistration.plateID = plateController.text;
-    selfRegistration.propertyID = _selectedproperty?.propertyID;
+    selfRegistration.propertyID = _exemptionRequestProperty?.propertyID2;
     selfRegistration.startDate = DateTime.now().toUtc();
     selfRegistration.endDate =
         DateTime.now().add(Duration(days: _selectedDuration)).toUtc();
@@ -268,46 +267,45 @@ class InitialState extends State<Initial> {
     selfRegistration.authBy = '';
     selfRegistration.isArchived = '';
 
-    var splitAddress = _selectedproperty?.propertyAddress?.split(',');
+    var splitAddress = _exemptionRequestProperty?.propertyAddress?.split(',');
 
     selfRegistration.streetNumber = splitAddress?[0] ?? '0';
     selfRegistration.streetName = 'test';
     selfRegistration.streetSuffix = '';
     selfRegistration.address =
-        _selectedproperty?.propertyAddress ?? 'Error getting addresss';
+        _exemptionRequestProperty?.propertyAddress ?? 'Error getting addresss';
 
     return selfRegistration;
   }
 
-  _getAddress() {
+  _verifyAddress() {
     var propertyID = sessionCubit.checkIfValidProperty(
         cityController.text.toLowerCase(),
         addressController.text.toLowerCase());
 
     if (propertyID != null) {
-      sessionCubit.addLocation(propertyID);
-
-      previousProperties =
-          sessionCubit.preferences.then((SharedPreferences prefs) {
-        var locations = prefs.getStringList('locations') ?? [];
-        if (locations.isNotEmpty) {
-          _selectedproperty = sessionCubit.properties
-              ?.firstWhere((element) => element.propertyID2 == locations[0]);
-        }
-        return locations;
+      setState(() {
+        _exemptionRequestProperty = sessionCubit.getPropertyFromID(propertyID);
       });
-    } else {
-      openDialog(
-          context,
-          'Incorrect Address',
-          'please double check the address and try again',
-          'please double check the address and try again');
     }
   }
 
+  _resetInterface() {
+    setState(() {
+      nameController.text = '';
+      emailController.text = '';
+      phoneController.text = '';
+      cityController.text = '';
+      addressController.text = '';
+      plateController.text = '';
+      unitController.text = '';
+      _exemptionRequestProperty = null;
+    });
+  }
+
   _submitPressed() {
+    _verifyAddress();
     final exemption = createExemption();
-    _getAddress();
 
     if (nameController.text != '' &&
         emailController.text != '' &&
@@ -315,14 +313,16 @@ class InitialState extends State<Initial> {
         cityController.text != '' &&
         addressController.text != '' &&
         plateController.text != '' &&
-        _selectedproperty != null) {
-      exemptionManager.createExemptionRequest(exemption);
+        _exemptionRequestProperty != null) {
+      databaseManager.createExemption(exemption);
 
       openDialog(
           context,
           'Requested Submitted Successfully',
           'Thank you for using R2Park! Enjoy your visit!',
           'Thank you for using R2Park! Enjoy your visit!');
+
+      _resetInterface();
     } else {
       openDialog(
           context,

@@ -1,10 +1,6 @@
 class Visitor {
-  String firstName;
-  String lastName;
+  String name;
   String plateNumber;
 
-  Visitor(
-      {required this.firstName,
-      required this.lastName,
-      required this.plateNumber});
+  Visitor({required this.name, required this.plateNumber});
 }

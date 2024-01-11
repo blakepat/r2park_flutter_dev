@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/visitor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../Managers/exemption_request_manager.dart';
+import '../../Old_Files/exemption_request_manager.dart';
 import '../../main.dart';
-import '../../models/self_registration.dart';
+import '../../models/exemption.dart';
 import '../../models/user.dart';
 
 class ResidentSessionView extends StatefulWidget {
@@ -31,7 +32,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
   final plateController = TextEditingController();
   int _selectedDuration = 1;
 
-  var exemptionManager = ExemptionRequestManager();
+  var databaseManager = DatabaseManager();
 
   late Future<List<Visitor>> visitors;
   Visitor? _selectedVisitor;
@@ -48,7 +49,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
         ?.firstWhere((element) => element.propertyID == user.propertyId);
 
     visitors = sessionCubit.preferences.then((SharedPreferences prefs) {
-      return sessionCubit.getVisitors();
+      return sessionCubit.getVisitors(user: user);
     });
   }
 
@@ -139,19 +140,22 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
                   var listOfVisitors = snapshot.data!
                       .map((visitor) => Dismissible(
                             background: Container(color: Colors.red),
-                            key: Key(visitor.firstName),
+                            key: Key(visitor.name),
                             onDismissed: (direction) {
                               setState(() {
                                 snapshot.data!.removeWhere(
                                     (element) => element == visitor);
-                                // sessionCubit.updateLicensePlates(
-                                //     plates: snapshot.data!, user: user);
+                                var stringVisitors = snapshot.data
+                                    ?.map((e) => "${e.name},${e.plateNumber}")
+                                    .toList();
+                                sessionCubit.updateVisitors(
+                                    visitors: stringVisitors ?? [], user: user);
                               });
                             },
                             child: CheckboxListTile(
                               tileColor: secondaryColor,
                               title: Text(
-                                '${visitor.firstName.toUpperCase()} ${visitor.lastName.toUpperCase()}',
+                                '${visitor.name.toUpperCase()}',
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w700,
@@ -362,8 +366,8 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
         ));
   }
 
-  SelfRegistration createExemption() {
-    var selfRegistration = SelfRegistration.def();
+  Exemption createExemption() {
+    var selfRegistration = Exemption.def();
     selfRegistration.regDate = DateTime.now().toUtc();
     selfRegistration.plateID = _selectedVisitor == null
         ? plateController.text
@@ -418,16 +422,15 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
         _selectedVisitor != null) {
       if (_selectedVisitor == null) {
         var visitor = Visitor(
-            firstName: firstNameController.text,
-            lastName: lastNameController.text,
+            name: "${firstNameController.text} ${lastNameController.text}",
             plateNumber: plateController.text);
 
-        sessionCubit.saveVisitor(visitor);
+        sessionCubit.saveVisitor(visitor: visitor, user: user);
       }
 
       // print(
       //     '✅ ${residence!.propertyID2}, ${plateController.text} submit pressed!');
-      exemptionManager.createExemptionRequest(exemption);
+      databaseManager.createExemption(exemption);
     } else {
       openDialog(
           context,

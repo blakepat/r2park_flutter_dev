@@ -4,12 +4,12 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
 import 'package:r2park_flutter_dev/Screens/auth/sign_up/confirm_email.dart';
 import 'package:r2park_flutter_dev/main.dart';
 import 'package:toast/toast.dart';
-import '../../../Managers/exemption_request_manager.dart';
 import '../../../models/user.dart';
 
 // ignore: must_be_immutable
@@ -28,11 +28,11 @@ class NewUser extends StatefulWidget {
 class NewUserState extends State<NewUser> {
   User? loggedInUser;
   SessionCubit? sessionCubit;
-  var exemptionManager = ExemptionRequestManager();
+
+  var databaseManager = DatabaseManager();
 
   TextEditingController? _emailTextFieldController;
-  TextEditingController? _firstNameTextFieldController;
-  TextEditingController? _lastNameTextFieldController;
+  TextEditingController? _fullNameTextFieldController;
   TextEditingController? _mobileNumberTextFieldController;
   TextEditingController? _address1TextFieldController;
   TextEditingController? _unitNumberTextFieldController;
@@ -45,8 +45,7 @@ class NewUserState extends State<NewUser> {
   TextEditingController? _password2TextFieldController;
 
   bool emailValidate = true;
-  bool firstNameValidate = true;
-  bool lastNameValidate = true;
+  bool fullNameValidate = true;
   bool mobileNumberValidate = true;
   bool address1Validate = true;
   bool address2Validate = true;
@@ -81,8 +80,8 @@ class NewUserState extends State<NewUser> {
     _emailTextFieldController = TextEditingController();
     _emailTextFieldController?.text = widget.user?.email ?? '';
 
-    _firstNameTextFieldController = TextEditingController();
-    _firstNameTextFieldController?.text = widget.user?.fullName ?? '';
+    _fullNameTextFieldController = TextEditingController();
+    _fullNameTextFieldController?.text = widget.user?.fullName ?? '';
 
     _mobileNumberTextFieldController = TextEditingController();
     _mobileNumberTextFieldController?.text = widget.user?.mobileNumber ?? '';
@@ -122,8 +121,7 @@ class NewUserState extends State<NewUser> {
     super.dispose();
 
     _emailTextFieldController?.dispose();
-    _firstNameTextFieldController?.dispose();
-    _lastNameTextFieldController?.dispose();
+    _fullNameTextFieldController?.dispose();
     _mobileNumberTextFieldController?.dispose();
     _address1TextFieldController?.dispose();
     _unitNumberTextFieldController?.dispose();
@@ -134,6 +132,20 @@ class NewUserState extends State<NewUser> {
     _companyCityTextFieldController?.dispose();
     _password1TextFieldController?.dispose();
     _password2TextFieldController?.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: loggedInUser == null
+          ? AppBar(
+              title: checkifNewUser(widget.user ?? User.def())
+                  ? Text('Create an Account')
+                  : Text('Update User'),
+            )
+          : null,
+      body: SingleChildScrollView(child: Center(child: _inputData(context))),
+    );
   }
 
   Widget _textField(
@@ -172,19 +184,8 @@ class NewUserState extends State<NewUser> {
           SizedBox(
             height: 4,
           ),
-          Row(
-            children: [
-              Expanded(
-                  child: _textField('First Name', _firstNameTextFieldController,
-                      firstNameValidate)),
-              SizedBox(
-                width: 12,
-              ),
-              Expanded(
-                  child: _textField('Last Name', _lastNameTextFieldController,
-                      lastNameValidate)),
-            ],
-          ),
+          _textField(
+              'Full Name', _fullNameTextFieldController, fullNameValidate),
           SizedBox(
             height: 4,
           ),
@@ -263,171 +264,7 @@ class NewUserState extends State<NewUser> {
           SizedBox(
             height: 30,
           ),
-          Container(
-            height: 40,
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: secondaryColor),
-              child: checkifNewUser(widget.user ?? User.def())
-                  ? Text('Create', style: TextStyle(color: Colors.white))
-                  : Text('Update', style: TextStyle(color: Colors.white)),
-              onPressed: () {
-                String? email = _emailTextFieldController?.text;
-                String? firstName = _firstNameTextFieldController?.text;
-                String? lastName = _lastNameTextFieldController?.text;
-                String? mobileNumber = _mobileNumberTextFieldController?.text;
-                String? address1 = _address1TextFieldController?.text;
-                String? address2 = _unitNumberTextFieldController?.text;
-                String? city = _cityTextFieldController?.text;
-                String? province = _provinceTextFieldController?.text;
-                String? postalCode = _postalCodeTextFieldController?.text;
-                String? password = _password1TextFieldController?.text;
-
-                setState(() {
-                  isNullOrEmpty(email)
-                      ? emailValidate = false
-                      : emailValidate = true;
-                  isNullOrEmpty(firstName)
-                      ? firstNameValidate = false
-                      : firstNameValidate = true;
-                  isNullOrEmpty(lastName)
-                      ? lastNameValidate = false
-                      : lastNameValidate = true;
-                  isNullOrEmpty(mobileNumber)
-                      ? mobileNumberValidate = false
-                      : mobileNumberValidate = true;
-                  isNullOrEmpty(address1)
-                      ? address1Validate = false
-                      : address1Validate = true;
-                  // isNullOrEmpty(address2)
-                  //     ? address2Validate = false
-                  //     : address2Validate = true;
-                  isNullOrEmpty(city)
-                      ? cityValidate = false
-                      : cityValidate = true;
-                  isNullOrEmpty(province)
-                      ? provinceValidate = false
-                      : provinceValidate = true;
-                  isNullOrEmpty(postalCode)
-                      ? postalCodeValidate = false
-                      : postalCodeValidate = true;
-                  isNullOrEmpty(password)
-                      ? password1Validate = false
-                      : password1Validate = true;
-                  if (checkifNewUser(widget.user ?? User.def())) {
-                    _password1TextFieldController?.text ==
-                            _password2TextFieldController?.text
-                        ? password2Validate = true
-                        : password2Validate = false;
-                  }
-                });
-                if (emailValidate &&
-                    firstNameValidate &&
-                    lastNameValidate &&
-                    mobileNumberValidate &&
-                    address1Validate &&
-                    address2Validate &&
-                    cityValidate &&
-                    provinceValidate &&
-                    postalCodeValidate &&
-                    password1Validate &&
-                    password2Validate) {
-                  var newUser = User.def();
-                  if (loggedInUser != null) {
-                    // print('🥶${loggedInUser?.id}');
-                    // loggedInUser?.id = id;
-                    loggedInUser?.email = email;
-                    loggedInUser?.fullName = firstName;
-                    loggedInUser?.mobileNumber = mobileNumber;
-                    loggedInUser?.address = address1;
-                    loggedInUser?.unitNumber = address2;
-                    loggedInUser?.city = city;
-                    loggedInUser?.province = province;
-                    loggedInUser?.postalCode = postalCode;
-                    loggedInUser?.password = password;
-
-                    widget.user = loggedInUser;
-                  } else {
-                    // newUser.id = id;
-                    newUser.email = email;
-                    newUser.fullName = firstName;
-                    newUser.mobileNumber = mobileNumber;
-                    newUser.address = address1;
-                    newUser.unitNumber = address2;
-                    newUser.city = city;
-                    newUser.province = province;
-                    newUser.postalCode = postalCode;
-                    newUser.password = password;
-
-                    widget.user = newUser;
-                  }
-                  //if address matches property assign property ID to user
-                  var propertyID = sessionCubit?.checkIfValidProperty(
-                      _cityTextFieldController?.text.toLowerCase() ?? '',
-                      _address1TextFieldController?.text.toLowerCase() ?? '');
-
-                  var companyID = sessionCubit?.checkIfValidProperty(
-                      _companyCityTextFieldController?.text.toLowerCase() ?? '',
-                      _companyAddressTextFieldController?.text.toLowerCase() ??
-                          '');
-
-                  if (propertyID != null) {
-                    widget.user?.propertyId = propertyID;
-
-                    if (isNewUser) {
-                      openDialog(
-                          context,
-                          '✅ User Created!',
-                          "You can now login! Your address matches one of our properties, we have sent a request to your property manager to give you residence access!",
-                          "You can now login! Your address matches one of our properties, we have sent a request to your property manager to give you residence access!");
-                    }
-                  } else if (companyID != null) {
-                    widget.user?.companyId = companyID;
-
-                    if (isNewUser) {
-                      openDialog(
-                          context,
-                          '✅ User Created!',
-                          "You can now login! Your company address matches one of our properties, we have sent a request to your manager!",
-                          "You can now login! Your company address matches one of our properties, we have sent a request to your manager!");
-                    }
-                  } else {
-                    if (isNewUser) {
-                      openDialog(
-                          context,
-                          '✅ User Created!',
-                          "Thank you very using R2Park, sign in to register your vehicle!",
-                          "Thank you very using R2Park, sign in to register your vehicle!");
-                    } else {
-                      openDialog(
-                          context,
-                          'Success ✅',
-                          "Your account has been updated!",
-                          "Your account has been updated!");
-                    }
-                  }
-                  if (isNewUser) {
-                    if (widget.user?.email != null) {
-                      setState(() {
-                        sendEmail(email: _emailTextFieldController!.text);
-                      });
-
-                      Navigator.of(context)
-                          .push(MaterialPageRoute(
-                              builder: (context) => ConfirmEmail(
-                                    email: _emailTextFieldController!.text,
-                                    newPass: newPass,
-                                  )))
-                          .then((value) =>
-                              Navigator.of(context).pop(widget.user));
-                    }
-                  } else {
-                    // userManager.updateUser(widget.user!);
-                  }
-                }
-              },
-            ),
-          ),
+          _createUpdateButton(),
           SizedBox(height: 12),
           if (isNewUser == false)
             TextButton(
@@ -437,6 +274,157 @@ class NewUserState extends State<NewUser> {
                   style: TextStyle(color: Colors.red),
                 ))
         ],
+      ),
+    );
+  }
+
+  Widget _createUpdateButton() {
+    return Container(
+      height: 40,
+      padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: secondaryColor),
+        child: checkifNewUser(widget.user ?? User.def())
+            ? Text('Create', style: TextStyle(color: Colors.white))
+            : Text('Update', style: TextStyle(color: Colors.white)),
+        onPressed: () {
+          String? email = _emailTextFieldController?.text;
+          String? fullName = _fullNameTextFieldController?.text;
+          String? mobileNumber = _mobileNumberTextFieldController?.text;
+          String? address1 = _address1TextFieldController?.text;
+          String? address2 = _unitNumberTextFieldController?.text;
+          String? city = _cityTextFieldController?.text;
+          String? province = _provinceTextFieldController?.text;
+          String? postalCode = _postalCodeTextFieldController?.text;
+          String? password = _password1TextFieldController?.text;
+
+          setState(() {
+            isNullOrEmpty(email) ? emailValidate = false : emailValidate = true;
+            isNullOrEmpty(fullName)
+                ? fullNameValidate = false
+                : fullNameValidate = true;
+            isNullOrEmpty(mobileNumber)
+                ? mobileNumberValidate = false
+                : mobileNumberValidate = true;
+            isNullOrEmpty(address1)
+                ? address1Validate = false
+                : address1Validate = true;
+            // isNullOrEmpty(address2)
+            //     ? address2Validate = false
+            //     : address2Validate = true;
+            isNullOrEmpty(city) ? cityValidate = false : cityValidate = true;
+            isNullOrEmpty(province)
+                ? provinceValidate = false
+                : provinceValidate = true;
+            isNullOrEmpty(postalCode)
+                ? postalCodeValidate = false
+                : postalCodeValidate = true;
+            isNullOrEmpty(password)
+                ? password1Validate = false
+                : password1Validate = true;
+            if (checkifNewUser(widget.user ?? User.def())) {
+              _password1TextFieldController?.text ==
+                      _password2TextFieldController?.text
+                  ? password2Validate = true
+                  : password2Validate = false;
+            }
+          });
+          if (emailValidate &&
+              fullNameValidate &&
+              mobileNumberValidate &&
+              address1Validate &&
+              address2Validate &&
+              cityValidate &&
+              provinceValidate &&
+              postalCodeValidate &&
+              password1Validate &&
+              password2Validate) {
+            if (loggedInUser != null) {
+              // print('🥶${loggedInUser?.id}');
+              // loggedInUser?.id = id;
+              widget.user?.fullName = fullName;
+              widget.user?.mobileNumber = mobileNumber;
+              widget.user?.address = address1;
+              widget.user?.unitNumber = address2;
+              widget.user?.city = city;
+              widget.user?.province = province;
+              widget.user?.postalCode = postalCode;
+              widget.user?.password = password;
+            } else {
+              // newUser.id = id;
+              widget.user?.email = email;
+              widget.user?.fullName = fullName;
+              widget.user?.mobileNumber = mobileNumber;
+              widget.user?.address = address1;
+              widget.user?.unitNumber = address2;
+              widget.user?.city = city;
+              widget.user?.province = province;
+              widget.user?.postalCode = postalCode;
+              widget.user?.password = password;
+            }
+            //if address matches property assign property ID to user
+            var propertyID = sessionCubit?.checkIfValidProperty(
+                _cityTextFieldController?.text.toLowerCase() ?? '',
+                _address1TextFieldController?.text.toLowerCase() ?? '');
+
+            var companyID = sessionCubit?.checkIfValidProperty(
+                _companyCityTextFieldController?.text.toLowerCase() ?? '',
+                _companyAddressTextFieldController?.text.toLowerCase() ?? '');
+
+            if (propertyID != null) {
+              widget.user?.propertyId = propertyID;
+
+              if (isNewUser) {
+                openDialog(
+                    context,
+                    '✅ User Created!',
+                    "You can now login! Your address matches one of our properties, we have sent a request to your property manager to give you residence access!",
+                    "You can now login! Your address matches one of our properties, we have sent a request to your property manager to give you residence access!");
+              }
+            } else if (companyID != null) {
+              widget.user?.companyId = companyID;
+
+              if (isNewUser) {
+                openDialog(
+                    context,
+                    '✅ User Created!',
+                    "You can now login! Your company address matches one of our properties, we have sent a request to your manager!",
+                    "You can now login! Your company address matches one of our properties, we have sent a request to your manager!");
+              }
+            } else {
+              if (isNewUser) {
+                openDialog(
+                    context,
+                    '✅ User Created!',
+                    "Thank you very using R2Park, sign in to register your vehicle!",
+                    "Thank you very using R2Park, sign in to register your vehicle!");
+              } else {
+                openDialog(
+                    context,
+                    'Success ✅',
+                    "Your account has been updated!",
+                    "Your account has been updated!");
+              }
+            }
+            if (isNewUser) {
+              if (widget.user?.email != null) {
+                setState(() {
+                  sendEmail(email: _emailTextFieldController!.text);
+                });
+
+                Navigator.of(context)
+                    .push(MaterialPageRoute(
+                        builder: (context) => ConfirmEmail(
+                              email: _emailTextFieldController!.text,
+                              newPass: newPass,
+                            )))
+                    .then((value) => Navigator.of(context).pop(widget.user));
+              }
+            } else {
+              databaseManager.updateUser(widget.user!);
+            }
+          }
+        },
       ),
     );
   }
@@ -458,11 +446,11 @@ class NewUserState extends State<NewUser> {
               actions: [
                 CupertinoActionSheetAction(
                   onPressed: () async {
-                    // userManager.deleteUser(loggedInUser!);
+                    databaseManager.deleteUser(loggedInUser!);
                     widget.user = null;
                     Navigator.of(modalContext).pop();
                     BlocProvider.of<SessionCubit>(context).signOut();
-                    Navigator.of(context).pop();
+                    // Navigator.of(context).pop();
                   },
                   isDestructiveAction: true,
                   child: Text('Delete'),
@@ -475,11 +463,6 @@ class NewUserState extends State<NewUser> {
                 child: Text('Cancel'),
               ),
             ));
-    // if (userDeleted == true) {
-    //   print('✅ USER DELETED TRUE');
-    //   BlocProvider.of<SessionCubit>(context).signOut();
-    //   Navigator.of(context).pop();
-    // }
   }
 
   final _random = Random();
@@ -561,52 +544,6 @@ class NewUserState extends State<NewUser> {
             ],
           );
         }));
-  }
-
-  //   @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //       body: SingleChildScrollView(
-  //     child: Center(
-  //       child: Padding(
-  //         padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-  //         child: Column(
-  //           children: [
-  //             _addPlateTitle(),
-  //             _licencePlateSeciton(),
-  //             _addLocationTitle(),
-  //             _locationSection(),
-  //             _durationInput(),
-  //             _submitButton(),
-  //             // _footerView()
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   ));
-  // }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: loggedInUser == null
-          ? AppBar(
-              title: checkifNewUser(widget.user ?? User.def())
-                  ? Text('Create an Account')
-                  : Text('Update User'),
-              actions: const [
-                // loggedInUser == null
-                //     ? SizedBox()
-                //     : IconButton(
-                //         onPressed: () {
-                //           _showActionSheet(context);
-                //         },
-                //         icon: Icon(Icons.delete_forever))
-              ],
-            )
-          : null,
-      body: SingleChildScrollView(child: Center(child: _inputData(context))),
-    );
   }
 }
 

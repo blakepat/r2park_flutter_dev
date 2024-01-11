@@ -1,64 +1,124 @@
 class Exemption {
-  int? id;
-  int? municipalId;
-  String? name;
+  int? registryID;
+  DateTime? regDate;
+  String? plateID;
+  String? propertyID;
+  DateTime? startDate;
+  DateTime? endDate;
+  String? unitNumber;
+  String? streetName;
+  String? zoneID;
   String? email;
   String? phone;
-  String? streetNumber;
-  String? streetName;
-  String? streetExemption;
-  String? streetNameExemption;
+  String? name;
+  String? makeModel;
+  String? numberOfDays;
   String? reason;
-  String? municipality;
-  DateTime? startDate;
-  DateTime? timeExemption;
-  String? plateNumber;
-  String? province;
-  String? vehicleType;
-  int? requestedDays;
-  DateTime? endDate;
-  DateTime? created;
+  String? notes;
+  String? authBy;
+  String? isArchived;
+  String? streetNumber;
+  String? streetSuffix;
+  String? address;
 
   Exemption(
-      {required this.id,
-      this.municipalId,
-      this.name,
+      {this.registryID,
+      this.regDate,
+      this.plateID,
+      this.propertyID,
+      this.startDate,
+      this.endDate,
+      this.unitNumber,
+      this.streetName,
+      this.zoneID,
       this.email,
       this.phone,
-      this.streetNumber,
-      this.streetName,
-      this.streetExemption,
-      this.streetNameExemption,
+      this.name,
+      this.makeModel,
+      this.numberOfDays,
       this.reason,
-      this.municipality,
-      this.startDate,
-      this.timeExemption,
-      this.plateNumber,
-      this.province,
-      this.vehicleType,
-      this.requestedDays,
-      this.endDate,
-      this.created});
+      this.notes,
+      this.authBy,
+      this.isArchived,
+      this.streetNumber,
+      this.streetSuffix,
+      this.address});
 
   Exemption.def() {
-    id = null;
-    municipalId = 0;
-    streetName = '';
+    registryID = null;
+    regDate = DateTime.now().toUtc();
+    plateID = '';
+    propertyID = '';
+    startDate = DateTime.now().toUtc();
+    endDate = DateTime.now().toUtc();
+    unitNumber = '';
+    streetNumber = '';
+    zoneID = '';
     email = '';
     phone = '';
-    streetNumber = '';
-    streetName = '';
-    streetExemption = '';
-    streetNameExemption = '';
+    name = '';
+    makeModel = '';
+    numberOfDays = '';
     reason = '';
-    municipality = '';
-    startDate = DateTime.now().toUtc();
-    timeExemption = DateTime.now().toUtc();
-    plateNumber = '';
-    province = '';
-    vehicleType = '';
-    requestedDays = 0;
-    endDate = DateTime.now().toUtc();
-    created = DateTime.now().toUtc();
+    notes = '';
+    authBy = '';
+    isArchived = '';
+    streetNumber = '';
+    streetSuffix = '';
+    address = '';
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+
+    data['Reg_Date'] = regDate.toString();
+    data['fk_Plate_ID'] = plateID;
+    data['fk_property_id'] = propertyID;
+    data['Start_Date'] = startDate.toString();
+    data['End_Date'] = endDate.toString();
+    data['Unit_No'] = unitNumber;
+    data['Street_Name'] = streetName;
+    data['fk_Zone_ID'] = zoneID;
+    data['email'] = email;
+    data['Phone'] = phone;
+    data['Name'] = name;
+    data['Make_Model'] = makeModel;
+    data['Days'] = numberOfDays;
+    data['Reason'] = reason;
+    data['Notes'] = notes;
+    data['Auth_By'] = authBy;
+    data['IsArchived'] = isArchived;
+    data['street_number'] = streetNumber;
+    data['street_suffix'] = streetSuffix;
+    data['address'] = address;
+
+    return data;
+  }
+
+  factory Exemption.convertFromJson(dynamic json) {
+    final exemption = Exemption.def();
+
+    exemption.registryID = json['Reg_Date'];
+    exemption.plateID = json['fk_Plate_ID'];
+    exemption.propertyID = json['fk_property_id'];
+    exemption.startDate = json['Start_Date'];
+    exemption.endDate = json['End_Date'];
+    exemption.unitNumber = json['Unit_No'];
+    exemption.streetName = json['Street_Name'];
+    exemption.zoneID = json['fk_Zone_ID'];
+    exemption.email = json['email'];
+    exemption.phone = json['Phone'];
+    exemption.name = json['Name'];
+    exemption.makeModel = json['Make_Model'];
+    exemption.numberOfDays = json['Days'];
+    exemption.reason = json['Reason'];
+    exemption.notes = json['Notes'];
+    exemption.authBy = json['Auth_By'];
+    exemption.isArchived = json['IsArchived'];
+    exemption.streetNumber = json['street_number'];
+    exemption.streetSuffix = json['street_suffix'];
+    exemption.address = json['address'];
+
+    return exemption;
   }
 }

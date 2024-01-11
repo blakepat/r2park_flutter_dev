@@ -17,79 +17,58 @@ class SessionCubit extends Cubit<SessionState> {
     attemptAutoLogin();
   }
 
-  void attemptAutoLogin() async {
+  //MARK: - Visitor Methods
+  void saveVisitor({required Visitor visitor, required User user}) async {
     final SharedPreferences prefs = await preferences;
-    String? userEmail = prefs.getString('email');
-    User? user;
-    try {
-      if (userEmail != null && users != null) {
-        if (users!.isNotEmpty) {
-          user = users?.firstWhere((element) => element.email == userEmail);
-        }
-      }
+    var previousVisitorList =
+        prefs.getStringList('${user.email}visitors') ?? [];
 
-      if (user == null) {
-        // print('attemptAutoLogin - USER is null');
-        // signOut();
-        emit(Unauthenticated());
-      } else {
-        showSession(user);
-        emit(Authenticated(user: user));
-      }
-    } on Exception {
-      emit(Unauthenticated());
-    }
-  }
-
-  void updateLicensePlates(
-      {required List<String> plates, required User user}) async {
-    final SharedPreferences prefs = await preferences;
-    await prefs.setStringList('plates', plates);
-  }
-
-  void saveVisitor(Visitor visitor) async {
-    final SharedPreferences prefs = await preferences;
-
-    var previousVisitorList = prefs.getStringList('visitors') ?? [];
-
-    String newVisitor =
-        '${visitor.firstName},${visitor.lastName},${visitor.plateNumber}';
-
+    String newVisitor = '${visitor.name},${visitor.plateNumber}';
     previousVisitorList.add(newVisitor);
-
-    prefs.setStringList('visitors', previousVisitorList);
+    prefs.setStringList('${user.email}visitors', previousVisitorList);
   }
 
-  Future<List<Visitor>> getVisitors() async {
+  void updateVisitors(
+      {required List<String> visitors, required User user}) async {
     final SharedPreferences prefs = await preferences;
-    var savedVisitors = prefs.getStringList('visitors') ?? [];
+    await prefs.setStringList('${user.email}visitors', visitors);
+  }
+
+  Future<List<Visitor>> getVisitors({required User user}) async {
+    final SharedPreferences prefs = await preferences;
+    var savedVisitors = prefs.getStringList('${user.email}visitors') ?? [];
     List<Visitor> visitorList = [];
     for (var i = 0; i < savedVisitors.length; i++) {
       var visitor = savedVisitors[i];
       List<String> separatedVisitor = visitor.split(',');
 
-      visitorList.add(Visitor(
-          firstName: separatedVisitor[0],
-          lastName: separatedVisitor[1],
-          plateNumber: separatedVisitor[2]));
+      visitorList.add(
+          Visitor(name: separatedVisitor[0], plateNumber: separatedVisitor[1]));
     }
     return visitorList;
   }
+  ///////////////////////////////////////////
 
-  void addLocation(String locationID) async {
+  //MARK: - Location Methods
+  void addLocation({required String locationID, required User user}) async {
     final SharedPreferences prefs = await preferences;
-    var locations = prefs.getStringList('locations') ?? [];
+    var locations = prefs.getStringList('${user.email}locations') ?? [];
     if (!locations.contains(locationID)) {
       locations.add(locationID);
     }
-    await prefs.setStringList('locations', locations);
+    await prefs.setStringList('${user.email}locations', locations);
   }
 
-  void removeLocation(String locationID) async {
+  void removeLocation({required String locationID, required User user}) async {
     final SharedPreferences prefs = await preferences;
-    var locations = prefs.getStringList('locations') ?? [];
+    var locations = prefs.getStringList('${user.email}locations') ?? [];
     locations.remove(locationID);
-    await prefs.setStringList('locations', locations);
+    await prefs.setStringList('${user.email}locations', locations);
+  }
+
+  Property? getPropertyFromID(String propertyId) {
+    return properties
+        ?.firstWhere((element) => element.propertyID == propertyId);
   }
 
   String? checkIfValidProperty(String city, String streetName) {
@@ -97,11 +76,8 @@ class SessionCubit extends Cubit<SessionState> {
     try {
       property = properties?.firstWhere((element) {
         var splitAddress = element.propertyAddress?.split(',');
-        // print(splitAddress);
         final cityName = splitAddress?[1].toLowerCase().trim();
         var partOfStreetName = splitAddress?[0].split(' ')[1].toLowerCase();
-        // print(partOfStreetName);
-        // print('✅ $partOfStreetName == $streetName and $cityName == $city');
         if (partOfStreetName != null) {
           return cityName == city && streetName.contains(partOfStreetName);
         }
@@ -110,15 +86,24 @@ class SessionCubit extends Cubit<SessionState> {
     } catch (e) {
       property = null;
     }
-    // print('${property?.propertyName}, ${property?.propertyID2}');
-    return property?.propertyID2;
+    return property?.propertyID;
   }
+  ///////////////////////////////////////////
 
-  Future<List<String>> getLicensePlates() async {
+  //MARK: - License Plate Methods
+  Future<List<String>> getLicensePlates({required User user}) async {
     final SharedPreferences prefs = await preferences;
-    return prefs.getStringList('plates') ?? [];
+    return prefs.getStringList('${user.email}plates') ?? [];
   }
 
+  void updateLicensePlates(
+      {required List<String> plates, required User user}) async {
+    final SharedPreferences prefs = await preferences;
+
+    await prefs.setStringList('${user.email}plates', plates);
+  }
+
+  //MARK: - Resident Methods
   List<User> getResidentRequests({required String addressID}) {
     var residents = users
             ?.where((element) =>
@@ -146,20 +131,16 @@ class SessionCubit extends Cubit<SessionState> {
 
     return residents;
   }
+  ///////////////////////////////////////////
 
+  //MARK: - Auth Methods
   void showAuth() => emit(Unauthenticated());
 
   void showSession(User user) async {
     try {
-      // if (user == null) {
-      // emit(Unauthenticated());
-      // } else {
       if (user.email != null) {
-        // print('SHARED PREFERENCE SET! - ${user.email!}');
         final SharedPreferences prefs = await preferences;
         await prefs.setString('email', user.email!);
-        // }
-
         emit(Authenticated(user: user));
       }
     } catch (e) {
@@ -170,7 +151,28 @@ class SessionCubit extends Cubit<SessionState> {
   void signOut() async {
     final SharedPreferences prefs = await preferences;
     prefs.remove('email');
-    authRepo.signOut();
     emit(Unauthenticated());
+  }
+
+  void attemptAutoLogin() async {
+    final SharedPreferences prefs = await preferences;
+    String? userEmail = prefs.getString('email');
+    User? user;
+    try {
+      if (userEmail != null && users != null) {
+        if (users!.isNotEmpty) {
+          user = users?.firstWhere((element) => element.email == userEmail);
+        }
+      }
+
+      if (user == null) {
+        emit(Unauthenticated());
+      } else {
+        showSession(user);
+        emit(Authenticated(user: user));
+      }
+    } on Exception {
+      emit(Unauthenticated());
+    }
   }
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:r2park_flutter_dev/Managers/exemption_request_manager.dart';
+import 'package:r2park_flutter_dev/Managers/database_manager.dart';
+import 'package:r2park_flutter_dev/Old_Files/exemption_request_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
-import 'package:r2park_flutter_dev/models/self_registration.dart';
+import 'package:r2park_flutter_dev/models/exemption.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../main.dart';
 import '../../models/user.dart';
@@ -40,14 +41,15 @@ class VisitorSessionScreen extends State<VisitorSessionView>
   final Future<SharedPreferences> prefs = SharedPreferences.getInstance();
 
   // var userManager = UserManager();
-  var exemptionManager = ExemptionRequestManager();
+  // var exemptionManager = ExemptionRequestManager();
+  var databaseManager = DatabaseManager();
 
   @override
   void initState() {
     super.initState();
 
     licensePlates = sessionCubit.preferences.then((SharedPreferences prefs) {
-      var plates = prefs.getStringList('plates') ?? [];
+      var plates = prefs.getStringList('${user.email}plates') ?? [];
       if (plates.isNotEmpty) {
         _selectedLicensePlate = plates[0];
       }
@@ -56,11 +58,11 @@ class VisitorSessionScreen extends State<VisitorSessionView>
     setState(() {
       previousProperties =
           sessionCubit.preferences.then((SharedPreferences prefs) {
-        var locations = prefs.getStringList('locations') ?? [];
+        var locations = prefs.getStringList('${user.email}locations') ?? [];
         if (locations.isNotEmpty) {
           _selectedAddressID = locations[0];
           _selectedproperty = sessionCubit.properties
-              ?.firstWhere((element) => element.propertyID2 == locations[0]);
+              ?.firstWhere((element) => element.propertyID == locations[0]);
         }
         return locations;
       });
@@ -172,7 +174,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
     if (plate.isNotEmpty) {
       // updatedPlates.addAll(licensePlates);
       await sessionCubit.preferences.then((SharedPreferences prefs) {
-        updatedPlates = prefs.getStringList('plates') ?? [];
+        updatedPlates = prefs.getStringList('${user.email}plates') ?? [];
       });
 
       if (updatedPlates.contains(plate)) {
@@ -270,7 +272,8 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                         // ),
                         SizedBox(
                           height: 120,
-                          child: ListView(children: listOfPlates),
+                          child:
+                              Material(child: ListView(children: listOfPlates)),
                         ),
                       ],
                     ),
@@ -420,15 +423,16 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                 streetController.text.toLowerCase());
 
             if (propertyID != null) {
-              sessionCubit.addLocation(propertyID);
+              sessionCubit.addLocation(locationID: propertyID, user: user);
 
               previousProperties =
                   sessionCubit.preferences.then((SharedPreferences prefs) {
-                var locations = prefs.getStringList('locations') ?? [];
+                var locations =
+                    prefs.getStringList('${user.email}locations') ?? [];
                 if (locations.isNotEmpty) {
                   _selectedAddressID = locations[0];
                   _selectedproperty = sessionCubit.properties?.firstWhere(
-                      (element) => element.propertyID2 == locations[0]);
+                      (element) => element.propertyID == locations[0]);
                 }
                 return locations;
               });
@@ -468,82 +472,62 @@ class VisitorSessionScreen extends State<VisitorSessionView>
                   try {
                     listOfAddress = sessionCubit.properties
                         ?.where((element) =>
-                            listOfaddressIds!.contains(element.propertyID2))
+                            listOfaddressIds!.contains(element.propertyID))
                         .toList();
                   } catch (e) {
                     // ignore: avoid_print
                     print('error gettings list of address: $e');
                   }
 
-                  if (listOfAddress != null) {
+                  if (snapshot.data != null && listOfAddress != null) {
                     if (listOfAddress.isNotEmpty) {
                       var listOfAddressTiles = listOfAddress
-                          .map((address) => Dismissible(
-                                background: Container(color: Colors.red),
-                                key: Key(address.propertyName!),
-                                onDismissed: (direction) {
-                                  setState(() {
-                                    snapshot.data!.removeWhere(
-                                        // ignore: unrelated_type_equality_checks
-                                        (element) => element == address.id);
-                                    properties?.remove(address);
-
-                                    sessionCubit
-                                        .removeLocation(address.propertyID2!);
-                                  });
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: CheckboxListTile(
-                                    tileColor: secondaryColor,
-                                    checkboxShape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8)),
-                                    title: Text(
-                                      address.propertyAddress!,
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 18),
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8)),
-                                    value: _selectedAddressID ==
-                                        address.propertyID2,
-                                    onChanged: (newValue) {
-                                      if (newValue != null) {
-                                        newValue
-                                            ? setState(() {
-                                                _selectedAddressID =
-                                                    address.propertyID2!;
-                                                _selectedproperty = address;
-                                              })
-                                            : setState(() {
-                                                _selectedAddressID = '';
-                                                _selectedproperty = null;
-                                              });
-                                      }
-                                    },
-                                  ),
+                          .map(
+                            (address) => Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: CheckboxListTile(
+                                tileColor: secondaryColor,
+                                checkboxShape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                                title: Text(
+                                  address.propertyAddress!,
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 18),
                                 ),
-                              ))
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                                value:
+                                    _selectedAddressID == address.propertyID2,
+                                onChanged: (newValue) {
+                                  if (newValue != null) {
+                                    newValue
+                                        ? setState(() {
+                                            _selectedAddressID =
+                                                address.propertyID2!;
+                                            _selectedproperty = address;
+                                          })
+                                        : setState(() {
+                                            _selectedAddressID = '';
+                                            _selectedproperty = null;
+                                          });
+                                  }
+                                },
+                              ),
+                            ),
+                          )
                           .toList();
 
                       return Padding(
                         padding: const EdgeInsets.all(0.0),
                         child: Column(
                           children: [
-                            // SizedBox(
-                            //   width: double.infinity,
-                            //   child: Text(
-                            //     'Select Location:',
-                            //     textAlign: TextAlign.left,
-                            //     style: TextStyle(
-                            //         fontSize: 22,
-                            //         fontWeight: FontWeight.w400,
-                            //         color: Colors.white),
-                            //   ),
-                            // ),
                             SizedBox(
                               height: 120,
-                              child: ListView(children: listOfAddressTiles),
+                              child: Material(
+                                child: ListView(
+                                  children: listOfAddressTiles,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -629,8 +613,8 @@ class VisitorSessionScreen extends State<VisitorSessionView>
     );
   }
 
-  SelfRegistration createExemption() {
-    var selfRegistration = SelfRegistration.def();
+  Exemption createExemption() {
+    var selfRegistration = Exemption.def();
     selfRegistration.regDate = DateTime.now().toUtc();
     selfRegistration.plateID = _selectedLicensePlate;
     selfRegistration.propertyID = _selectedAddressID;
@@ -656,18 +640,6 @@ class VisitorSessionScreen extends State<VisitorSessionView>
     selfRegistration.address =
         _selectedproperty?.propertyAddress ?? 'Error getting addresss';
 
-    // var exemption = Exemption.def();
-    // exemption.name = '${user.firstName} ${user.lastName}';
-    // exemption.email = user.email;
-    // exemption.phone = user.homePhone;
-    // exemption.plateNumber = _selectedLicensePlate;
-    // exemption.streetNumber = unitController.text;
-    // exemption.streetName = streetController.text;
-    // exemption.requestedDays = _selectedDuration;
-    // exemption.municipality = cityController.text;
-    // exemption.created = DateTime.now().toUtc();
-    // exemption.reason = 'guests';
-
     return selfRegistration;
   }
 
@@ -675,11 +647,9 @@ class VisitorSessionScreen extends State<VisitorSessionView>
     _addNewLicensePlate(_selectedLicensePlate);
 
     final exemption = createExemption();
-    // var propertyID = sessionCubit.checkIfValidProperty(
-    //     cityController.text.toLowerCase(), streetController.text.toLowerCase());
 
     if (_selectedAddressID != '' && _selectedLicensePlate != '') {
-      exemptionManager.createExemptionRequest(exemption);
+      databaseManager.createExemption(exemption);
 
       openDialog(
           context,
