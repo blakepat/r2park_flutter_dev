@@ -4,7 +4,6 @@ import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Screens/auth/login/login.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/exemption.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class Initial extends StatefulWidget {
   final SessionCubit sessionCubit;

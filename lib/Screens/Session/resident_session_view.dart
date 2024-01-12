@@ -4,8 +4,6 @@ import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/visitor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../Old_Files/exemption_request_manager.dart';
 import '../../main.dart';
 import '../../models/exemption.dart';
 import '../../models/user.dart';
