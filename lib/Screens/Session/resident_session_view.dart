@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
+import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/visitor.dart';
@@ -29,6 +30,8 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
   final lastNameController = TextEditingController();
   final plateController = TextEditingController();
   int _selectedDuration = 1;
+
+  String? unauthorizedPlateMessage;
 
   var databaseManager = DatabaseManager();
 
@@ -409,51 +412,43 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
     return selfRegistration;
   }
 
-  _submitPressed() {
-    // _addNewLicensePlate(_selectedLicensePlate);
-
-    final exemption = createExemption();
-
-    if (firstNameController.text != '' &&
-            lastNameController.text != '' &&
-            plateController.text != '' ||
-        _selectedVisitor != null) {
-      if (_selectedVisitor == null) {
-        var visitor = Visitor(
-            name: "${firstNameController.text} ${lastNameController.text}",
-            plateNumber: plateController.text);
-
-        sessionCubit.saveVisitor(visitor: visitor, user: user);
-      }
-
-      // print(
-      //     '✅ ${residence!.propertyID2}, ${plateController.text} submit pressed!');
-      databaseManager.createExemption(exemption);
-    } else {
-      openDialog(
-          context,
-          'Please select previous visitor or enter complete all 3 fields',
-          'Please ensure you have selected an address and licence plate',
-          'Please ensure you have selected an address and licence plate');
-    }
+  _verifyLicencePlate() async {
+    unauthorizedPlateMessage =
+        sessionCubit.isPlateBlacklisted(licencePlate: plateController.text);
   }
 
-  void openDialog(BuildContext context, String dialogTitle, stringContent,
-      String dialogContent) {
-    showDialog(
-        context: context,
-        builder: ((context) {
-          return AlertDialog(
-            title: Text(dialogTitle),
-            content: Text(dialogContent),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Back'))
-            ],
-          );
-        }));
+  _submitPressed() {
+    _verifyLicencePlate();
+    // _addNewLicensePlate(_selectedLicensePlate);
+
+    if (unauthorizedPlateMessage != null) {
+      openDialog(context, 'Request Unsuccessful', '$unauthorizedPlateMessage',
+          '$unauthorizedPlateMessage');
+    } else {
+      final exemption = createExemption();
+
+      if (firstNameController.text != '' &&
+              lastNameController.text != '' &&
+              plateController.text != '' ||
+          _selectedVisitor != null) {
+        if (_selectedVisitor == null) {
+          var visitor = Visitor(
+              name: "${firstNameController.text} ${lastNameController.text}",
+              plateNumber: plateController.text);
+
+          sessionCubit.saveVisitor(visitor: visitor, user: user);
+        }
+
+        // print(
+        //     '✅ ${residence!.propertyID2}, ${plateController.text} submit pressed!');
+        databaseManager.createExemption(exemption);
+      } else {
+        openDialog(
+            context,
+            'Please select previous visitor or enter complete all 3 fields',
+            'Please ensure you have selected an address and licence plate',
+            'Please ensure you have selected an address and licence plate');
+      }
+    }
   }
 }

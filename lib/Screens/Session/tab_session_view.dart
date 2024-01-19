@@ -79,7 +79,10 @@ class TabSessionScreen extends State<TabSessionView>
               ),
             Padding(
               padding: const EdgeInsets.all(0.0),
-              child: NewUser(user: user, sessionCubit: sessionCubit),
+              child: NewUser(
+                  isManagerScreen: false,
+                  user: user,
+                  sessionCubit: sessionCubit),
             ),
           ],
         ),

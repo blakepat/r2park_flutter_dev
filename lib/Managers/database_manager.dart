@@ -35,6 +35,19 @@ class DatabaseManager {
     return properties;
   }
 
+  Future<List<String>> getBlacklistLicencePlates() async {
+    List<String> blacklistPlates = [];
+
+    final String response =
+        await rootBundle.loadString('assets/r2park_table.json');
+    final data = await json.decode(response);
+    List jsonProperties = data["blacklistPlates"];
+
+    blacklistPlates = jsonProperties.map((entry) => '').toList();
+
+    return blacklistPlates;
+  }
+
   Future<void> createUser(User user) async {
     var jsonUser = user.toJson();
 

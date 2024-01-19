@@ -10,6 +10,7 @@ class SessionCubit extends Cubit<SessionState> {
   final AuthRepo authRepo;
   List<User>? users;
   List<Property>? properties;
+  List<String>? blacklistPlates;
   final Future<SharedPreferences> preferences = SharedPreferences.getInstance();
 
   SessionCubit({required this.authRepo, this.users, this.properties})
@@ -101,6 +102,18 @@ class SessionCubit extends Cubit<SessionState> {
     final SharedPreferences prefs = await preferences;
 
     await prefs.setStringList('${user.email}plates', plates);
+  }
+
+  String? isPlateBlacklisted({required String licencePlate}) {
+    String? unauthorizedMessage;
+    if (blacklistPlates != null) {
+      if (blacklistPlates!.contains(licencePlate)) {
+        unauthorizedMessage =
+            "Licence Plate Blacklisted, unable to park complete registration";
+      }
+    }
+
+    return unauthorizedMessage;
   }
 
   //MARK: - Resident Methods

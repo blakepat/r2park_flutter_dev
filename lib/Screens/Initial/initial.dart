@@ -28,6 +28,7 @@ class InitialState extends State<Initial> {
   final secondaryColor = Colors.green[900]!;
   int _selectedDuration = 1;
   Property? _exemptionRequestProperty;
+  String? unauthorizedPlateMessage;
 
   var databaseManager = DatabaseManager();
 
@@ -289,6 +290,11 @@ class InitialState extends State<Initial> {
     }
   }
 
+  _verifyLicencePlate() async {
+    unauthorizedPlateMessage =
+        sessionCubit.isPlateBlacklisted(licencePlate: plateController.text);
+  }
+
   _resetInterface() {
     setState(() {
       nameController.text = '';
@@ -304,30 +310,37 @@ class InitialState extends State<Initial> {
 
   _submitPressed() {
     _verifyAddress();
-    final exemption = createExemption();
+    _verifyLicencePlate();
 
-    if (nameController.text != '' &&
-        emailController.text != '' &&
-        phoneController.text != '' &&
-        cityController.text != '' &&
-        addressController.text != '' &&
-        plateController.text != '' &&
-        _exemptionRequestProperty != null) {
-      databaseManager.createExemption(exemption);
-
-      openDialog(
-          context,
-          'Requested Submitted Successfully',
-          'Thank you for using R2Park! Enjoy your visit!',
-          'Thank you for using R2Park! Enjoy your visit!');
-
-      _resetInterface();
+    if (unauthorizedPlateMessage != null) {
+      openDialog(context, 'Request Unsuccessful', '$unauthorizedPlateMessage',
+          '$unauthorizedPlateMessage');
     } else {
-      openDialog(
-          context,
-          'Please select Plate and Location',
-          'Please ensure you have filled out the address form correctly',
-          'Please ensure you have filled out the address form correctly');
+      final exemption = createExemption();
+
+      if (nameController.text != '' &&
+          emailController.text != '' &&
+          phoneController.text != '' &&
+          cityController.text != '' &&
+          addressController.text != '' &&
+          plateController.text != '' &&
+          _exemptionRequestProperty != null) {
+        databaseManager.createExemption(exemption);
+
+        openDialog(
+            context,
+            'Request Submitted Successfully',
+            'Thank you for using R2Park! Enjoy your visit!',
+            'Thank you for using R2Park! Enjoy your visit!');
+
+        _resetInterface();
+      } else {
+        openDialog(
+            context,
+            'Please select Plate and Location',
+            'Please ensure you have filled out the address form correctly',
+            'Please ensure you have filled out the address form correctly');
+      }
     }
   }
 

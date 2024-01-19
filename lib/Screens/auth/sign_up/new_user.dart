@@ -16,18 +16,24 @@ import '../../../models/user.dart';
 class NewUser extends StatefulWidget {
   User? user;
   SessionCubit? sessionCubit;
+  bool isManagerScreen;
 
-  NewUser({super.key, this.user, this.sessionCubit});
+  NewUser(
+      {super.key, required this.isManagerScreen, this.user, this.sessionCubit});
 
   @override
   NewUserState createState() =>
       // ignore: no_logic_in_create_state
-      NewUserState(loggedInUser: user, sessionCubit: sessionCubit);
+      NewUserState(
+          isManagerScreen: isManagerScreen,
+          loggedInUser: user,
+          sessionCubit: sessionCubit);
 }
 
 class NewUserState extends State<NewUser> {
   User? loggedInUser;
   SessionCubit? sessionCubit;
+  bool isManagerScreen;
 
   var databaseManager = DatabaseManager();
 
@@ -68,7 +74,8 @@ class NewUserState extends State<NewUser> {
     return false;
   }
 
-  NewUserState({this.loggedInUser, this.sessionCubit});
+  NewUserState(
+      {required this.isManagerScreen, this.loggedInUser, this.sessionCubit});
 
   @override
   void initState() {
@@ -250,9 +257,11 @@ class NewUserState extends State<NewUser> {
           SizedBox(
             height: 4,
           ),
-          _textField(
-              'Password', _password1TextFieldController, password1Validate,
-              hideText: true),
+          isManagerScreen
+              ? SizedBox(height: 2)
+              : _textField(
+                  'Password', _password1TextFieldController, password1Validate,
+                  hideText: true),
           SizedBox(
             height: 4,
           ),
@@ -268,9 +277,11 @@ class NewUserState extends State<NewUser> {
           SizedBox(height: 12),
           if (isNewUser == false)
             TextButton(
-                onPressed: () => _showActionSheet(context),
+                onPressed: () => isManagerScreen
+                    ? _showActionSheetForRemoveResident(context)
+                    : _showActionSheetForDelete(context),
                 child: Text(
-                  'Delete Profile',
+                  isManagerScreen ? 'Remove Resident' : 'Delete Profile',
                   style: TextStyle(color: Colors.red),
                 ))
         ],
@@ -429,7 +440,7 @@ class NewUserState extends State<NewUser> {
     );
   }
 
-  void _showActionSheet(BuildContext context) {
+  void _showActionSheetForDelete(BuildContext context) {
     // var userDeleted = false;
 
     showCupertinoModalPopup<void>(
@@ -454,6 +465,47 @@ class NewUserState extends State<NewUser> {
                   },
                   isDestructiveAction: true,
                   child: Text('Delete'),
+                )
+              ],
+              cancelButton: CupertinoActionSheetAction(
+                onPressed: (() {
+                  Navigator.pop(modalContext);
+                }),
+                child: Text('Cancel'),
+              ),
+            ));
+  }
+
+  void _showActionSheetForRemoveResident(BuildContext context) {
+    // var userDeleted = false;
+
+    showCupertinoModalPopup<void>(
+        context: context,
+        builder: (BuildContext modalContext) => CupertinoActionSheet(
+              title: Text(
+                'Remove Resident From Property?',
+                style: TextStyle(fontSize: 20, color: Colors.red),
+              ),
+              message: Text(
+                'Are you sure you want to remove this resident from the property',
+                style: TextStyle(fontSize: 16),
+              ),
+              actions: [
+                CupertinoActionSheetAction(
+                  onPressed: () async {
+                    User residentToRemove = loggedInUser!;
+                    residentToRemove.propertyId = "";
+                    residentToRemove.userType = "Visitor";
+                    residentToRemove.address = "";
+                    residentToRemove.unitNumber = "";
+
+                    databaseManager.updateUser(residentToRemove);
+                    widget.user = null;
+                    Navigator.of(modalContext).pop();
+                    Navigator.of(context).pop();
+                  },
+                  isDestructiveAction: true,
+                  child: Text('Remove'),
                 )
               ],
               cancelButton: CupertinoActionSheetAction(
@@ -526,25 +578,4 @@ class NewUserState extends State<NewUser> {
 
     // print(response.body);
   }
-
-  void openDialog(BuildContext context, String dialogTitle, stringContent,
-      String dialogContent) {
-    showDialog(
-        context: context,
-        builder: ((context) {
-          return AlertDialog(
-            title: Text(dialogTitle),
-            content: Text(dialogContent),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Back'))
-            ],
-          );
-        }));
-  }
 }
-
-void openDialog(BuildContext context, String s, String t, String u) {}

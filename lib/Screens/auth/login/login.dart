@@ -175,6 +175,7 @@ class LoginState extends State<Login> {
                       Navigator.of(context)
                           .push(MaterialPageRoute(
                         builder: (context) => NewUser(
+                          isManagerScreen: false,
                           sessionCubit: sessionCubit,
                         ),
                       ))

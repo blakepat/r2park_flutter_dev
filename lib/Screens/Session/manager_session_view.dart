@@ -156,6 +156,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                         title: Text('Update User'),
                       ),
                       body: NewUser(
+                        isManagerScreen: true,
                         sessionCubit: sessionCubit,
                         user: e,
                       )),
@@ -315,16 +316,24 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8))),
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
+              Navigator.of(context)
+                  .push(MaterialPageRoute(
                 builder: (context) => Scaffold(
                     appBar: AppBar(
                       title: Text('Update User'),
                     ),
                     body: NewUser(
+                      isManagerScreen: true,
                       sessionCubit: sessionCubit,
                       user: e,
                     )),
-              ));
+              ))
+                  .then((value) {
+                setState(() {
+                  residents = sessionCubit.getResidents(
+                      addressID: user.propertyId ?? '');
+                });
+              });
             },
             child: Row(
               children: [

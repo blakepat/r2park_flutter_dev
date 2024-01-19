@@ -4,6 +4,7 @@ import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/exemption.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../Managers/helper_functions.dart';
 import '../../main.dart';
 import '../../models/user.dart';
 
@@ -38,6 +39,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
   String _selectedLicensePlate = '';
   int _selectedDuration = 1;
   final Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+  String? unauthorizedPlateMessage;
 
   // var userManager = UserManager();
   // var exemptionManager = ExemptionRequestManager();
@@ -642,45 +644,37 @@ class VisitorSessionScreen extends State<VisitorSessionView>
     return selfRegistration;
   }
 
-  _submitPressed() {
-    _addNewLicensePlate(_selectedLicensePlate);
-
-    final exemption = createExemption();
-
-    if (_selectedAddressID != '' && _selectedLicensePlate != '') {
-      databaseManager.createExemption(exemption);
-
-      openDialog(
-          context,
-          'Requested Submitted Successfully',
-          'Thank you for using R2Park! Enjoy your visit!',
-          'Thank you for using R2Park! Enjoy your visit!');
-    } else {
-      openDialog(
-          context,
-          'Please select Plate and Location',
-          'Please ensure you have selected an address and licence plate',
-          'Please ensure you have selected an address and licence plate');
-    }
+  _verifyLicencePlate() async {
+    unauthorizedPlateMessage =
+        sessionCubit.isPlateBlacklisted(licencePlate: plateController.text);
   }
 
-  void openDialog(BuildContext context, String dialogTitle, stringContent,
-      String dialogContent) {
-    showDialog(
-        context: context,
-        builder: ((context) {
-          return AlertDialog(
-            title: Text(dialogTitle),
-            content: Text(dialogContent),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Back'))
-            ],
-          );
-        }));
+  _submitPressed() {
+    _verifyLicencePlate();
+    _addNewLicensePlate(_selectedLicensePlate);
+
+    if (unauthorizedPlateMessage != null) {
+      openDialog(context, 'Request Unsuccessful', '$unauthorizedPlateMessage',
+          '$unauthorizedPlateMessage');
+    } else {
+      final exemption = createExemption();
+
+      if (_selectedAddressID != '' && _selectedLicensePlate != '') {
+        databaseManager.createExemption(exemption);
+
+        openDialog(
+            context,
+            'Requested Submitted Successfully',
+            'Thank you for using R2Park! Enjoy your visit!',
+            'Thank you for using R2Park! Enjoy your visit!');
+      } else {
+        openDialog(
+            context,
+            'Please select Plate and Location',
+            'Please ensure you have selected an address and licence plate',
+            'Please ensure you have selected an address and licence plate');
+      }
+    }
   }
 
   // ignore: unused_element
