@@ -16,22 +16,7 @@
             "company_id": "",
             "password": "123456"
         },
-        {
-            "user_id": "2",
-            "user_type": "Resident",
-            "property_id": "H522",
-            "email": "blakepat@me.com",
-            "full_name": "Blake Patenaude",
-            "mobile_number": "9059051413",
-            "unit_number": "22",
-            "address": "4340 Fairview St",
-            "city": "Burlington",
-            "province": "ON",
-            "postal_code": "L7L7A3",
-            "company_address": "",
-            "company_id": "",
-            "password": "123456"
-        },
+
         {
             "user_id": "3",
             "user_type": "Visitor",

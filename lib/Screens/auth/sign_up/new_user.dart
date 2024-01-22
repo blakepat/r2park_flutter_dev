@@ -67,6 +67,9 @@ class NewUserState extends State<NewUser> {
 
   String newPass = '0';
 
+  String errorText = "";
+  String passwordInadequateMessage = "";
+
   checkifNewUser(User user) {
     if (user.fullName == '') {
       return true;
@@ -157,17 +160,23 @@ class NewUserState extends State<NewUser> {
 
   Widget _textField(
       String labelText, TextEditingController? controller, bool validate,
-      {bool passwordConfirmField = false, bool hideText = false}) {
+      {bool passwordConfirmField = false,
+      bool hideText = false,
+      int? maxLength,
+      String errorText = ""}) {
     return TextField(
+      maxLength: maxLength,
       obscureText: hideText,
       decoration: InputDecoration(
-        labelText: labelText,
-        errorText: validate
-            ? null
-            : passwordConfirmField
-                ? "Passwords do not match"
-                : 'Field Can\'t be empty',
-      ),
+          counterText: '',
+          labelText: labelText,
+          errorText: errorText.isEmpty
+              ? validate
+                  ? null
+                  : passwordConfirmField
+                      ? "Passwords do not match"
+                      : 'Field Can\'t be empty'
+              : errorText),
       controller: controller,
     );
   }
@@ -225,8 +234,9 @@ class NewUserState extends State<NewUser> {
           Row(
             children: [
               Expanded(
-                  child: _textField('Province', _provinceTextFieldController,
-                      provinceValidate)),
+                  child: _textField('Province (ON, AB)',
+                      _provinceTextFieldController, provinceValidate,
+                      maxLength: 2, errorText: errorText)),
               SizedBox(
                 width: 12,
               ),
@@ -299,140 +309,90 @@ class NewUserState extends State<NewUser> {
             ? Text('Create', style: TextStyle(color: Colors.white))
             : Text('Update', style: TextStyle(color: Colors.white)),
         onPressed: () {
-          String? email = _emailTextFieldController?.text;
-          String? fullName = _fullNameTextFieldController?.text;
-          String? mobileNumber = _mobileNumberTextFieldController?.text;
-          String? address1 = _address1TextFieldController?.text;
-          String? address2 = _unitNumberTextFieldController?.text;
-          String? city = _cityTextFieldController?.text;
-          String? province = _provinceTextFieldController?.text;
-          String? postalCode = _postalCodeTextFieldController?.text;
-          String? password = _password1TextFieldController?.text;
+          passwordInadequateMessage =
+              validatePassword(_password1TextFieldController!.text);
 
-          setState(() {
-            isNullOrEmpty(email) ? emailValidate = false : emailValidate = true;
-            isNullOrEmpty(fullName)
-                ? fullNameValidate = false
-                : fullNameValidate = true;
-            isNullOrEmpty(mobileNumber)
-                ? mobileNumberValidate = false
-                : mobileNumberValidate = true;
-            isNullOrEmpty(address1)
-                ? address1Validate = false
-                : address1Validate = true;
-            // isNullOrEmpty(address2)
-            //     ? address2Validate = false
-            //     : address2Validate = true;
-            isNullOrEmpty(city) ? cityValidate = false : cityValidate = true;
-            isNullOrEmpty(province)
-                ? provinceValidate = false
-                : provinceValidate = true;
-            isNullOrEmpty(postalCode)
-                ? postalCodeValidate = false
-                : postalCodeValidate = true;
-            isNullOrEmpty(password)
-                ? password1Validate = false
-                : password1Validate = true;
-            if (checkifNewUser(widget.user ?? User.def())) {
-              _password1TextFieldController?.text ==
-                      _password2TextFieldController?.text
-                  ? password2Validate = true
-                  : password2Validate = false;
-            }
-          });
-          if (emailValidate &&
-              fullNameValidate &&
-              mobileNumberValidate &&
-              address1Validate &&
-              address2Validate &&
-              cityValidate &&
-              provinceValidate &&
-              postalCodeValidate &&
-              password1Validate &&
-              password2Validate) {
-            if (loggedInUser != null) {
-              // print('🥶${loggedInUser?.id}');
-              // loggedInUser?.id = id;
-              widget.user?.fullName = fullName;
-              widget.user?.mobileNumber = mobileNumber;
-              widget.user?.address = address1;
-              widget.user?.unitNumber = address2;
-              widget.user?.city = city;
-              widget.user?.province = province;
-              widget.user?.postalCode = postalCode;
-              widget.user?.password = password;
-            } else {
-              // newUser.id = id;
-              widget.user?.email = email;
-              widget.user?.fullName = fullName;
-              widget.user?.mobileNumber = mobileNumber;
-              widget.user?.address = address1;
-              widget.user?.unitNumber = address2;
-              widget.user?.city = city;
-              widget.user?.province = province;
-              widget.user?.postalCode = postalCode;
-              widget.user?.password = password;
-            }
-            //if address matches property assign property ID to user
-            var propertyID = sessionCubit?.checkIfValidProperty(
-                _cityTextFieldController?.text.toLowerCase() ?? '',
-                _address1TextFieldController?.text.toLowerCase() ?? '');
+          if (passwordInadequateMessage.isNotEmpty) {
+            openDialog(context, 'Insufficient Password',
+                passwordInadequateMessage, passwordInadequateMessage);
+          } else {
+            _validateTextFields();
 
-            var companyID = sessionCubit?.checkIfValidProperty(
-                _companyCityTextFieldController?.text.toLowerCase() ?? '',
-                _companyAddressTextFieldController?.text.toLowerCase() ?? '');
-
-            if (propertyID != null) {
-              widget.user?.propertyId = propertyID;
-
-              if (isNewUser) {
-                openDialog(
-                    context,
-                    '✅ User Created!',
-                    "You can now login! Your address matches one of our properties, we have sent a request to your property manager to give you residence access!",
-                    "You can now login! Your address matches one of our properties, we have sent a request to your property manager to give you residence access!");
+            if (_textFieldsAreAllValid()) {
+              if (loggedInUser == null) {
+                widget.user?.email = _emailTextFieldController?.text;
               }
-            } else if (companyID != null) {
-              widget.user?.companyId = companyID;
+              widget.user?.fullName = _fullNameTextFieldController?.text;
+              widget.user?.mobileNumber =
+                  _mobileNumberTextFieldController?.text;
+              widget.user?.address = _address1TextFieldController?.text;
+              widget.user?.unitNumber = _unitNumberTextFieldController?.text;
+              widget.user?.city = _cityTextFieldController?.text;
+              widget.user?.province = _provinceTextFieldController?.text;
+              widget.user?.postalCode = _postalCodeTextFieldController?.text;
+              widget.user?.password = _password1TextFieldController?.text;
 
-              if (isNewUser) {
-                openDialog(
-                    context,
-                    '✅ User Created!',
-                    "You can now login! Your company address matches one of our properties, we have sent a request to your manager!",
-                    "You can now login! Your company address matches one of our properties, we have sent a request to your manager!");
-              }
-            } else {
-              if (isNewUser) {
-                openDialog(
-                    context,
-                    '✅ User Created!',
-                    "Thank you very using R2Park, sign in to register your vehicle!",
-                    "Thank you very using R2Park, sign in to register your vehicle!");
+              //if address matches property assign property ID to user
+              var propertyID = sessionCubit?.checkIfValidProperty(
+                  _cityTextFieldController?.text.toLowerCase() ?? '',
+                  _address1TextFieldController?.text.toLowerCase() ?? '');
+
+              var companyID = sessionCubit?.checkIfValidProperty(
+                  _companyCityTextFieldController?.text.toLowerCase() ?? '',
+                  _companyAddressTextFieldController?.text.toLowerCase() ?? '');
+
+              if (propertyID != null) {
+                widget.user?.propertyId = propertyID;
+
+                if (isNewUser) {
+                  openDialog(
+                      context,
+                      '✅ User Created!',
+                      "You can now login! Your address matches one of our properties, we have sent a request to your property manager to give you residence access!",
+                      "You can now login! Your address matches one of our properties, we have sent a request to your property manager to give you residence access!");
+                }
+              } else if (companyID != null) {
+                widget.user?.companyId = companyID;
+
+                if (isNewUser) {
+                  openDialog(
+                      context,
+                      '✅ User Created!',
+                      "You can now login! Your company address matches one of our properties, we have sent a request to your manager!",
+                      "You can now login! Your company address matches one of our properties, we have sent a request to your manager!");
+                }
               } else {
-                openDialog(
-                    context,
-                    'Success ✅',
-                    "Your account has been updated!",
-                    "Your account has been updated!");
+                if (isNewUser) {
+                  openDialog(
+                      context,
+                      '✅ User Created!',
+                      "Thank you very using R2Park, sign in to register your vehicle!",
+                      "Thank you very using R2Park, sign in to register your vehicle!");
+                } else {
+                  openDialog(
+                      context,
+                      'Success ✅',
+                      "Your account has been updated!",
+                      "Your account has been updated!");
+                }
               }
-            }
-            if (isNewUser) {
-              if (widget.user?.email != null) {
-                setState(() {
-                  sendEmail(email: _emailTextFieldController!.text);
-                });
+              if (isNewUser) {
+                if (widget.user?.email != null) {
+                  setState(() {
+                    sendEmail(email: _emailTextFieldController!.text);
+                  });
 
-                Navigator.of(context)
-                    .push(MaterialPageRoute(
-                        builder: (context) => ConfirmEmail(
-                              email: _emailTextFieldController!.text,
-                              newPass: newPass,
-                            )))
-                    .then((value) => Navigator.of(context).pop(widget.user));
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(
+                          builder: (context) => ConfirmEmail(
+                                email: _emailTextFieldController!.text,
+                                newPass: newPass,
+                              )))
+                      .then((value) => Navigator.of(context).pop(widget.user));
+                }
+              } else {
+                databaseManager.updateUser(widget.user!);
               }
-            } else {
-              databaseManager.updateUser(widget.user!);
             }
           }
         },
@@ -440,9 +400,57 @@ class NewUserState extends State<NewUser> {
     );
   }
 
-  void _showActionSheetForDelete(BuildContext context) {
-    // var userDeleted = false;
+  _textFieldsAreAllValid() {
+    return emailValidate &&
+        fullNameValidate &&
+        mobileNumberValidate &&
+        address1Validate &&
+        address2Validate &&
+        cityValidate &&
+        provinceValidate &&
+        postalCodeValidate &&
+        password1Validate &&
+        password2Validate;
+  }
 
+  _validateTextFields() {
+    setState(() {
+      isNullOrEmpty(_emailTextFieldController?.text)
+          ? emailValidate = false
+          : emailValidate = true;
+      isNullOrEmpty(_fullNameTextFieldController?.text)
+          ? fullNameValidate = false
+          : fullNameValidate = true;
+      isNullOrEmpty(_mobileNumberTextFieldController?.text)
+          ? mobileNumberValidate = false
+          : mobileNumberValidate = true;
+      isNullOrEmpty(_address1TextFieldController?.text)
+          ? address1Validate = false
+          : address1Validate = true;
+      isNullOrEmpty(_cityTextFieldController?.text)
+          ? cityValidate = false
+          : cityValidate = true;
+      isNullOrEmpty(_provinceTextFieldController?.text)
+          ? provinceValidate = false
+          : isValidProvince(_provinceTextFieldController!.text)
+              ? provinceValidate = true
+              : ({provinceValidate = false, errorText = "Invalid Province"});
+      isNullOrEmpty(_postalCodeTextFieldController?.text)
+          ? postalCodeValidate = false
+          : postalCodeValidate = true;
+      isNullOrEmpty(_password1TextFieldController?.text)
+          ? password1Validate = false
+          : password1Validate = true;
+      if (checkifNewUser(widget.user ?? User.def())) {
+        _password1TextFieldController?.text ==
+                _password2TextFieldController?.text
+            ? password2Validate = true
+            : password2Validate = false;
+      }
+    });
+  }
+
+  void _showActionSheetForDelete(BuildContext context) {
     showCupertinoModalPopup<void>(
         context: context,
         builder: (BuildContext modalContext) => CupertinoActionSheet(
@@ -477,8 +485,6 @@ class NewUserState extends State<NewUser> {
   }
 
   void _showActionSheetForRemoveResident(BuildContext context) {
-    // var userDeleted = false;
-
     showCupertinoModalPopup<void>(
         context: context,
         builder: (BuildContext modalContext) => CupertinoActionSheet(
@@ -521,28 +527,6 @@ class NewUserState extends State<NewUser> {
   String randomIntString(int min, int max) =>
       '${min + _random.nextInt(max - min)}';
 
-  // Future verfiyAndGetCode(String changePassLink, String accountEmail) async {
-  //   var url = Uri.parse(changePassLink);
-  //   var response = await http.post(url);
-  //   print(response.body);
-  //   var link = json.decode(response.body);
-  //   print(link);
-  //   setState(() {
-  //     int min = 111111, max = 999999;
-  //     newPass = next(min, max);
-
-  //     sendEmail(email: accountEmail);
-  //   });
-  //   showToast(
-  //       'Your password reset email has been sent, please check your email',
-  //       duration: 3,
-  //       gravity: Toast.bottom);
-  // }
-
-  showToast(String msg, {required int duration, required int gravity}) {
-    Toast.show(msg, duration: duration, gravity: gravity);
-  }
-
   sendEmail({
     required String email,
   }) async {
@@ -568,14 +552,10 @@ class NewUserState extends State<NewUser> {
           'template_id': templateId,
           'user_id': userId,
           'template_params': {
-            // 'user_name': name,
             'user_email': email,
-            // 'to_email': email,
             'user_subject': subject,
             'user_message': message,
           }
         }));
-
-    // print(response.body);
   }
 }

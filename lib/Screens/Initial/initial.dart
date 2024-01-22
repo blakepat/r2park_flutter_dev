@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
+import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Screens/auth/login/login.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
@@ -24,6 +25,7 @@ class InitialState extends State<Initial> {
   TextEditingController unitController = TextEditingController();
   TextEditingController addressController = TextEditingController();
   TextEditingController plateController = TextEditingController();
+  TextEditingController plateProvinceController = TextEditingController();
 
   final secondaryColor = Colors.green[900]!;
   int _selectedDuration = 1;
@@ -65,7 +67,9 @@ class InitialState extends State<Initial> {
                 _createUnitField(),
                 _createAddressField(),
               ]),
-              _createPlateField(),
+              Row(
+                children: [_createPlateField(), _createPlateProvinceField()],
+              ),
               _durationInput(),
               _submitButton(),
             ])));
@@ -167,10 +171,31 @@ class InitialState extends State<Initial> {
   Widget _createPlateField() {
     return Container(
       padding: EdgeInsets.all(10),
-      child: TextField(
-        controller: plateController,
-        decoration:
-            InputDecoration(border: OutlineInputBorder(), labelText: 'Plate'),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width -
+            (MediaQuery.of(context).size.width / 1.5),
+        child: TextField(
+          controller: plateController,
+          decoration: InputDecoration(
+              border: OutlineInputBorder(), labelText: 'Licence Plate'),
+        ),
+      ),
+    );
+  }
+
+  Widget _createPlateProvinceField() {
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width / 2,
+        child: TextField(
+          maxLength: 2,
+          controller: plateProvinceController,
+          decoration: InputDecoration(
+              counterText: "",
+              border: OutlineInputBorder(),
+              labelText: 'Plate Province (ON, AB)'),
+        ),
       ),
     );
   }
@@ -290,9 +315,19 @@ class InitialState extends State<Initial> {
     }
   }
 
+  _verifyProvince() {
+    if (!isValidProvince(plateProvinceController.text)) {
+      unauthorizedPlateMessage = "Province is invalid";
+    }
+  }
+
   _verifyLicencePlate() async {
-    unauthorizedPlateMessage =
-        sessionCubit.isPlateBlacklisted(licencePlate: plateController.text);
+    if (isValidPlate(plateController.text)) {
+      unauthorizedPlateMessage =
+          sessionCubit.isPlateBlacklisted(licencePlate: plateController.text);
+    } else {
+      unauthorizedPlateMessage = "Licence Plate contains invalid characters";
+    }
   }
 
   _resetInterface() {
@@ -311,6 +346,7 @@ class InitialState extends State<Initial> {
   _submitPressed() {
     _verifyAddress();
     _verifyLicencePlate();
+    _verifyProvince();
 
     if (unauthorizedPlateMessage != null) {
       openDialog(context, 'Request Unsuccessful', '$unauthorizedPlateMessage',
@@ -342,24 +378,5 @@ class InitialState extends State<Initial> {
             'Please ensure you have filled out the address form correctly');
       }
     }
-  }
-
-  void openDialog(BuildContext context, String dialogTitle, stringContent,
-      String dialogContent) {
-    showDialog(
-        context: context,
-        builder: ((context) {
-          return AlertDialog(
-            title: Text(dialogTitle),
-            content: Text(dialogContent),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Back'))
-            ],
-          );
-        }));
   }
 }
