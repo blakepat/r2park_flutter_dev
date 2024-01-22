@@ -153,29 +153,36 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
                                     visitors: stringVisitors ?? [], user: user);
                               });
                             },
-                            child: CheckboxListTile(
-                              tileColor: secondaryColor,
-                              title: Text(
-                                '${visitor.name.toUpperCase()}',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 16),
+                            child: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: CheckboxListTile(
+                                checkboxShape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                                tileColor: secondaryColor,
+                                title: Text(
+                                  '${visitor.name.toUpperCase()}',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 16),
+                                ),
+                                subtitle: Text(
+                                  visitor.plateNumber.toUpperCase(),
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                                value: _selectedVisitor == visitor,
+                                onChanged: (newValue) {
+                                  if (newValue != null) {
+                                    newValue
+                                        ? setState(
+                                            () => _selectedVisitor = visitor)
+                                        : setState(
+                                            () => _selectedVisitor = null);
+                                  }
+                                },
                               ),
-                              subtitle: Text(
-                                visitor.plateNumber.toUpperCase(),
-                                style: TextStyle(fontSize: 14),
-                              ),
-                              shape: RoundedRectangleBorder(),
-                              value: _selectedVisitor == visitor,
-                              onChanged: (newValue) {
-                                if (newValue != null) {
-                                  newValue
-                                      ? setState(
-                                          () => _selectedVisitor = visitor)
-                                      : setState(() => _selectedVisitor = null);
-                                }
-                              },
                             ),
                           ))
                       .toList();
@@ -208,7 +215,8 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
                           height: 180,
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: ListView(children: listOfVisitors),
+                            child: Material(
+                                child: ListView(children: listOfVisitors)),
                           ),
                         ),
                       ],
@@ -297,7 +305,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
                     Icons.rectangle_rounded,
                     color: Colors.white,
                   ),
-                  hintText: 'License Plate...',
+                  hintText: 'License Plate',
                   hintStyle: TextStyle(color: Colors.white),
                   labelStyle: TextStyle(color: Colors.white),
                   enabledBorder: UnderlineInputBorder(
@@ -371,7 +379,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
     var selfRegistration = Exemption.def();
     selfRegistration.regDate = DateTime.now().toUtc();
     selfRegistration.plateID = _selectedVisitor == null
-        ? plateController.text
+        ? plateController.text.toUpperCase().replaceAll(' ', '')
         : _selectedVisitor?.plateNumber;
     selfRegistration.propertyID = residence!.propertyID2;
     selfRegistration.startDate = DateTime.now().toUtc();
@@ -397,57 +405,83 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
     selfRegistration.address =
         residence?.propertyAddress ?? 'Error getting addresss';
 
-    // var exemption = Exemption.def();
-    // exemption.name = '${user.firstName} ${user.lastName}';
-    // exemption.email = user.email;
-    // exemption.phone = user.homePhone;
-    // exemption.plateNumber = _selectedLicensePlate;
-    // exemption.streetNumber = unitController.text;
-    // exemption.streetName = streetController.text;
-    // exemption.requestedDays = _selectedDuration;
-    // exemption.municipality = cityController.text;
-    // exemption.created = DateTime.now().toUtc();
-    // exemption.reason = 'guests';
-
     return selfRegistration;
   }
 
   _verifyLicencePlate() async {
-    unauthorizedPlateMessage =
-        sessionCubit.isPlateBlacklisted(licencePlate: plateController.text);
+    if (_selectedVisitor != null) {
+      unauthorizedPlateMessage = sessionCubit.isPlateBlacklisted(
+          licencePlate: _selectedVisitor!.plateNumber);
+    } else {
+      unauthorizedPlateMessage =
+          sessionCubit.isPlateBlacklisted(licencePlate: plateController.text);
+    }
+  }
+
+  _resetTextFields() {
+    setState(() {
+      firstNameController.text = "";
+      lastNameController.text = "";
+      plateController.text = "";
+    });
   }
 
   _submitPressed() {
+    //check to see if licence plate is blacklisted (either selected previous visitor or entered licence plate)
     _verifyLicencePlate();
-    // _addNewLicensePlate(_selectedLicensePlate);
-
     if (unauthorizedPlateMessage != null) {
       openDialog(context, 'Request Unsuccessful', '$unauthorizedPlateMessage',
           '$unauthorizedPlateMessage');
+      // if licence plate is confirmed has NOT blacklisted continue process
     } else {
-      final exemption = createExemption();
-
-      if (firstNameController.text != '' &&
-              lastNameController.text != '' &&
-              plateController.text != '' ||
-          _selectedVisitor != null) {
-        if (_selectedVisitor == null) {
-          var visitor = Visitor(
-              name: "${firstNameController.text} ${lastNameController.text}",
-              plateNumber: plateController.text);
-
-          sessionCubit.saveVisitor(visitor: visitor, user: user);
-        }
-
-        // print(
-        //     '✅ ${residence!.propertyID2}, ${plateController.text} submit pressed!');
+      //if its a previous visitor licence plate has already been verified, create exemption
+      if (_selectedVisitor != null) {
+        final exemption = createExemption();
         databaseManager.createExemption(exemption);
-      } else {
         openDialog(
             context,
-            'Please select previous visitor or enter complete all 3 fields',
-            'Please ensure you have selected an address and licence plate',
-            'Please ensure you have selected an address and licence plate');
+            '✅ Registration Successful',
+            'Your guest ${_selectedVisitor!.name}, ${_selectedVisitor!.plateNumber} has been successfully registered!',
+            'Your guest ${_selectedVisitor!.name}, ${_selectedVisitor!.plateNumber} has been successfully registered!');
+        _resetTextFields();
+      } else {
+        //if not a previous visitor check licence plate
+        if (isValidPlate(plateController.text.toUpperCase().trim())) {
+          final exemption = createExemption();
+          //ensure form is filled out properly
+          if (firstNameController.text != '' &&
+              lastNameController.text != '' &&
+              plateController.text != '') {
+            //if filled out correctly save visitor for future registrations
+            var visitor = Visitor(
+                name:
+                    "${firstNameController.text.trim()} ${lastNameController.text.trim()}",
+                plateNumber:
+                    plateController.text.toUpperCase().replaceAll(' ', ''));
+            sessionCubit.saveVisitor(visitor: visitor, user: user);
+            //create exemption!
+            databaseManager.createExemption(exemption);
+
+            openDialog(
+                context,
+                '✅ Registration Successful',
+                'Your guest ${firstNameController.text} ${lastNameController.text}, ${plateController.text.toUpperCase().trim()} has been successfully registered!',
+                'Your guest ${firstNameController.text} ${lastNameController.text}, ${plateController.text.toUpperCase().trim()} has been successfully registered!');
+            _resetTextFields();
+          } else {
+            openDialog(
+                context,
+                'Please select previous visitor or enter complete all 3 fields',
+                'Please ensure you have selected an address and licence plate',
+                'Please ensure you have selected an address and licence plate');
+          }
+        } else {
+          openDialog(
+              context,
+              'Licence Plate invalid',
+              'Please double check licence plate and try again',
+              'Please double check licence plate and try again');
+        }
       }
     }
   }

@@ -157,7 +157,8 @@ class VisitorSessionScreen extends State<VisitorSessionView>
           ),
           IconButton(
               onPressed: () {
-                _addNewLicensePlate(plateController.text);
+                _addNewLicensePlate(
+                    plateController.text.toUpperCase().replaceAll(' ', ''));
                 plateController.text = '';
               },
               icon: Icon(
@@ -172,7 +173,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
   void _addNewLicensePlate(String plate) async {
     List<String> updatedPlates = List.empty(growable: true);
     //validate plate
-    if (plate.isNotEmpty) {
+    if (plate.isNotEmpty && isValidPlate(plate)) {
       // updatedPlates.addAll(licensePlates);
       await sessionCubit.preferences.then((SharedPreferences prefs) {
         updatedPlates = prefs.getStringList('${user.email}plates') ?? [];
@@ -195,6 +196,12 @@ class VisitorSessionScreen extends State<VisitorSessionView>
       });
 
       setState(() {});
+    } else {
+      openDialog(
+          context,
+          'Licence Plate invalid',
+          'Please double check licence plate and try again',
+          'Please double check licence plate and try again');
     }
   }
 
@@ -646,12 +653,12 @@ class VisitorSessionScreen extends State<VisitorSessionView>
 
   _verifyLicencePlate() async {
     unauthorizedPlateMessage =
-        sessionCubit.isPlateBlacklisted(licencePlate: plateController.text);
+        sessionCubit.isPlateBlacklisted(licencePlate: _selectedLicensePlate);
   }
 
   _submitPressed() {
     _verifyLicencePlate();
-    _addNewLicensePlate(_selectedLicensePlate);
+    // _addNewLicensePlate(_selectedLicensePlate);
 
     if (unauthorizedPlateMessage != null) {
       openDialog(context, 'Request Unsuccessful', '$unauthorizedPlateMessage',

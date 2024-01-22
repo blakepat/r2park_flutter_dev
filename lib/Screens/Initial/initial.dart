@@ -276,7 +276,8 @@ class InitialState extends State<Initial> {
   Exemption createExemption() {
     var selfRegistration = Exemption.def();
     selfRegistration.regDate = DateTime.now().toUtc();
-    selfRegistration.plateID = plateController.text;
+    selfRegistration.plateID =
+        '${plateController.text.toUpperCase().replaceAll(' ', '')}_${plateProvinceController.text}';
     selfRegistration.propertyID = _exemptionRequestProperty?.propertyID2;
     selfRegistration.startDate = DateTime.now().toUtc();
     selfRegistration.endDate =
@@ -322,7 +323,7 @@ class InitialState extends State<Initial> {
   }
 
   _verifyLicencePlate() async {
-    if (isValidPlate(plateController.text)) {
+    if (isValidPlate(plateController.text.toUpperCase().replaceAll(' ', ''))) {
       unauthorizedPlateMessage =
           sessionCubit.isPlateBlacklisted(licencePlate: plateController.text);
     } else {
@@ -339,6 +340,7 @@ class InitialState extends State<Initial> {
       addressController.text = '';
       plateController.text = '';
       unitController.text = '';
+      plateProvinceController.text = '';
       _exemptionRequestProperty = null;
     });
   }

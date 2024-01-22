@@ -25,8 +25,10 @@ class SessionCubit extends Cubit<SessionState> {
         prefs.getStringList('${user.email}visitors') ?? [];
 
     String newVisitor = '${visitor.name},${visitor.plateNumber}';
-    previousVisitorList.add(newVisitor);
-    prefs.setStringList('${user.email}visitors', previousVisitorList);
+    if (!previousVisitorList.contains(newVisitor)) {
+      previousVisitorList.add(newVisitor);
+      prefs.setStringList('${user.email}visitors', previousVisitorList);
+    }
   }
 
   void updateVisitors(

@@ -9,7 +9,6 @@ import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
 import 'package:r2park_flutter_dev/Screens/auth/sign_up/confirm_email.dart';
 import 'package:r2park_flutter_dev/main.dart';
-import 'package:toast/toast.dart';
 import '../../../models/user.dart';
 
 // ignore: must_be_immutable
@@ -37,18 +36,18 @@ class NewUserState extends State<NewUser> {
 
   var databaseManager = DatabaseManager();
 
-  TextEditingController? _emailTextFieldController;
-  TextEditingController? _fullNameTextFieldController;
-  TextEditingController? _mobileNumberTextFieldController;
-  TextEditingController? _address1TextFieldController;
-  TextEditingController? _unitNumberTextFieldController;
-  TextEditingController? _cityTextFieldController;
-  TextEditingController? _provinceTextFieldController;
-  TextEditingController? _postalCodeTextFieldController;
-  TextEditingController? _companyAddressTextFieldController;
-  TextEditingController? _companyCityTextFieldController;
-  TextEditingController? _password1TextFieldController;
-  TextEditingController? _password2TextFieldController;
+  final _emailTextFieldController = TextEditingController();
+  final _fullNameTextFieldController = TextEditingController();
+  final _mobileNumberTextFieldController = TextEditingController();
+  final _address1TextFieldController = TextEditingController();
+  final _unitNumberTextFieldController = TextEditingController();
+  final _cityTextFieldController = TextEditingController();
+  final _provinceTextFieldController = TextEditingController();
+  final _postalCodeTextFieldController = TextEditingController();
+  final _companyAddressTextFieldController = TextEditingController();
+  final _companyCityTextFieldController = TextEditingController();
+  final _password1TextFieldController = TextEditingController();
+  final _password2TextFieldController = TextEditingController();
 
   bool emailValidate = true;
   bool fullNameValidate = true;
@@ -64,18 +63,9 @@ class NewUserState extends State<NewUser> {
   bool password2Validate = true;
 
   bool isNewUser = true;
-
   String newPass = '0';
-
   String errorText = "";
   String passwordInadequateMessage = "";
-
-  checkifNewUser(User user) {
-    if (user.fullName == '') {
-      return true;
-    }
-    return false;
-  }
 
   NewUserState(
       {required this.isManagerScreen, this.loggedInUser, this.sessionCubit});
@@ -85,63 +75,39 @@ class NewUserState extends State<NewUser> {
     super.initState();
 
     isNewUser = checkifNewUser(widget.user ?? User.def());
-
     widget.user ??= User.def();
-    _emailTextFieldController = TextEditingController();
-    _emailTextFieldController?.text = widget.user?.email ?? '';
 
-    _fullNameTextFieldController = TextEditingController();
-    _fullNameTextFieldController?.text = widget.user?.fullName ?? '';
-
-    _mobileNumberTextFieldController = TextEditingController();
-    _mobileNumberTextFieldController?.text = widget.user?.mobileNumber ?? '';
-
-    _address1TextFieldController = TextEditingController();
-    _address1TextFieldController?.text = widget.user?.address ?? '';
-
-    _unitNumberTextFieldController = TextEditingController();
-    _unitNumberTextFieldController?.text = widget.user?.unitNumber ?? '';
-
-    _cityTextFieldController = TextEditingController();
-    _cityTextFieldController?.text = widget.user?.city ?? '';
-
-    _provinceTextFieldController = TextEditingController();
-    _provinceTextFieldController?.text =
+    _emailTextFieldController.text = widget.user?.email ?? '';
+    _fullNameTextFieldController.text = widget.user?.fullName ?? '';
+    _mobileNumberTextFieldController.text = widget.user?.mobileNumber ?? '';
+    _address1TextFieldController.text = widget.user?.address ?? '';
+    _unitNumberTextFieldController.text = widget.user?.unitNumber ?? '';
+    _cityTextFieldController.text = widget.user?.city ?? '';
+    _provinceTextFieldController.text =
         widget.user?.province?.toUpperCase() ?? '';
-
-    _postalCodeTextFieldController = TextEditingController();
-    _postalCodeTextFieldController?.text = widget.user?.postalCode ?? '';
-
-    _companyAddressTextFieldController = TextEditingController();
-    _companyAddressTextFieldController?.text =
-        widget.user?.companyAddress ?? '';
-
-    _companyCityTextFieldController = TextEditingController();
-    _companyCityTextFieldController?.text = widget.user?.companyId ?? '';
-
-    _password1TextFieldController = TextEditingController();
-    _password1TextFieldController?.text = widget.user?.password ?? '';
-
-    _password2TextFieldController = TextEditingController();
-    _password2TextFieldController?.text = widget.user?.password ?? '';
+    _postalCodeTextFieldController.text = widget.user?.postalCode ?? '';
+    _companyAddressTextFieldController.text = widget.user?.companyAddress ?? '';
+    _companyCityTextFieldController.text = widget.user?.companyId ?? '';
+    _password1TextFieldController.text = widget.user?.password ?? '';
+    _password2TextFieldController.text = widget.user?.password ?? '';
   }
 
   @override
   void dispose() {
     super.dispose();
 
-    _emailTextFieldController?.dispose();
-    _fullNameTextFieldController?.dispose();
-    _mobileNumberTextFieldController?.dispose();
-    _address1TextFieldController?.dispose();
-    _unitNumberTextFieldController?.dispose();
-    _cityTextFieldController?.dispose();
-    _provinceTextFieldController?.dispose();
-    _postalCodeTextFieldController?.dispose();
-    _companyAddressTextFieldController?.dispose();
-    _companyCityTextFieldController?.dispose();
-    _password1TextFieldController?.dispose();
-    _password2TextFieldController?.dispose();
+    _emailTextFieldController.dispose();
+    _fullNameTextFieldController.dispose();
+    _mobileNumberTextFieldController.dispose();
+    _address1TextFieldController.dispose();
+    _unitNumberTextFieldController.dispose();
+    _cityTextFieldController.dispose();
+    _provinceTextFieldController.dispose();
+    _postalCodeTextFieldController.dispose();
+    _companyAddressTextFieldController.dispose();
+    _companyCityTextFieldController.dispose();
+    _password1TextFieldController.dispose();
+    _password2TextFieldController.dispose();
   }
 
   @override
@@ -310,7 +276,7 @@ class NewUserState extends State<NewUser> {
             : Text('Update', style: TextStyle(color: Colors.white)),
         onPressed: () {
           passwordInadequateMessage =
-              validatePassword(_password1TextFieldController!.text);
+              validatePassword(_password1TextFieldController.text);
 
           if (passwordInadequateMessage.isNotEmpty) {
             openDialog(context, 'Insufficient Password',
@@ -320,26 +286,25 @@ class NewUserState extends State<NewUser> {
 
             if (_textFieldsAreAllValid()) {
               if (loggedInUser == null) {
-                widget.user?.email = _emailTextFieldController?.text;
+                widget.user?.email = _emailTextFieldController.text;
               }
-              widget.user?.fullName = _fullNameTextFieldController?.text;
-              widget.user?.mobileNumber =
-                  _mobileNumberTextFieldController?.text;
-              widget.user?.address = _address1TextFieldController?.text;
-              widget.user?.unitNumber = _unitNumberTextFieldController?.text;
-              widget.user?.city = _cityTextFieldController?.text;
-              widget.user?.province = _provinceTextFieldController?.text;
-              widget.user?.postalCode = _postalCodeTextFieldController?.text;
-              widget.user?.password = _password1TextFieldController?.text;
+              widget.user?.fullName = _fullNameTextFieldController.text;
+              widget.user?.mobileNumber = _mobileNumberTextFieldController.text;
+              widget.user?.address = _address1TextFieldController.text;
+              widget.user?.unitNumber = _unitNumberTextFieldController.text;
+              widget.user?.city = _cityTextFieldController.text;
+              widget.user?.province = _provinceTextFieldController.text;
+              widget.user?.postalCode = _postalCodeTextFieldController.text;
+              widget.user?.password = _password1TextFieldController.text;
 
               //if address matches property assign property ID to user
               var propertyID = sessionCubit?.checkIfValidProperty(
-                  _cityTextFieldController?.text.toLowerCase() ?? '',
-                  _address1TextFieldController?.text.toLowerCase() ?? '');
+                  _cityTextFieldController.text.toLowerCase(),
+                  _address1TextFieldController.text.toLowerCase());
 
               var companyID = sessionCubit?.checkIfValidProperty(
-                  _companyCityTextFieldController?.text.toLowerCase() ?? '',
-                  _companyAddressTextFieldController?.text.toLowerCase() ?? '');
+                  _companyCityTextFieldController.text.toLowerCase(),
+                  _companyAddressTextFieldController.text.toLowerCase());
 
               if (propertyID != null) {
                 widget.user?.propertyId = propertyID;
@@ -379,13 +344,13 @@ class NewUserState extends State<NewUser> {
               if (isNewUser) {
                 if (widget.user?.email != null) {
                   setState(() {
-                    sendEmail(email: _emailTextFieldController!.text);
+                    sendEmail(email: _emailTextFieldController.text);
                   });
 
                   Navigator.of(context)
                       .push(MaterialPageRoute(
                           builder: (context) => ConfirmEmail(
-                                email: _emailTextFieldController!.text,
+                                email: _emailTextFieldController.text,
                                 newPass: newPass,
                               )))
                       .then((value) => Navigator.of(context).pop(widget.user));
@@ -398,6 +363,13 @@ class NewUserState extends State<NewUser> {
         },
       ),
     );
+  }
+
+  checkifNewUser(User user) {
+    if (user.fullName == '') {
+      return true;
+    }
+    return false;
   }
 
   _textFieldsAreAllValid() {
@@ -415,35 +387,34 @@ class NewUserState extends State<NewUser> {
 
   _validateTextFields() {
     setState(() {
-      isNullOrEmpty(_emailTextFieldController?.text)
+      isNullOrEmpty(_emailTextFieldController.text)
           ? emailValidate = false
           : emailValidate = true;
-      isNullOrEmpty(_fullNameTextFieldController?.text)
+      isNullOrEmpty(_fullNameTextFieldController.text)
           ? fullNameValidate = false
           : fullNameValidate = true;
-      isNullOrEmpty(_mobileNumberTextFieldController?.text)
+      isNullOrEmpty(_mobileNumberTextFieldController.text)
           ? mobileNumberValidate = false
           : mobileNumberValidate = true;
-      isNullOrEmpty(_address1TextFieldController?.text)
+      isNullOrEmpty(_address1TextFieldController.text)
           ? address1Validate = false
           : address1Validate = true;
-      isNullOrEmpty(_cityTextFieldController?.text)
+      isNullOrEmpty(_cityTextFieldController.text)
           ? cityValidate = false
           : cityValidate = true;
-      isNullOrEmpty(_provinceTextFieldController?.text)
+      isNullOrEmpty(_provinceTextFieldController.text)
           ? provinceValidate = false
-          : isValidProvince(_provinceTextFieldController!.text)
+          : isValidProvince(_provinceTextFieldController.text)
               ? provinceValidate = true
               : ({provinceValidate = false, errorText = "Invalid Province"});
-      isNullOrEmpty(_postalCodeTextFieldController?.text)
+      isNullOrEmpty(_postalCodeTextFieldController.text)
           ? postalCodeValidate = false
           : postalCodeValidate = true;
-      isNullOrEmpty(_password1TextFieldController?.text)
+      isNullOrEmpty(_password1TextFieldController.text)
           ? password1Validate = false
           : password1Validate = true;
       if (checkifNewUser(widget.user ?? User.def())) {
-        _password1TextFieldController?.text ==
-                _password2TextFieldController?.text
+        _password1TextFieldController.text == _password2TextFieldController.text
             ? password2Validate = true
             : password2Validate = false;
       }

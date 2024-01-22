@@ -29,7 +29,8 @@ void openDialog(BuildContext context, String dialogTitle, stringContent,
 }
 
 bool isValidPlate(String licencePlate) {
-  return RegExp(r'^[A-Za-z0-9_.]+$').hasMatch(licencePlate);
+  return RegExp(r'^[A-Za-z0-9_.]+$').hasMatch(licencePlate) &&
+      licencePlate.length < 10;
 }
 
 bool isValidLocationCityOrProvince(String location) {
