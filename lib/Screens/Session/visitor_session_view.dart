@@ -133,12 +133,13 @@ class VisitorSessionScreen extends State<VisitorSessionView>
   }
 
   Widget _licencePlateForm() {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
       child: Row(
         children: [
           SizedBox(
-            width: MediaQuery.of(context).size.width - 120,
+            width: screenWidth < 700 ? 260 : 360,
             child: TextFormField(
                 style: TextStyle(color: Colors.white),
                 controller: plateController,
@@ -336,13 +337,14 @@ class VisitorSessionScreen extends State<VisitorSessionView>
   }
 
   Widget _streetInput() {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: MediaQuery.of(context).size.width / 2,
+            width: screenWidth < 700 ? 200 : 280,
             child: TextFormField(
               style: TextStyle(color: Colors.white),
               controller: streetController,
@@ -365,13 +367,14 @@ class VisitorSessionScreen extends State<VisitorSessionView>
   }
 
   Widget _unitNumberInput() {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: MediaQuery.of(context).size.width / 4,
+            width: screenWidth < 700 ? 100 : 120,
             child: TextFormField(
               style: TextStyle(color: Colors.white),
               controller: unitController,
@@ -394,13 +397,14 @@ class VisitorSessionScreen extends State<VisitorSessionView>
   }
 
   Widget _cityInput() {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: MediaQuery.of(context).size.width - 130,
+            width: screenWidth < 700 ? 260 : 360,
             child: TextFormField(
               style: TextStyle(color: Colors.white),
               controller: cityController,
@@ -568,7 +572,7 @@ class VisitorSessionScreen extends State<VisitorSessionView>
         .map(
           (duration) => SizedBox(
             height: 64,
-            width: MediaQuery.of(context).size.width / 4 - 10,
+            width: 90,
             child: CheckboxListTile(
               checkColor: Colors.red,
               activeColor: Colors.white,

@@ -91,6 +91,8 @@ class TabSessionScreen extends State<TabSessionView>
   }
 
   AppBar _createAppBar(double width) {
+    double screenWidth = width < 700 ? width : 700;
+
     String title = '';
     setState(() {
       if (_activeIndex == 0) {
@@ -112,9 +114,9 @@ class TabSessionScreen extends State<TabSessionView>
           labelPadding: EdgeInsets.symmetric(
               horizontal: isResident
                   ? isManager
-                      ? width / 8 - 15
-                      : width / 6 - 15
-                  : width / 4 - 15),
+                      ? screenWidth / 8 - 15
+                      : screenWidth / 6 - 15
+                  : screenWidth / 4 - 15),
           isScrollable: true,
           tabs: [
             Tab(

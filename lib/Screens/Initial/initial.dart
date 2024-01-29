@@ -145,7 +145,9 @@ class InitialState extends State<Initial> {
     return Container(
         padding: EdgeInsets.all(10),
         child: SizedBox(
-          width: MediaQuery.of(context).size.width / 4,
+          width: MediaQuery.of(context).size.width < 700
+              ? MediaQuery.of(context).size.width / 4
+              : 200,
           child: TextField(
             controller: unitController,
             decoration: InputDecoration(
@@ -158,8 +160,10 @@ class InitialState extends State<Initial> {
     return Container(
         padding: EdgeInsets.all(10),
         child: SizedBox(
-          width: MediaQuery.of(context).size.width -
-              (MediaQuery.of(context).size.width / 2.4),
+          width: MediaQuery.of(context).size.width < 700
+              ? MediaQuery.of(context).size.width -
+                  (MediaQuery.of(context).size.width / 2.1)
+              : 400,
           child: TextField(
             controller: addressController,
             decoration: InputDecoration(
@@ -172,8 +176,10 @@ class InitialState extends State<Initial> {
     return Container(
       padding: EdgeInsets.all(10),
       child: SizedBox(
-        width: MediaQuery.of(context).size.width -
-            (MediaQuery.of(context).size.width / 1.5),
+        width: MediaQuery.of(context).size.width < 700
+            ? MediaQuery.of(context).size.width -
+                (MediaQuery.of(context).size.width / 1.5)
+            : 300,
         child: TextField(
           controller: plateController,
           decoration: InputDecoration(
@@ -187,14 +193,16 @@ class InitialState extends State<Initial> {
     return Container(
       padding: EdgeInsets.all(10),
       child: SizedBox(
-        width: MediaQuery.of(context).size.width / 2,
+        width: MediaQuery.of(context).size.width < 700
+            ? MediaQuery.of(context).size.width / 2.3
+            : 300,
         child: TextField(
           maxLength: 2,
           controller: plateProvinceController,
           decoration: InputDecoration(
               counterText: "",
               border: OutlineInputBorder(),
-              labelText: 'Plate Province (ON, AB)'),
+              labelText: 'Plate Prov. (ON, AB)'),
         ),
       ),
     );
@@ -205,61 +213,72 @@ class InitialState extends State<Initial> {
         .map(
           (duration) => SizedBox(
             height: 64,
-            width: MediaQuery.of(context).size.width / 4 - 10,
-            child: CheckboxListTile(
-              checkColor: Colors.red,
-              activeColor: Colors.white,
-              title: Text(
-                duration.toString(),
-                style: TextStyle(color: Colors.white),
+            width: 90,
+            child: Container(
+              alignment: Alignment.centerLeft,
+              child: CheckboxListTile(
+                checkColor: Colors.red,
+                activeColor: Colors.white,
+                title: Text(
+                  duration.toString(),
+                  style: TextStyle(color: Colors.white),
+                ),
+                value: duration == _selectedDuration,
+                onChanged: (newValue) => setState(() {
+                  if (newValue != null) {
+                    _selectedDuration = duration;
+                  }
+                }),
               ),
-              value: duration == _selectedDuration,
-              onChanged: (newValue) => setState(() {
-                if (newValue != null) {
-                  _selectedDuration = duration;
-                }
-              }),
             ),
           ),
         )
         .toList();
     return Padding(
-      padding: const EdgeInsets.fromLTRB(6, 10, 6, 10),
-      child: Column(
-        children: [
-          SizedBox(
-            width: double.infinity,
-            child: Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Text(
-                'Days Requested:',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white),
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+        child: Container(
+          decoration: BoxDecoration(
+              color: Colors.black26,
+              border: Border.all(color: Colors.white30),
+              borderRadius: BorderRadius.all(Radius.circular(8))),
+          child: Column(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'Days Requested:',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.white),
+                  ),
+                ),
               ),
-            ),
+              Row(children: durationsList),
+            ],
           ),
-          Row(children: durationsList),
-        ],
-      ),
-    );
+        ));
   }
 
   Widget _submitButton() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-      child: ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(backgroundColor: secondaryColor),
-        onPressed: () => _submitPressed(),
-        label: Text(
-          '  Submit  ',
-          style: TextStyle(color: Colors.white, fontSize: 18),
-        ),
-        icon: Icon(
-          Icons.arrow_forward_ios,
-          color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(20, 40, 20, 0),
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(backgroundColor: secondaryColor),
+          onPressed: () => _submitPressed(),
+          label: Text(
+            '  Submit  ',
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: Colors.white,
+          ),
         ),
       ),
     );

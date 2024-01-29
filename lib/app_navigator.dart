@@ -12,88 +12,96 @@ class AppNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      body: BlocBuilder<SessionCubit, SessionState>(builder: (context, state) {
-        return Navigator(
-            pages: [
-              // show loading screen
-              if (state is UnknownSessionState)
-                MaterialPage(child: LoadingView()),
+      backgroundColor: Color(0xff121212),
+      body: Center(
+        child:
+            BlocBuilder<SessionCubit, SessionState>(builder: (context, state) {
+          return FractionallySizedBox(
+            widthFactor: screenWidth < 700 ? 1.0 : 700 / screenWidth,
+            child: Navigator(
+                pages: [
+                  // show loading screen
+                  if (state is UnknownSessionState)
+                    MaterialPage(child: LoadingView()),
 
-              //show auth flow
-              if (state is Unauthenticated)
-                MaterialPage(
-                    child:
-                        //     child: StreamBuilder(
-                        //   stream: Stream.fromFuture(userManager.getUsers()),
-                        //   builder: (context, response) {
-                        //     if (!response.hasData) {
-                        //       return
-                        // Center(
-                        //     child: Column(
-                        //         mainAxisAlignment: MainAxisAlignment.center,
-                        //         children: const [CircularProgressIndicator()]));
-                        // } else if (response.hasError) {
-                        //   return Center(child: Text(response.error.toString()));
-                        // } else {
-                        //   return MultiProvider(
-                        //     providers: [
-                        //       Provider<List<User>>.value(value: response.data!),
-                        //     ],
-                        //     child:
-                        MaterialApp(
-                  title: 'Login Flutter',
-                  theme: ThemeData(
-                      appBarTheme: AppBarTheme(color: primaryColor),
-                      brightness: Brightness.dark,
-                      primaryColor: primaryColor,
-                      colorScheme: ColorScheme.dark()),
-                  home: Initial(
-                    // Login(
-                    sessionCubit: context.read<SessionCubit>(),
-                  ),
-                )),
+                  //show auth flow
+                  if (state is Unauthenticated)
+                    MaterialPage(
+                        child:
+                            //     child: StreamBuilder(
+                            //   stream: Stream.fromFuture(userManager.getUsers()),
+                            //   builder: (context, response) {
+                            //     if (!response.hasData) {
+                            //       return
+                            // Center(
+                            //     child: Column(
+                            //         mainAxisAlignment: MainAxisAlignment.center,
+                            //         children: const [CircularProgressIndicator()]));
+                            // } else if (response.hasError) {
+                            //   return Center(child: Text(response.error.toString()));
+                            // } else {
+                            //   return MultiProvider(
+                            //     providers: [
+                            //       Provider<List<User>>.value(value: response.data!),
+                            //     ],
+                            //     child:
+                            MaterialApp(
+                      title: 'Login Flutter',
+                      theme: ThemeData(
+                          appBarTheme: AppBarTheme(color: primaryColor),
+                          brightness: Brightness.dark,
+                          primaryColor: primaryColor,
+                          colorScheme: ColorScheme.dark()),
+                      home: Initial(
+                        // Login(
+                        sessionCubit: context.read<SessionCubit>(),
+                      ),
+                    )),
 
-              //show session flow
-              if (state is Authenticated)
-                MaterialPage(
-                  // child:
-                  // StreamBuilder(
-                  //     stream:
-                  //         Stream.fromFuture(exemptionManager.getProperties()),
-                  //     builder: (context, response) {
-                  //       if (!response.hasData) {
-                  //         return Center(
-                  //             child: Column(
-                  //                 mainAxisAlignment: MainAxisAlignment.center,
-                  //                 children: const [
-                  //               CircularProgressIndicator()
-                  //             ]));
-                  //       } else if (response.hasError) {
-                  //         return Center(child: Text(response.error.toString()));
-                  //       } else {
-                  //         return MultiProvider(
-                  //           providers: [
-                  //             Provider<List<Property>>.value(
-                  //                 value: response.data!)
-                  //           ],
-                  child: MaterialApp(
-                    theme: ThemeData(
-                        appBarTheme: AppBarTheme(color: primaryColor),
-                        brightness: Brightness.dark,
-                        primaryColor: primaryColor,
-                        colorScheme: ColorScheme.dark()),
-                    home: TabSessionView(
-                      user: state.user,
-                      sessionCubit: context.read<SessionCubit>(),
-                    ),
-                  ),
-                )
-            ],
-            onPopPage: (route, result) {
-              return route.didPop(result);
-            });
-      }),
+                  //show session flow
+                  if (state is Authenticated)
+                    MaterialPage(
+                      // child:
+                      // StreamBuilder(
+                      //     stream:
+                      //         Stream.fromFuture(exemptionManager.getProperties()),
+                      //     builder: (context, response) {
+                      //       if (!response.hasData) {
+                      //         return Center(
+                      //             child: Column(
+                      //                 mainAxisAlignment: MainAxisAlignment.center,
+                      //                 children: const [
+                      //               CircularProgressIndicator()
+                      //             ]));
+                      //       } else if (response.hasError) {
+                      //         return Center(child: Text(response.error.toString()));
+                      //       } else {
+                      //         return MultiProvider(
+                      //           providers: [
+                      //             Provider<List<Property>>.value(
+                      //                 value: response.data!)
+                      //           ],
+                      child: MaterialApp(
+                        theme: ThemeData(
+                            appBarTheme: AppBarTheme(color: primaryColor),
+                            brightness: Brightness.dark,
+                            primaryColor: primaryColor,
+                            colorScheme: ColorScheme.dark()),
+                        home: TabSessionView(
+                          user: state.user,
+                          sessionCubit: context.read<SessionCubit>(),
+                        ),
+                      ),
+                    )
+                ],
+                onPopPage: (route, result) {
+                  return route.didPop(result);
+                }),
+          );
+        }),
+      ),
     );
   }
 }

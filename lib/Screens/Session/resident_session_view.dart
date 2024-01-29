@@ -231,13 +231,14 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
   }
 
   Widget _visitorFirstNameTextForm() {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: MediaQuery.of(context).size.width / 3 + 22,
+            width: screenWidth < 700 ? 130 : 160,
             child: TextFormField(
               style: TextStyle(color: Colors.white),
               controller: firstNameController,
@@ -260,13 +261,14 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
   }
 
   Widget _visitorLastNameTextForm() {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: MediaQuery.of(context).size.width / 3 + 36,
+            width: screenWidth < 700 ? 180 : 220,
             child: TextFormField(
               style: TextStyle(color: Colors.white),
               controller: lastNameController,
@@ -296,7 +298,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: MediaQuery.of(context).size.width - 64,
+            width: 300,
             child: TextFormField(
               style: TextStyle(color: Colors.white),
               controller: plateController,
@@ -323,7 +325,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
         .map(
           (duration) => SizedBox(
             height: 64,
-            width: (MediaQuery.of(context).size.width / 4) - 12,
+            width: 90,
             child: CheckboxListTile(
               checkColor: Colors.red,
               activeColor: Colors.white,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:easy_search_bar/easy_search_bar.dart';
 import 'package:r2park_flutter_dev/main.dart';
@@ -21,6 +22,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
   final User user;
   final SessionCubit sessionCubit;
   // final userManager = UserManager();
+  final databaseManager = DatabaseManager();
 
   List<User>? residentRequests;
   List<User>? residents;
@@ -202,11 +204,15 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                       Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${e.fullName?.toUpperCase() ?? ''} ',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold)),
+                            SizedBox(
+                              width: 160,
+                              child: Text('${e.fullName?.toUpperCase() ?? ''} ',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      overflow: TextOverflow.visible)),
+                            ),
                             // Text(e.lastName?.toUpperCase() ?? '',
                             //     style: TextStyle(
                             //         color: Colors.white,
@@ -225,7 +231,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                         //TO:DO - change user authority level so its accepted / isConfirmed Variable
                         setState(() {
                           e.userType = "Resident";
-                          // userManager.updateUser(e);
+                          databaseManager.updateUser(e);
                           sessionCubit.users?.removeWhere(
                               (element) => element.userId == e.userId);
                           sessionCubit.users?.add(e);
@@ -254,7 +260,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                         setState(() {
                           e.propertyId == '';
                           e.userType = "Visitor";
-                          // userManager.updateUser(e);
+                          databaseManager.updateUser(e);
                           sessionCubit.users?.removeWhere(
                               (element) => element.userId == e.userId);
                           sessionCubit.users?.add(e);
@@ -310,90 +316,92 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
     var listOfResidents = filteredResidents?.map((e) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(2, 4, 2, 4),
-        child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                backgroundColor: (secondaryColor.withAlpha(150)),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8))),
-            onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(
-                builder: (context) => Scaffold(
-                    appBar: AppBar(
-                      title: Text('Update User'),
-                    ),
-                    body: NewUser(
-                      isManagerScreen: true,
-                      sessionCubit: sessionCubit,
-                      user: e,
-                    )),
-              ))
-                  .then((value) {
-                setState(() {
-                  residents = sessionCubit.getResidents(
-                      addressID: user.propertyId ?? '');
+        child: SizedBox(
+          child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: (secondaryColor.withAlpha(150)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8))),
+              onPressed: () {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                      appBar: AppBar(
+                        title: Text('Update User'),
+                      ),
+                      body: NewUser(
+                        isManagerScreen: true,
+                        sessionCubit: sessionCubit,
+                        user: e,
+                      )),
+                ))
+                    .then((value) {
+                  setState(() {
+                    residents = sessionCubit.getResidents(
+                        addressID: user.propertyId ?? '');
+                  });
                 });
-              });
-            },
-            child: Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Container(
-                    decoration: BoxDecoration(
-                        color: Colors.black26,
-                        border: Border.all(color: Colors.white30),
-                        borderRadius: BorderRadius.all(Radius.circular(8))),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 2, 8, 2),
+              },
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.black26,
+                          border: Border.all(color: Colors.white30),
+                          borderRadius: BorderRadius.all(Radius.circular(8))),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Column(
-                          children: [
-                            Text(
-                              'Unit',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 14),
-                            ),
-                            Text(
-                              e.unitNumber == null
-                                  ? e.address ?? ''
-                                  : e.unitNumber ?? '',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 32),
-                            ),
-                          ],
+                        padding: const EdgeInsets.fromLTRB(8, 2, 8, 2),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Column(
+                            children: [
+                              Text(
+                                'Unit',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 14),
+                              ),
+                              Text(
+                                e.unitNumber == null
+                                    ? e.address ?? ''
+                                    : e.unitNumber ?? '',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 32),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('${e.fullName?.toUpperCase() ?? ''} ',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold)),
-                          // Text(e.lastName?.toUpperCase() ?? '',
-                          //     style: TextStyle(
-                          //         color: Colors.white,
-                          //         fontSize: 16,
-                          //         fontWeight: FontWeight.bold))
-                        ]),
-                    Text(e.mobileNumber ?? '',
-                        style: TextStyle(color: Colors.white60, fontSize: 14))
-                  ],
-                ),
-                Spacer(),
-                Icon(Icons.arrow_forward_ios_outlined, color: Colors.white)
-              ],
-            )),
+                  SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('${e.fullName?.toUpperCase() ?? ''} ',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold)),
+                            // Text(e.lastName?.toUpperCase() ?? '',
+                            //     style: TextStyle(
+                            //         color: Colors.white,
+                            //         fontSize: 16,
+                            //         fontWeight: FontWeight.bold))
+                          ]),
+                      Text(e.mobileNumber ?? '',
+                          style: TextStyle(color: Colors.white60, fontSize: 14))
+                    ],
+                  ),
+                  Spacer(),
+                  Icon(Icons.arrow_forward_ios_outlined, color: Colors.white)
+                ],
+              )),
+        ),
       );
     }).toList();
 
