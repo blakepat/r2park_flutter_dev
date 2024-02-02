@@ -53,7 +53,8 @@ class AppNavigator extends StatelessWidget {
                           appBarTheme: AppBarTheme(color: primaryColor),
                           brightness: Brightness.dark,
                           primaryColor: primaryColor,
-                          colorScheme: ColorScheme.dark()),
+                          colorScheme: ColorScheme.dark(
+                              primary: Color.fromARGB(220, 160, 245, 107))),
                       home: Initial(
                         // Login(
                         sessionCubit: context.read<SessionCubit>(),
@@ -88,7 +89,8 @@ class AppNavigator extends StatelessWidget {
                             appBarTheme: AppBarTheme(color: primaryColor),
                             brightness: Brightness.dark,
                             primaryColor: primaryColor,
-                            colorScheme: ColorScheme.dark()),
+                            colorScheme: ColorScheme.dark(
+                                primary: Color.fromARGB(220, 160, 245, 107))),
                         home: TabSessionView(
                           user: state.user,
                           sessionCubit: context.read<SessionCubit>(),

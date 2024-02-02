@@ -123,7 +123,7 @@ class SessionCubit extends Cubit<SessionState> {
     var residents = users
             ?.where((element) =>
                 element.propertyId == addressID &&
-                element.userType == "Resident")
+                element.userType == "Visitor")
             .toList() ??
         [];
 
@@ -137,7 +137,7 @@ class SessionCubit extends Cubit<SessionState> {
     var residents = users
             ?.where((element) =>
                 element.propertyId == addressID &&
-                element.userType == "Visitor")
+                element.userType == "Resident")
             .toList() ??
         [];
 

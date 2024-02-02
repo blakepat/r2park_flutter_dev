@@ -56,6 +56,8 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
         body: SingleChildScrollView(
       child: Padding(
@@ -72,7 +74,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
               ],
             ),
             _visitorPlateTextForm(),
-            _durationInput(),
+            _durationInput(height: screenHeight, width: screenWidth),
             _submitButton()
           ],
         ),
@@ -320,52 +322,109 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
     );
   }
 
-  Widget _durationInput() {
+  Widget _durationInput({required double height, required double width}) {
     final durationsList = [1, 2, 3, 4]
         .map(
           (duration) => SizedBox(
             height: 64,
-            width: 90,
-            child: CheckboxListTile(
-              checkColor: Colors.red,
-              activeColor: Colors.white,
-              title: Text(
-                duration.toString(),
-                style: TextStyle(color: Colors.white),
+            width: width < 700 ? width / 4 : 90,
+            child: Container(
+              alignment: Alignment.centerLeft,
+              child: CheckboxListTile(
+                checkColor: Colors.red,
+                activeColor: Colors.white,
+                title: Text(
+                  duration.toString(),
+                  style: TextStyle(color: Colors.white),
+                ),
+                value: duration == _selectedDuration,
+                onChanged: (newValue) => setState(() {
+                  if (newValue != null) {
+                    _selectedDuration = duration;
+                  }
+                }),
               ),
-              value: duration == _selectedDuration,
-              onChanged: (newValue) => setState(() {
-                if (newValue != null) {
-                  _selectedDuration = duration;
-                }
-              }),
             ),
           ),
         )
         .toList();
     return Padding(
-      padding: const EdgeInsets.fromLTRB(6, 24, 6, 10),
-      child: Column(
-        children: [
-          SizedBox(
-            width: double.infinity,
-            child: Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Text(
-                'Days Requested:',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white),
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+        child: Container(
+          decoration: BoxDecoration(
+              color: Colors.black26,
+              border: Border.all(color: Colors.white30),
+              borderRadius: BorderRadius.all(Radius.circular(8))),
+          child: Column(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'Days Requested:',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.white),
+                  ),
+                ),
               ),
-            ),
+              FittedBox(
+                  child: Row(
+                      mainAxisSize: MainAxisSize.min, children: durationsList)),
+            ],
           ),
-          Row(children: durationsList),
-        ],
-      ),
-    );
+        ));
   }
+
+  // Widget _durationInput() {
+  //   final durationsList = [1, 2, 3, 4]
+  //       .map(
+  //         (duration) => SizedBox(
+  //           height: 64,
+  //           width: 90,
+  //           child: CheckboxListTile(
+  //             checkColor: Colors.red,
+  //             activeColor: Colors.white,
+  //             title: Text(
+  //               duration.toString(),
+  //               style: TextStyle(color: Colors.white),
+  //             ),
+  //             value: duration == _selectedDuration,
+  //             onChanged: (newValue) => setState(() {
+  //               if (newValue != null) {
+  //                 _selectedDuration = duration;
+  //               }
+  //             }),
+  //           ),
+  //         ),
+  //       )
+  //       .toList();
+  //   return Padding(
+  //     padding: const EdgeInsets.fromLTRB(6, 24, 6, 10),
+  //     child: Column(
+  //       children: [
+  //         SizedBox(
+  //           width: double.infinity,
+  //           child: Padding(
+  //             padding: const EdgeInsets.all(4.0),
+  //             child: Text(
+  //               'Days Requested:',
+  //               textAlign: TextAlign.left,
+  //               style: TextStyle(
+  //                   fontSize: 18,
+  //                   fontWeight: FontWeight.w400,
+  //                   color: Colors.white),
+  //             ),
+  //           ),
+  //         ),
+  //         Row(children: durationsList),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _submitButton() {
     return ElevatedButton(

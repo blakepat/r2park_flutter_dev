@@ -43,6 +43,8 @@ class InitialState extends State<Initial> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
         appBar: AppBar(
           actions: [
@@ -70,7 +72,7 @@ class InitialState extends State<Initial> {
               Row(
                 children: [_createPlateField(), _createPlateProvinceField()],
               ),
-              _durationInput(),
+              _durationInput(height: screenHeight, width: screenWidth),
               _submitButton(),
             ])));
   }
@@ -208,12 +210,12 @@ class InitialState extends State<Initial> {
     );
   }
 
-  Widget _durationInput() {
+  Widget _durationInput({required double height, required double width}) {
     final durationsList = [1, 2, 3, 4]
         .map(
           (duration) => SizedBox(
             height: 64,
-            width: 90,
+            width: width < 700 ? width / 4 : 90,
             child: Container(
               alignment: Alignment.centerLeft,
               child: CheckboxListTile(
@@ -257,7 +259,9 @@ class InitialState extends State<Initial> {
                   ),
                 ),
               ),
-              Row(children: durationsList),
+              FittedBox(
+                  child: Row(
+                      mainAxisSize: MainAxisSize.min, children: durationsList)),
             ],
           ),
         ));
@@ -386,7 +390,7 @@ class InitialState extends State<Initial> {
 
         openDialog(
             context,
-            'Request Submitted Successfully',
+            '✅ Request Submitted Successfully',
             'Thank you for using R2Park! Enjoy your visit!',
             'Thank you for using R2Park! Enjoy your visit!');
 

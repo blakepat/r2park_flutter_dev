@@ -21,7 +21,6 @@ class ManagerSessionView extends StatefulWidget {
 class ManagerSessionScreen extends State<ManagerSessionView> {
   final User user;
   final SessionCubit sessionCubit;
-  // final userManager = UserManager();
   final databaseManager = DatabaseManager();
 
   List<User>? residentRequests;
@@ -98,18 +97,21 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
   }
 
   Widget _addResidentRequestView() {
-    return Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-            border: Border.all(color: Colors.white30),
-            color: Colors.black26,
-            borderRadius: BorderRadius.all(Radius.circular(8))),
-        child: Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: createRequestCells()),
-        ));
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+              border: Border.all(color: Colors.white30),
+              color: Colors.black26,
+              borderRadius: BorderRadius.all(Radius.circular(8))),
+          child: Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: createRequestCells()),
+          )),
+    );
   }
 
   Widget _addResidentsTitle() {
@@ -128,18 +130,21 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
   }
 
   Widget _addResidentsListView() {
-    return Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-            border: Border.all(color: Colors.white30),
-            color: Colors.black26,
-            borderRadius: BorderRadius.all(Radius.circular(8))),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: createResidentCells()),
-        ));
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+              border: Border.all(color: Colors.white30),
+              color: Colors.black26,
+              borderRadius: BorderRadius.all(Radius.circular(8))),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: createResidentCells()),
+          )),
+    );
   }
 
   List<Widget> createRequestCells() {
@@ -147,7 +152,9 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
       return Padding(
           padding: const EdgeInsets.fromLTRB(2, 4, 2, 4),
           child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
+              style: FilledButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  alignment: Alignment.centerLeft,
                   backgroundColor: (secondaryColor.withAlpha(150)),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8))),
@@ -165,6 +172,8 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                 ));
               },
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
@@ -174,7 +183,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                           border: Border.all(color: Colors.white30),
                           borderRadius: BorderRadius.all(Radius.circular(8))),
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 2, 8, 2),
+                        padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4),
                           child: Column(
@@ -201,24 +210,28 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              width: 160,
-                              child: Text('${e.fullName?.toUpperCase() ?? ''} ',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      overflow: TextOverflow.visible)),
-                            ),
-                            // Text(e.lastName?.toUpperCase() ?? '',
-                            //     style: TextStyle(
-                            //         color: Colors.white,
-                            //         fontSize: 16,
-                            //         fontWeight: FontWeight.bold))
-                          ]),
+                      FittedBox(
+                        child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 150,
+                                child: Text(
+                                    '${e.fullName?.toUpperCase() ?? ''} ',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        overflow: TextOverflow.visible)),
+                              ),
+                              // Text(e.lastName?.toUpperCase() ?? '',
+                              //     style: TextStyle(
+                              //         color: Colors.white,
+                              //         fontSize: 16,
+                              //         fontWeight: FontWeight.bold))
+                            ]),
+                      ),
                       Text(e.mobileNumber ?? '',
                           style: TextStyle(color: Colors.white60, fontSize: 14))
                     ],
@@ -318,7 +331,8 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
         padding: const EdgeInsets.fromLTRB(2, 4, 2, 4),
         child: SizedBox(
           child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
+              style: FilledButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
                   backgroundColor: (secondaryColor.withAlpha(150)),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8))),
@@ -352,7 +366,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                           border: Border.all(color: Colors.white30),
                           borderRadius: BorderRadius.all(Radius.circular(8))),
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 2, 8, 2),
+                        padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4),
                           child: Column(
@@ -386,7 +400,8 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
-                                    fontWeight: FontWeight.bold)),
+                                    fontWeight: FontWeight.bold,
+                                    overflow: TextOverflow.visible)),
                             // Text(e.lastName?.toUpperCase() ?? '',
                             //     style: TextStyle(
                             //         color: Colors.white,
@@ -408,11 +423,24 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
     if (listOfResidents != null && listOfResidents.isNotEmpty) {
       return listOfResidents;
     } else {
-      return [SizedBox(height: 100)];
+      return [
+        SizedBox(
+          height: 200,
+          width: MediaQuery.of(context).size.width - 50,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Text(
+              'Currently No Residents...',
+              style: TextStyle(fontSize: 20, color: Colors.white54),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        )
+      ];
     }
   }
 
   String fullNameTrimmed(User user) {
-    return '${user.fullName?.toLowerCase()}';
+    return '${user.fullName?.toLowerCase().replaceAll(' ', '')}';
   }
 }
