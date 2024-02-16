@@ -14,7 +14,8 @@
             "postal_code": "L7L7A3",
             "company_address": "",
             "company_id": "",
-            "password": "123456"
+            "password": "123456",
+            "accessCodes" : [12345, 2342]
         },
         {
             "user_id": "2",
@@ -32,8 +33,6 @@
             "company_id": "",
             "password": "123456"
         },
-
-
         {
             "user_id": "3",
             "user_type": "Visitor",

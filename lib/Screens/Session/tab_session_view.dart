@@ -54,37 +54,40 @@ class TabSessionScreen extends State<TabSessionView>
     });
 
     return Scaffold(
-      backgroundColor: Colors.grey[850],
+      backgroundColor: Color(0xff121212),
       appBar: _createAppBar(width),
-      body: SizedBox(
-        width: width,
-        child: TabBarView(
-          controller: _tabController,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(0.0),
-              child: VisitorSessionView(user: user, sessionCubit: sessionCubit),
-            ),
-            if (isResident)
+      body: SafeArea(
+        child: SizedBox(
+          width: width,
+          child: TabBarView(
+            controller: _tabController,
+            children: [
               Padding(
                 padding: const EdgeInsets.all(0.0),
                 child:
-                    ResidentSessionView(user: user, sessionCubit: sessionCubit),
+                    VisitorSessionView(user: user, sessionCubit: sessionCubit),
               ),
-            if (isManager)
+              if (isResident)
+                Padding(
+                  padding: const EdgeInsets.all(0.0),
+                  child: ResidentSessionView(
+                      user: user, sessionCubit: sessionCubit),
+                ),
+              if (isManager)
+                Padding(
+                  padding: const EdgeInsets.all(0.0),
+                  child: ManagerSessionView(
+                      user: user, sessionCubit: sessionCubit),
+                ),
               Padding(
                 padding: const EdgeInsets.all(0.0),
-                child:
-                    ManagerSessionView(user: user, sessionCubit: sessionCubit),
+                child: NewUser(
+                    isManagerScreen: false,
+                    user: user,
+                    sessionCubit: sessionCubit),
               ),
-            Padding(
-              padding: const EdgeInsets.all(0.0),
-              child: NewUser(
-                  isManagerScreen: false,
-                  user: user,
-                  sessionCubit: sessionCubit),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

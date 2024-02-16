@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
@@ -47,6 +48,20 @@ class InitialState extends State<Initial> {
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
         appBar: AppBar(
+          leadingWidth: 180,
+          toolbarHeight: 80,
+          leading: Transform.scale(
+            scale: 1.6,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 28),
+              child: Image.asset(
+                'assets/images/3DLogo.png',
+                fit: BoxFit.contain,
+                height: 180,
+                alignment: Alignment.centerLeft,
+              ),
+            ),
+          ),
           actions: [
             TextButton(
                 onPressed: _loginPressed,
@@ -56,40 +71,46 @@ class InitialState extends State<Initial> {
                 ))
           ],
         ),
-        body: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-            child: ListView(children: [
-              _createLogoView(),
-              _createInfoView(),
-              _createNameField(),
-              _createEmailField(),
-              _createPhoneField(),
-              _createCityField(),
-              Row(children: [
-                _createUnitField(),
-                _createAddressField(),
-              ]),
-              Row(
-                children: [_createPlateField(), _createPlateProvinceField()],
-              ),
-              _durationInput(height: screenHeight, width: screenWidth),
-              _submitButton(),
-            ])));
-  }
-
-  Widget _createLogoView() {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(0, 0, 20, 0),
-      child:
-          SizedBox(height: 180, child: Image.asset('assets/images/3DLogo.png')),
-    );
+        body: SafeArea(
+          child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+              child: ListView(children: [
+                _createInfoView(),
+                _createNameField(),
+                _createEmailField(),
+                _createPhoneField(),
+                _createCityField(),
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Row(children: [
+                    _createUnitField(),
+                    SizedBox(width: 12),
+                    _createAddressField(),
+                  ]),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    children: [
+                      _createPlateField(),
+                      SizedBox(width: 12),
+                      _createPlateProvinceField()
+                    ],
+                  ),
+                ),
+                _durationInput(height: screenHeight, width: screenWidth),
+                _submitButton(),
+                _createDivider(),
+                _footerTextView()
+              ])),
+        ));
   }
 
   Widget _createInfoView() {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Container(
-        padding: EdgeInsets.fromLTRB(4, 0, 10, 0),
+        padding: EdgeInsets.fromLTRB(32, 0, 10, 0),
         child: Text(
           'Register your vehicle:',
           style: TextStyle(
@@ -104,8 +125,11 @@ class InitialState extends State<Initial> {
       padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
       child: TextField(
         controller: nameController,
-        decoration:
-            InputDecoration(border: OutlineInputBorder(), labelText: 'Name'),
+        decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Name',
+            labelStyle: kInitialTextLabelStyle,
+            icon: Icon(Icons.person)),
       ),
     );
   }
@@ -115,8 +139,11 @@ class InitialState extends State<Initial> {
       padding: EdgeInsets.all(10),
       child: TextField(
         controller: emailController,
-        decoration:
-            InputDecoration(border: OutlineInputBorder(), labelText: 'Email'),
+        decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Email',
+            labelStyle: kInitialTextLabelStyle,
+            icon: Icon(Icons.email)),
       ),
     );
   }
@@ -126,8 +153,11 @@ class InitialState extends State<Initial> {
       padding: EdgeInsets.all(10),
       child: TextField(
         controller: phoneController,
-        decoration:
-            InputDecoration(border: OutlineInputBorder(), labelText: 'Phone'),
+        decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Phone',
+            labelStyle: kInitialTextLabelStyle,
+            icon: Icon(Icons.phone)),
       ),
     );
   }
@@ -137,75 +167,69 @@ class InitialState extends State<Initial> {
       padding: EdgeInsets.all(10),
       child: TextField(
         controller: cityController,
-        decoration:
-            InputDecoration(border: OutlineInputBorder(), labelText: 'City'),
+        decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'City',
+            labelStyle: kInitialTextLabelStyle,
+            icon: Icon(Icons.location_city_rounded)),
       ),
     );
   }
 
   Widget _createUnitField() {
-    return Container(
-        padding: EdgeInsets.all(10),
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width < 700
-              ? MediaQuery.of(context).size.width / 4
-              : 200,
-          child: TextField(
-            controller: unitController,
-            decoration: InputDecoration(
-                border: OutlineInputBorder(), labelText: 'Unit'),
-          ),
-        ));
+    return Expanded(
+      flex: 1,
+      child: TextField(
+        controller: unitController,
+        decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Unit',
+            labelStyle: kInitialTextLabelStyle,
+            icon: Icon(Icons.numbers)),
+      ),
+    );
   }
 
   Widget _createAddressField() {
-    return Container(
-        padding: EdgeInsets.all(10),
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width < 700
-              ? MediaQuery.of(context).size.width -
-                  (MediaQuery.of(context).size.width / 2.1)
-              : 400,
-          child: TextField(
-            controller: addressController,
-            decoration: InputDecoration(
-                border: OutlineInputBorder(), labelText: 'Address'),
-          ),
-        ));
+    return Expanded(
+      flex: 2,
+      child: TextField(
+        controller: addressController,
+        decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Address',
+            labelStyle: kInitialTextLabelStyle,
+            icon: Icon(Icons.location_on)),
+      ),
+    );
   }
 
   Widget _createPlateField() {
-    return Container(
-      padding: EdgeInsets.all(10),
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width < 700
-            ? MediaQuery.of(context).size.width -
-                (MediaQuery.of(context).size.width / 1.5)
-            : 300,
-        child: TextField(
-          controller: plateController,
-          decoration: InputDecoration(
-              border: OutlineInputBorder(), labelText: 'Licence Plate'),
-        ),
+    return Expanded(
+      flex: 5,
+      child: TextField(
+        controller: plateController,
+        decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Licence Plate',
+            labelStyle: kInitialTextLabelStyle,
+            icon: Icon(Icons.rectangle_rounded)),
       ),
     );
   }
 
   Widget _createPlateProvinceField() {
-    return Container(
-      padding: EdgeInsets.all(10),
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width < 700
-            ? MediaQuery.of(context).size.width / 2.3
-            : 300,
-        child: TextField(
-          maxLength: 2,
-          controller: plateProvinceController,
-          decoration: InputDecoration(
-              counterText: "",
-              border: OutlineInputBorder(),
-              labelText: 'Plate Prov. (ON, AB)'),
-        ),
+    return Expanded(
+      flex: 4,
+      child: TextField(
+        maxLength: 2,
+        controller: plateProvinceController,
+        decoration: InputDecoration(
+            counterText: "",
+            border: OutlineInputBorder(),
+            labelText: 'Plate Prov. (ON, AB)',
+            labelStyle: kInitialTextLabelStyle,
+            icon: Icon(Icons.sort_by_alpha_rounded)),
       ),
     );
   }
@@ -237,7 +261,7 @@ class InitialState extends State<Initial> {
         )
         .toList();
     return Padding(
-        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+        padding: const EdgeInsets.fromLTRB(8, 10, 4, 10),
         child: Container(
           decoration: BoxDecoration(
               color: Colors.black26,
@@ -269,7 +293,7 @@ class InitialState extends State<Initial> {
 
   Widget _submitButton() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 40, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: ElevatedButton.icon(
@@ -285,6 +309,56 @@ class InitialState extends State<Initial> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _createDivider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Divider(
+        color: Colors.grey[600],
+        indent: 40,
+        endIndent: 40,
+      ),
+    );
+  }
+
+  Widget _footerTextView() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Container(
+            alignment: Alignment.center,
+            child: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Frequent Visitors: ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                    TextSpan(
+                      text: kInitialInfoText,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                )),
+          ),
+        ),
+        Text('Telephone: 905-873-7100 Ext. 304'),
+        Text('Toll Free: 1-800-268-7100 Ext. 304'),
+        Text('Fax: 905-873-7311'),
+        Text('E-mail: Support@R2Park.ca')
+      ],
     );
   }
 

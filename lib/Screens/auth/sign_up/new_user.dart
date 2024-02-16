@@ -120,7 +120,13 @@ class NewUserState extends State<NewUser> {
                   : Text('Update User'),
             )
           : null,
-      body: SingleChildScrollView(child: Center(child: _inputData(context))),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Center(
+            child: _inputData(context),
+          ),
+        ),
+      ),
     );
   }
 
