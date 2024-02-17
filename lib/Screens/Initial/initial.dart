@@ -6,6 +6,7 @@ import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Screens/auth/login/login.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/exemption.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Initial extends StatefulWidget {
   final SessionCubit sessionCubit;
@@ -31,15 +32,41 @@ class InitialState extends State<Initial> {
   final secondaryColor = Colors.green[900]!;
   int _selectedDuration = 1;
   Property? _exemptionRequestProperty;
+  Property? _previousProperty;
   String? unauthorizedPlateMessage;
 
+  final _nameKey = 'initialName';
+  final _emailKey = 'initialEmail';
+  final _phoneKey = 'initialPhone';
+  final _plateKey = 'initialPlate';
+  final _plateProvKey = 'initialPlateProvince';
+  final _propertyIDKey = 'initialPropertyID';
+
   var databaseManager = DatabaseManager();
+  SharedPreferences? _prefs;
 
   InitialState({required this.sessionCubit});
 
   @override
   void initState() {
     super.initState();
+    getPreferences();
+  }
+
+  void getPreferences() async {
+    _prefs = await SharedPreferences.getInstance();
+    nameController.text = _prefs?.getString(_nameKey) ?? '';
+    emailController.text = _prefs?.getString(_emailKey) ?? '';
+    phoneController.text = _prefs?.getString(_phoneKey) ?? '';
+    plateController.text = _prefs?.getString(_plateKey) ?? '';
+    plateProvinceController.text = _prefs?.getString(_plateProvKey) ?? '';
+
+    final propertyID = _prefs?.getString(_propertyIDKey);
+    if (propertyID != null) {
+      setState(() {
+        _previousProperty = sessionCubit.getPropertyFromID(propertyID);
+      });
+    }
   }
 
   @override
@@ -98,6 +125,7 @@ class InitialState extends State<Initial> {
                     ],
                   ),
                 ),
+                _createPreviousPropertyView(),
                 _durationInput(height: screenHeight, width: screenWidth),
                 _submitButton(),
                 _createDivider(),
@@ -232,6 +260,39 @@ class InitialState extends State<Initial> {
             icon: Icon(Icons.sort_by_alpha_rounded)),
       ),
     );
+  }
+
+  Widget _createPreviousPropertyView() {
+    if (_previousProperty != null) {
+      return Container(
+        padding: EdgeInsets.all(4),
+        child: Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: CheckboxListTile(
+            tileColor: secondaryColor,
+            checkboxShape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            title: Text(
+              _previousProperty?.propertyAddress ?? '',
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            value: _exemptionRequestProperty == _previousProperty,
+            onChanged: (newValue) {
+              if (newValue != null) {
+                newValue
+                    ? setState(
+                        () => _exemptionRequestProperty = _previousProperty)
+                    : setState(() => _exemptionRequestProperty = null);
+              }
+            },
+          ),
+        ),
+      );
+    } else {
+      return SizedBox();
+    }
   }
 
   Widget _durationInput({required double height, required double width}) {
@@ -370,6 +431,14 @@ class InitialState extends State<Initial> {
     ));
   }
 
+  _storeInfoPreferences() {
+    _prefs?.setString(_nameKey, nameController.text);
+    _prefs?.setString(_emailKey, emailController.text);
+    _prefs?.setString(_phoneKey, phoneController.text);
+    _prefs?.setString(_plateKey, plateController.text);
+    _prefs?.setString(_plateProvKey, plateProvinceController.text);
+  }
+
   Exemption createExemption() {
     var selfRegistration = Exemption.def();
     selfRegistration.regDate = DateTime.now().toUtc();
@@ -409,6 +478,7 @@ class InitialState extends State<Initial> {
     if (propertyID != null) {
       setState(() {
         _exemptionRequestProperty = sessionCubit.getPropertyFromID(propertyID);
+        _prefs?.setString(_propertyIDKey, propertyID);
       });
     }
   }
@@ -443,7 +513,10 @@ class InitialState extends State<Initial> {
   }
 
   _submitPressed() {
-    _verifyAddress();
+    if (_exemptionRequestProperty == null) {
+      _verifyAddress();
+    }
+
     _verifyLicencePlate();
     _verifyProvince();
 
@@ -451,15 +524,13 @@ class InitialState extends State<Initial> {
       openDialog(context, 'Request Unsuccessful', '$unauthorizedPlateMessage',
           '$unauthorizedPlateMessage');
     } else {
-      final exemption = createExemption();
-
       if (nameController.text != '' &&
           emailController.text != '' &&
           phoneController.text != '' &&
-          cityController.text != '' &&
-          addressController.text != '' &&
           plateController.text != '' &&
           _exemptionRequestProperty != null) {
+        _storeInfoPreferences();
+        final exemption = createExemption();
         databaseManager.createExemption(exemption);
 
         openDialog(
