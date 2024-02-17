@@ -27,7 +27,8 @@ class InitialState extends State<Initial> {
   TextEditingController unitController = TextEditingController();
   TextEditingController addressController = TextEditingController();
   TextEditingController plateController = TextEditingController();
-  TextEditingController plateProvinceController = TextEditingController();
+  // TextEditingController plateProvinceController = TextEditingController();
+  var _plateProvince = 'ON';
 
   final secondaryColor = Colors.green[900]!;
   int _selectedDuration = 1;
@@ -59,7 +60,7 @@ class InitialState extends State<Initial> {
     emailController.text = _prefs?.getString(_emailKey) ?? '';
     phoneController.text = _prefs?.getString(_phoneKey) ?? '';
     plateController.text = _prefs?.getString(_plateKey) ?? '';
-    plateProvinceController.text = _prefs?.getString(_plateProvKey) ?? '';
+    _plateProvince = _prefs?.getString(_plateProvKey) ?? '';
 
     final propertyID = _prefs?.getString(_propertyIDKey);
     if (propertyID != null) {
@@ -121,7 +122,8 @@ class InitialState extends State<Initial> {
                     children: [
                       _createPlateField(),
                       SizedBox(width: 12),
-                      _createPlateProvinceField()
+                      // _createPlateProvinceField()
+                      _createPlateProvinceDropDownMenu()
                     ],
                   ),
                 ),
@@ -129,7 +131,8 @@ class InitialState extends State<Initial> {
                 _durationInput(height: screenHeight, width: screenWidth),
                 _submitButton(),
                 _createDivider(),
-                _footerTextView()
+                _footerTextView(),
+                _createClearButton()
               ])),
         ));
   }
@@ -246,20 +249,54 @@ class InitialState extends State<Initial> {
     );
   }
 
-  Widget _createPlateProvinceField() {
+  // Widget _createPlateProvinceField() {
+  //   return Expanded(
+  //     flex: 4,
+  //     child: TextField(
+  //       maxLength: 2,
+  //       controller: plateProvinceController,
+  //       decoration: InputDecoration(
+  //           counterText: "",
+  //           border: OutlineInputBorder(),
+  //           labelText: 'Plate Prov. (ON, AB)',
+  //           labelStyle: kInitialTextLabelStyle,
+  //           icon: Icon(Icons.sort_by_alpha_rounded)),
+  //     ),
+  //   );
+  // }
+
+  Widget _createPlateProvinceDropDownMenu() {
     return Expanded(
-      flex: 4,
-      child: TextField(
-        maxLength: 2,
-        controller: plateProvinceController,
-        decoration: InputDecoration(
-            counterText: "",
-            border: OutlineInputBorder(),
-            labelText: 'Plate Prov. (ON, AB)',
-            labelStyle: kInitialTextLabelStyle,
-            icon: Icon(Icons.sort_by_alpha_rounded)),
-      ),
-    );
+        flex: 3,
+        child: DropdownButtonFormField(
+          hint: Text(
+            "Plate Prov.",
+            style: kInitialTextLabelStyle,
+          ),
+          // alignment: Alignment.center,
+          decoration: InputDecoration(
+            labelText: "Plate Province",
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(width: 2, color: Colors.grey),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(width: 2, color: Colors.green),
+            ),
+          ),
+          items: statesAndProvinces,
+          value: _plateProvince,
+          onChanged: dropdownCallback,
+        ));
+  }
+
+  void dropdownCallback(dynamic selectedValue) {
+    if (selectedValue is String) {
+      setState(() {
+        _plateProvince = selectedValue;
+      });
+    }
   }
 
   Widget _createPreviousPropertyView() {
@@ -423,6 +460,25 @@ class InitialState extends State<Initial> {
     );
   }
 
+  Widget _createClearButton() {
+    return TextButton(
+        onPressed: () => _clearPressed(), child: Text('Clear saved data'));
+  }
+
+  _clearPressed() {
+    _prefs?.remove(_nameKey);
+    _prefs?.remove(_emailKey);
+    _prefs?.remove(_phoneKey);
+    _prefs?.remove(_plateKey);
+    _prefs?.remove(_plateProvKey);
+    _prefs?.remove(_propertyIDKey);
+    _resetInterface();
+    setState(() {
+      _exemptionRequestProperty = null;
+      _previousProperty = null;
+    });
+  }
+
   _loginPressed() {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => Login(
@@ -436,14 +492,14 @@ class InitialState extends State<Initial> {
     _prefs?.setString(_emailKey, emailController.text);
     _prefs?.setString(_phoneKey, phoneController.text);
     _prefs?.setString(_plateKey, plateController.text);
-    _prefs?.setString(_plateProvKey, plateProvinceController.text);
+    _prefs?.setString(_plateProvKey, _plateProvince);
   }
 
   Exemption createExemption() {
     var selfRegistration = Exemption.def();
     selfRegistration.regDate = DateTime.now().toUtc();
     selfRegistration.plateID =
-        '${plateController.text.toUpperCase().replaceAll(' ', '')}_${plateProvinceController.text}';
+        '${plateController.text.toUpperCase().replaceAll(' ', '')}_${_plateProvince}';
     selfRegistration.propertyID = _exemptionRequestProperty?.propertyID2;
     selfRegistration.startDate = DateTime.now().toUtc();
     selfRegistration.endDate =
@@ -483,11 +539,11 @@ class InitialState extends State<Initial> {
     }
   }
 
-  _verifyProvince() {
-    if (!isValidProvince(plateProvinceController.text)) {
-      unauthorizedPlateMessage = "Province is invalid";
-    }
-  }
+  // _verifyProvince() {
+  //   if (!isValidProvince(plateProvinceController.text)) {
+  //     unauthorizedPlateMessage = "Province is invalid";
+  //   }
+  // }
 
   _verifyLicencePlate() async {
     if (isValidPlate(plateController.text.toUpperCase().replaceAll(' ', ''))) {
@@ -507,7 +563,7 @@ class InitialState extends State<Initial> {
       addressController.text = '';
       plateController.text = '';
       unitController.text = '';
-      plateProvinceController.text = '';
+      _plateProvince = 'ON';
       _exemptionRequestProperty = null;
     });
   }
@@ -518,7 +574,7 @@ class InitialState extends State<Initial> {
     }
 
     _verifyLicencePlate();
-    _verifyProvince();
+    // _verifyProvince();
 
     if (unauthorizedPlateMessage != null) {
       openDialog(context, 'Request Unsuccessful', '$unauthorizedPlateMessage',
