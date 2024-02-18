@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Screens/Initial/initial.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_state.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/loading_view.dart';
@@ -50,9 +51,11 @@ class AppNavigator extends StatelessWidget {
                             MaterialApp(
                       title: 'Login Flutter',
                       theme: ThemeData(
-                          appBarTheme: AppBarTheme(color: primaryColor),
+                          appBarTheme: AppBarTheme(color: Colors.blueGrey[800]),
                           brightness: Brightness.dark,
                           primaryColor: primaryColor,
+                          // inputDecorationTheme: InputDecorationTheme(
+                          //     filled: true, fillColor: Colors.grey[850]),
                           colorScheme: ColorScheme.dark(
                               primary: Color.fromARGB(220, 160, 245, 107))),
                       home: Initial(
@@ -86,9 +89,10 @@ class AppNavigator extends StatelessWidget {
                       //           ],
                       child: MaterialApp(
                         theme: ThemeData(
-                            appBarTheme: AppBarTheme(color: primaryColor),
+                            appBarTheme:
+                                AppBarTheme(color: Colors.blueGrey[800]),
                             brightness: Brightness.dark,
-                            primaryColor: primaryColor,
+                            primaryColor: Colors.blueGrey[800],
                             colorScheme: ColorScheme.dark(
                                 primary: Color.fromARGB(220, 160, 245, 107))),
                         home: TabSessionView(

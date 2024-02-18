@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
+import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
 import 'package:r2park_flutter_dev/Screens/auth/sign_up/forgot_password.dart';
 import '../../../models/user.dart';
 import '../../Session/session_cubit.dart';
@@ -125,46 +127,44 @@ class LoginState extends State<Login> {
                   },
                   child: Text(
                     'Forgot Password',
-                    style: TextStyle(color: Colors.blue, fontSize: 16),
+                    style: TextStyle(fontSize: 16),
                   ),
                 ),
               ),
               Container(
                 height: 50,
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green[900]),
-                  child: Text(
-                    'Login',
-                    style: TextStyle(color: Colors.white, fontSize: 18),
-                  ),
-                  onPressed: () {
-                    if (users != null) {
-                      if (users!.any((element) =>
-                          element.email == usernameController.text)) {
-                        User user = users!.firstWhere((element) =>
-                            element.email == usernameController.text);
-                        if (user.password == passwordController.text) {
-                          sessionCubit.showSession(user);
-                          Navigator.of(context).pop(widget);
+                child: GradientButton(
+                    borderRadius: BorderRadius.circular(30),
+                    onPressed: () {
+                      if (users != null) {
+                        if (users!.any((element) =>
+                            element.email == usernameController.text)) {
+                          User user = users!.firstWhere((element) =>
+                              element.email == usernameController.text);
+                          if (user.password == passwordController.text) {
+                            sessionCubit.showSession(user);
+                            Navigator.of(context).pop(widget);
+                          } else {
+                            openDialog(
+                                context,
+                                'Invalid Data',
+                                'invalid password',
+                                'Make sure your username and password are correct');
+                          }
                         } else {
                           openDialog(
                               context,
-                              'Invalid Data',
-                              'invalid password',
+                              'Invalid Credentials',
+                              'Make sure your username and password are correct',
                               'Make sure your username and password are correct');
                         }
-                      } else {
-                        openDialog(
-                            context,
-                            'Invalid Credentials',
-                            'Make sure your username and password are correct',
-                            'Make sure your username and password are correct');
                       }
-                    }
-                  },
-                ),
+                    },
+                    child: Text(
+                      'Login',
+                      style: kButtonTextStyle,
+                    )),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -175,7 +175,7 @@ class LoginState extends State<Login> {
                     child: TextButton(
                       child: Text(
                         'Sign up!',
-                        style: TextStyle(fontSize: 18, color: Colors.blue),
+                        style: TextStyle(fontSize: 18),
                       ),
                       onPressed: () {
                         Navigator.of(context)

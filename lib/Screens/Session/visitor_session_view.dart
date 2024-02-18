@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
+import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/exemption.dart';
@@ -681,14 +683,13 @@ class VisitorSessionScreen extends State<VisitorSessionView>
   // }
 
   Widget _submitButton() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(backgroundColor: secondaryColor),
-      onPressed: () => _submitPressed(),
-      child: Text(
-        '  Submit  ',
-        style: TextStyle(color: Colors.white, fontSize: 18),
-      ),
-    );
+    return GradientButton(
+        borderRadius: BorderRadius.circular(30),
+        onPressed: () => _submitPressed(),
+        child: Text(
+          'Submit',
+          style: kButtonTextStyle,
+        ));
   }
 
   Exemption createExemption() {

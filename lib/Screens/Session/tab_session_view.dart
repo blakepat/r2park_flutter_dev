@@ -144,7 +144,7 @@ class TabSessionScreen extends State<TabSessionView>
         icon: Icon(Icons.logout),
         onPressed: () => BlocProvider.of<SessionCubit>(context).signOut(),
       ),
-      backgroundColor: primaryColor,
+      backgroundColor: Colors.blueGrey[800],
       title: Text(title),
       shadowColor: Colors.black54,
     );

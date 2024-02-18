@@ -1,7 +1,11 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
+import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Screens/auth/login/login.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
@@ -139,16 +143,11 @@ class InitialState extends State<Initial> {
 
   Widget _createInfoView() {
     return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: Container(
-        padding: EdgeInsets.fromLTRB(32, 0, 10, 0),
-        child: Text(
-          'Register your vehicle:',
-          style: TextStyle(
-              fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white),
-        ),
-      ),
-    );
+        padding: const EdgeInsets.all(10.0),
+        child: Container(
+            padding: EdgeInsets.fromLTRB(32, 0, 10, 0),
+            child: Text('Register your vehicle:',
+                style: GoogleFonts.montserrat(fontSize: 32))));
   }
 
   Widget _createNameField() {
@@ -156,11 +155,7 @@ class InitialState extends State<Initial> {
       padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
       child: TextField(
         controller: nameController,
-        decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Name',
-            labelStyle: kInitialTextLabelStyle,
-            icon: Icon(Icons.person)),
+        decoration: textFieldDecoration(icon: Icons.person, labelName: 'Name'),
       ),
     );
   }
@@ -170,11 +165,7 @@ class InitialState extends State<Initial> {
       padding: EdgeInsets.all(10),
       child: TextField(
         controller: emailController,
-        decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Email',
-            labelStyle: kInitialTextLabelStyle,
-            icon: Icon(Icons.email)),
+        decoration: textFieldDecoration(icon: Icons.email, labelName: 'Email'),
       ),
     );
   }
@@ -184,11 +175,7 @@ class InitialState extends State<Initial> {
       padding: EdgeInsets.all(10),
       child: TextField(
         controller: phoneController,
-        decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Phone',
-            labelStyle: kInitialTextLabelStyle,
-            icon: Icon(Icons.phone)),
+        decoration: textFieldDecoration(icon: Icons.phone, labelName: 'Phone'),
       ),
     );
   }
@@ -198,11 +185,8 @@ class InitialState extends State<Initial> {
       padding: EdgeInsets.all(10),
       child: TextField(
         controller: cityController,
-        decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'City',
-            labelStyle: kInitialTextLabelStyle,
-            icon: Icon(Icons.location_city_rounded)),
+        decoration: textFieldDecoration(
+            icon: Icons.location_city_rounded, labelName: 'City'),
       ),
     );
   }
@@ -212,11 +196,7 @@ class InitialState extends State<Initial> {
       flex: 1,
       child: TextField(
         controller: unitController,
-        decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Unit',
-            labelStyle: kInitialTextLabelStyle,
-            icon: Icon(Icons.numbers)),
+        decoration: textFieldDecoration(icon: Icons.numbers, labelName: 'Unit'),
       ),
     );
   }
@@ -226,11 +206,8 @@ class InitialState extends State<Initial> {
       flex: 2,
       child: TextField(
         controller: addressController,
-        decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Address',
-            labelStyle: kInitialTextLabelStyle,
-            icon: Icon(Icons.location_on)),
+        decoration:
+            textFieldDecoration(icon: Icons.location_on, labelName: 'Address'),
       ),
     );
   }
@@ -240,11 +217,8 @@ class InitialState extends State<Initial> {
       flex: 5,
       child: TextField(
         controller: plateController,
-        decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Licence Plate',
-            labelStyle: kInitialTextLabelStyle,
-            icon: Icon(Icons.rectangle_rounded)),
+        decoration: textFieldDecoration(
+            icon: Icons.rectangle_rounded, labelName: 'Licence Plate'),
       ),
     );
   }
@@ -285,6 +259,8 @@ class InitialState extends State<Initial> {
               borderSide: BorderSide(width: 2, color: Colors.green),
             ),
           ),
+          menuMaxHeight: 400,
+          dropdownColor: Colors.blueGrey,
           items: statesAndProvinces,
           value: _plateProvince,
           onChanged: dropdownCallback,
@@ -389,22 +365,39 @@ class InitialState extends State<Initial> {
         ));
   }
 
+  // Widget _submitButton() {
+  //   return Padding(
+  //     padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+  //     child: Directionality(
+  //       textDirection: TextDirection.rtl,
+  //       child: Stack(
+  //         children: [ElevatedButton.icon(
+  //           style: ElevatedButton.styleFrom(backgroundColor: secondaryColor),
+  //           onPressed: () => _submitPressed(),
+  //           label: Text(
+  //             '  Submit  ',
+  //             style: TextStyle(color: Colors.white, fontSize: 18),
+  //           ),
+  //           icon: Icon(
+  //             Icons.arrow_back_ios,
+  //             color: Colors.white,
+  //           ),
+
+  //         ),
+  //       ]),
+  //     ),
+  //   );
+  // }
+
   Widget _submitButton() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      child: Directionality(
-        textDirection: TextDirection.rtl,
-        child: ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(backgroundColor: secondaryColor),
-          onPressed: () => _submitPressed(),
-          label: Text(
-            '  Submit  ',
-            style: TextStyle(color: Colors.white, fontSize: 18),
-          ),
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: Colors.white,
-          ),
+      child: GradientButton(
+        onPressed: () => _submitPressed(),
+        borderRadius: BorderRadius.circular(20),
+        child: Text(
+          'Submit',
+          style: kButtonTextStyle,
         ),
       ),
     );

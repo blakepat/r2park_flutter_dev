@@ -1,12 +1,27 @@
 import 'package:flutter/material.dart';
 
+Color primaryColor = Colors.blue[900]!;
+Color secondaryColor = Colors.green[900]!;
+
 String kInitialInfoText =
     'please contact Parking Support at the following telephone numbers during regular business hours \n(M-F 9:00am - 5:00pm) or e-mail anytime.';
 
 TextStyle kInitialTextLabelStyle = TextStyle(
-    color: Colors.grey[600],
+    color: Colors.grey[400],
     fontSize: 14,
     textBaseline: TextBaseline.alphabetic);
+
+TextStyle kButtonTextStyle =
+    TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white);
+
+InputDecoration textFieldDecoration({icon: Icons, labelName: String}) {
+  return InputDecoration(
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      // borderSide: BorderSide(width: 0, style: BorderStyle.none)),
+      labelText: labelName,
+      labelStyle: kInitialTextLabelStyle,
+      icon: Icon(icon));
+}
 
 List<DropdownMenuItem<String>> statesAndProvinces = [
   //Provinces and territories

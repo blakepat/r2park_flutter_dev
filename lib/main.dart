@@ -11,9 +11,6 @@ void main() {
   runApp(MyApp());
 }
 
-final primaryColor = Colors.blue[900]!;
-final secondaryColor = Colors.green[900]!;
-
 class MyApp extends StatefulWidget {
   // ignore: prefer_const_constructors_in_immutables
   MyApp({super.key});
