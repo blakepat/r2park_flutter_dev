@@ -219,10 +219,13 @@ class LoginState extends State<Login> {
   }
 
   Widget _createLogoView() {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(0, 0, 20, 0),
-      child:
-          SizedBox(height: 180, child: Image.asset('assets/images/3DLogo.png')),
+    return Hero(
+      tag: 'logo',
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(0, 0, 20, 0),
+        child: SizedBox(
+            height: 180, child: Image.asset('assets/images/3DLogo.png')),
+      ),
     );
   }
 }

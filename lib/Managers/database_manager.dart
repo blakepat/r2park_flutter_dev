@@ -4,6 +4,7 @@ import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/exemption.dart';
 import 'package:r2park_flutter_dev/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class DatabaseManager {
   final Future<SharedPreferences> preferences = SharedPreferences.getInstance();
@@ -19,6 +20,25 @@ class DatabaseManager {
     users = jsonUsers.map((entry) => User.convertFromJson(entry)).toList();
 
     return users;
+  }
+
+  Future<List<User>> getUsersFromDevelopment() async {
+    List<User> users = [];
+
+    var url = Uri.https('dev.r2p.live', '/services/registry_index');
+    var response = await http.get(url);
+    final data = await json.decode(response.body);
+    List jsonUsers = data["data"];
+
+    users = jsonUsers.map((entry) => User.convertFromJson(entry)).toList();
+
+    return users;
+  }
+
+  Future<void> getDataFromPostman() async {
+    var url = Uri.https('dev.r2p.live', '/services/registry_index');
+    var response = await http.get(url);
+    print(json.decode(response.body));
   }
 
   Future<List<Property>> getPropertiesFromJson() async {
@@ -48,23 +68,68 @@ class DatabaseManager {
     return blacklistPlates;
   }
 
-  Future<void> createUser(User user) async {
-    var jsonUser = user.toJson();
+  // Future<void> createUser(User user) async {
+  //   var jsonUser = user.toJson();
 
-    print("New User: ${jsonUser}");
+  //   print("New User: ${jsonUser}");
+  // }
+
+  Future<void> createUser(User user) async {
+    var newUser = user;
+    newUser.propertyId = '';
+    newUser.companyAddress = '';
+    newUser.companyId = '';
+    print(user.toJson());
+
+    var url = Uri.https('dev.r2p.live', '/services/registry_index/');
+    final response = await http.post(
+      url,
+      // headers: {"Content-Type": "application/json"},
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(user),
+    );
+
+    print("💜💜 ${response.body}");
   }
 
   Future<void> updateUser(User user) async {
-    var jsonUser = user.toJson();
+    var userId = user.userId!;
 
-    print("Updated User: ${jsonUser}");
+    var url = Uri.https('dev.r2p.live', '/services/registry_index/$userId');
+    final response = await http.put(
+      url,
+      // headers: {"Content-Type": "application/json"},
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(user),
+    );
+
+    print("💜💜 ${response.body}");
   }
 
+  // Future<void> deleteUser(User user) async {
+  //   var userId = user.userId;
+  //   deleteUserPreferences(user: user);
+
+  //   print("User To Delete: ${userId} ${user.fullName}");
+  // }
+
   Future<void> deleteUser(User user) async {
-    var userId = user.userId;
+    var userId = user.userId!;
     deleteUserPreferences(user: user);
 
-    print("User To Delete: ${userId} ${user.fullName}");
+    var url = Uri.https('dev.r2p.live', '/services/registry_index/$userId');
+    final response = await http.delete(
+      url,
+      // headers: {"Content-Type": "application/json"},
+      // headers: <String, String>{
+      //   'Content-Type': 'application/json; charset=UTF-8',
+      // },
+    );
+    print('${response.statusCode} ${response.body}');
   }
 
   deleteUserPreferences({required User user}) async {

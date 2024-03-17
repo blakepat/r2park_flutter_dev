@@ -56,8 +56,11 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> getData() async {
-    var users = await databaseManager.getUsersFromJson();
+    // var users = await databaseManager.getUsersFromJson();
     var properties = await databaseManager.getPropertiesFromJson();
+    var users = await databaseManager.getUsersFromDevelopment();
+
+    // print(testUsers.length);
 
     if (_users.isEmpty) {
       setState(() {

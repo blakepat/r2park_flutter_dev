@@ -293,15 +293,20 @@ class NewUserState extends State<NewUser> {
 
             if (_textFieldsAreAllValid()) {
               if (loggedInUser == null) {
+                widget.user = User.def();
                 widget.user?.email = _emailTextFieldController.text;
               }
               widget.user?.fullName = _fullNameTextFieldController.text;
+              widget.user?.userType = 'visitor';
+              widget.user?.userId = "666";
               widget.user?.mobileNumber = _mobileNumberTextFieldController.text;
               widget.user?.address = _address1TextFieldController.text;
               widget.user?.unitNumber = _unitNumberTextFieldController.text;
               widget.user?.city = _cityTextFieldController.text;
               widget.user?.province = _provinceTextFieldController.text;
               widget.user?.postalCode = _postalCodeTextFieldController.text;
+              widget.user?.companyAddress = "";
+              widget.user?.companyId = "";
               widget.user?.password = _password1TextFieldController.text;
 
               //if address matches property assign property ID to user

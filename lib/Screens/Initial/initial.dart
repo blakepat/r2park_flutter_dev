@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
@@ -46,6 +44,7 @@ class InitialState extends State<Initial> {
   final _plateKey = 'initialPlate';
   final _plateProvKey = 'initialPlateProvince';
   final _propertyIDKey = 'initialPropertyID';
+  final _unitNumberKey = 'initialUnitNumber';
 
   var databaseManager = DatabaseManager();
   SharedPreferences? _prefs;
@@ -64,7 +63,8 @@ class InitialState extends State<Initial> {
     emailController.text = _prefs?.getString(_emailKey) ?? '';
     phoneController.text = _prefs?.getString(_phoneKey) ?? '';
     plateController.text = _prefs?.getString(_plateKey) ?? '';
-    _plateProvince = _prefs?.getString(_plateProvKey) ?? '';
+    unitController.text = _prefs?.getString(_unitNumberKey) ?? '';
+    _plateProvince = _prefs?.getString(_plateProvKey) ?? 'ON';
 
     final propertyID = _prefs?.getString(_propertyIDKey);
     if (propertyID != null) {
@@ -84,13 +84,16 @@ class InitialState extends State<Initial> {
           toolbarHeight: 80,
           leading: Transform.scale(
             scale: 1.6,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 28),
-              child: Image.asset(
-                'assets/images/3DLogo.png',
-                fit: BoxFit.contain,
-                height: 180,
-                alignment: Alignment.centerLeft,
+            child: Hero(
+              tag: 'logo',
+              child: Padding(
+                padding: const EdgeInsets.only(left: 28),
+                child: Image.asset(
+                  'assets/images/3DLogo.png',
+                  fit: BoxFit.contain,
+                  height: 180,
+                  alignment: Alignment.centerLeft,
+                ),
               ),
             ),
           ),
@@ -218,7 +221,8 @@ class InitialState extends State<Initial> {
       child: TextField(
         controller: plateController,
         decoration: textFieldDecoration(
-            icon: Icons.rectangle_rounded, labelName: 'Licence Plate'),
+            icon: IconData(0xe1d7, fontFamily: 'MaterialIcons'),
+            labelName: 'Licence Plate'),
       ),
     );
   }
@@ -282,15 +286,19 @@ class InitialState extends State<Initial> {
         child: Padding(
           padding: const EdgeInsets.all(4.0),
           child: CheckboxListTile(
-            tileColor: secondaryColor,
-            checkboxShape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            tileColor: Colors.black26,
+            checkboxShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(
+                    color: Colors.green, style: BorderStyle.solid, width: 2)),
             title: Text(
               _previousProperty?.propertyAddress ?? '',
               style: TextStyle(color: Colors.white, fontSize: 20),
             ),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(
+                    color: Colors.green, style: BorderStyle.solid, width: 4)),
             value: _exemptionRequestProperty == _previousProperty,
             onChanged: (newValue) {
               if (newValue != null) {
@@ -465,6 +473,7 @@ class InitialState extends State<Initial> {
     _prefs?.remove(_plateKey);
     _prefs?.remove(_plateProvKey);
     _prefs?.remove(_propertyIDKey);
+    _prefs?.remove(_unitNumberKey);
     _resetInterface();
     setState(() {
       _exemptionRequestProperty = null;
@@ -473,11 +482,13 @@ class InitialState extends State<Initial> {
   }
 
   _loginPressed() {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => Login(
-        sessionCubit: sessionCubit,
-      ),
-    ));
+    Navigator.of(context)
+        .push(MaterialPageRoute(
+          builder: (context) => Login(
+            sessionCubit: sessionCubit,
+          ),
+        ))
+        .then((value) => getPreferences());
   }
 
   _storeInfoPreferences() {
@@ -486,6 +497,7 @@ class InitialState extends State<Initial> {
     _prefs?.setString(_phoneKey, phoneController.text);
     _prefs?.setString(_plateKey, plateController.text);
     _prefs?.setString(_plateProvKey, _plateProvince);
+    _prefs?.setString(_unitNumberKey, unitController.text);
   }
 
   Exemption createExemption() {
