@@ -221,7 +221,7 @@ class InitialState extends State<Initial> {
       child: TextField(
         controller: plateController,
         decoration: textFieldDecoration(
-            icon: IconData(0xe1d7, fontFamily: 'MaterialIcons'),
+            icon: const IconData(0xe1d7, fontFamily: 'MaterialIcons'),
             labelName: 'Licence Plate'),
       ),
     );
