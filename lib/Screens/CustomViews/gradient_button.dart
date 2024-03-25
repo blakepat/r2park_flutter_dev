@@ -34,7 +34,8 @@ class GradientButton extends StatelessWidget {
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
+          shadowColor: Colors.black,
+          elevation: 5,
           shape: RoundedRectangleBorder(borderRadius: borderRadius),
         ),
         child: child,

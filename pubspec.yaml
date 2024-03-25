@@ -74,7 +74,6 @@ flutter:
   assets:
       - assets/images/
       - assets/r2park_table.json
-      - 
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

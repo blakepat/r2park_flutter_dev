@@ -9,18 +9,18 @@ import 'package:http/http.dart' as http;
 class DatabaseManager {
   final Future<SharedPreferences> preferences = SharedPreferences.getInstance();
 
-  Future<List<User>> getUsersFromJson() async {
-    List<User> users = [];
+  // Future<List<User>> getUsersFromJson() async {
+  //   List<User> users = [];
 
-    final String response =
-        await rootBundle.loadString('assets/r2park_table.json');
-    final data = await json.decode(response);
-    List jsonUsers = data["users"];
+  //   final String response =
+  //       await rootBundle.loadString('assets/r2park_table.json');
+  //   final data = await json.decode(response);
+  //   List jsonUsers = data["users"];
 
-    users = jsonUsers.map((entry) => User.convertFromJson(entry)).toList();
+  //   users = jsonUsers.map((entry) => User.convertFromJson(entry)).toList();
 
-    return users;
-  }
+  //   return users;
+  // }
 
   Future<List<User>> getUsersFromDevelopment() async {
     List<User> users = [];
@@ -28,6 +28,9 @@ class DatabaseManager {
     var url = Uri.https('dev.r2p.live', '/services/registry_index');
     var response = await http.get(url);
     final data = await json.decode(response.body);
+
+    print("${response.statusCode}: ${response.body}");
+
     List jsonUsers = data["data"];
 
     users = jsonUsers.map((entry) => User.convertFromJson(entry)).toList();
