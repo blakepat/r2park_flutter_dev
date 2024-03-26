@@ -220,12 +220,13 @@ class InitialState extends State<Initial> {
       flex: 5,
       child: TextField(
         controller: plateController,
-        decoration: textFieldDecoration(
-            icon: const IconData(0xe1d7, fontFamily: 'MaterialIcons'),
-            labelName: 'Licence Plate'),
+        decoration:
+            textFieldDecoration(icon: Icons.abc, labelName: 'Licence Plate'),
       ),
     );
   }
+
+  // const IconData(0xe1d7, fontFamily: 'MaterialIcons'),
 
   // Widget _createPlateProvinceField() {
   //   return Expanded(
