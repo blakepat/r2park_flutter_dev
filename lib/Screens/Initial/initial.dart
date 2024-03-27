@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
@@ -116,6 +117,7 @@ class InitialState extends State<Initial> {
                 _createNameField(),
                 _createEmailField(),
                 _createPhoneField(),
+                _createDivider(),
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: Row(children: [
@@ -132,6 +134,7 @@ class InitialState extends State<Initial> {
                     _createStreetNameField(),
                   ]),
                 ),
+                _createDivider(),
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: Row(
@@ -146,7 +149,10 @@ class InitialState extends State<Initial> {
                 _createPreviousPropertyView(),
                 _durationInput(height: screenHeight, width: screenWidth),
                 _submitButton(),
-                _createDivider(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: _createDivider(),
+                ),
                 _footerTextView(),
                 _createClearButton()
               ])),
@@ -215,7 +221,7 @@ class InitialState extends State<Initial> {
 
   Widget _createStreetNumberField() {
     return Expanded(
-      flex: 2,
+      flex: 3,
       child: TextField(
         controller: streetNumberController,
         decoration:
@@ -226,7 +232,7 @@ class InitialState extends State<Initial> {
 
   Widget _createStreetNameField() {
     return Expanded(
-      flex: 4,
+      flex: 5,
       child: TextField(
         controller: streetNameController,
         decoration: textFieldDecoration(
@@ -433,13 +439,10 @@ class InitialState extends State<Initial> {
   }
 
   Widget _createDivider() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Divider(
-        color: Colors.grey[600],
-        indent: 40,
-        endIndent: 40,
-      ),
+    return Divider(
+      color: Colors.grey[600],
+      indent: 40,
+      endIndent: 40,
     );
   }
 
