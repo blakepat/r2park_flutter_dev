@@ -8,6 +8,7 @@ import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Screens/auth/login/login.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/exemption.dart';
+import 'package:r2park_flutter_dev/models/registration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Initial extends StatefulWidget {
@@ -27,7 +28,8 @@ class InitialState extends State<Initial> {
   TextEditingController phoneController = TextEditingController();
   TextEditingController cityController = TextEditingController();
   TextEditingController unitController = TextEditingController();
-  TextEditingController addressController = TextEditingController();
+  TextEditingController streetNameController = TextEditingController();
+  TextEditingController streetNumberController = TextEditingController();
   TextEditingController plateController = TextEditingController();
   // TextEditingController plateProvinceController = TextEditingController();
   var _plateProvince = 'ON';
@@ -114,13 +116,20 @@ class InitialState extends State<Initial> {
                 _createNameField(),
                 _createEmailField(),
                 _createPhoneField(),
-                _createCityField(),
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: Row(children: [
                     _createUnitField(),
                     SizedBox(width: 12),
-                    _createAddressField(),
+                    _createCityField(),
+                  ]),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Row(children: [
+                    _createStreetNumberField(),
+                    SizedBox(width: 12),
+                    _createStreetNameField(),
                   ]),
                 ),
                 Padding(
@@ -184,8 +193,8 @@ class InitialState extends State<Initial> {
   }
 
   Widget _createCityField() {
-    return Container(
-      padding: EdgeInsets.all(10),
+    return Expanded(
+      flex: 4,
       child: TextField(
         controller: cityController,
         decoration: textFieldDecoration(
@@ -196,7 +205,7 @@ class InitialState extends State<Initial> {
 
   Widget _createUnitField() {
     return Expanded(
-      flex: 1,
+      flex: 2,
       child: TextField(
         controller: unitController,
         decoration: textFieldDecoration(icon: Icons.numbers, labelName: 'Unit'),
@@ -204,13 +213,24 @@ class InitialState extends State<Initial> {
     );
   }
 
-  Widget _createAddressField() {
+  Widget _createStreetNumberField() {
     return Expanded(
       flex: 2,
       child: TextField(
-        controller: addressController,
+        controller: streetNumberController,
         decoration:
-            textFieldDecoration(icon: Icons.location_on, labelName: 'Address'),
+            textFieldDecoration(icon: Icons.house, labelName: 'Street #'),
+      ),
+    );
+  }
+
+  Widget _createStreetNameField() {
+    return Expanded(
+      flex: 4,
+      child: TextField(
+        controller: streetNameController,
+        decoration: textFieldDecoration(
+            icon: Icons.location_on, labelName: 'Street Name'),
       ),
     );
   }
@@ -501,49 +521,68 @@ class InitialState extends State<Initial> {
     _prefs?.setString(_unitNumberKey, unitController.text);
   }
 
-  Exemption createExemption() {
-    var selfRegistration = Exemption.def();
-    selfRegistration.regDate = DateTime.now().toUtc();
-    selfRegistration.plateID =
-        '${plateController.text.toUpperCase().replaceAll(' ', '')}_${_plateProvince}';
-    selfRegistration.propertyID = _exemptionRequestProperty?.propertyID2;
-    selfRegistration.startDate = DateTime.now().toUtc();
-    selfRegistration.endDate =
-        DateTime.now().add(Duration(days: _selectedDuration)).toUtc();
-    selfRegistration.unitNumber = '';
-    selfRegistration.email = emailController.text;
-    selfRegistration.phone = phoneController.text;
-    selfRegistration.name = nameController.text;
-    selfRegistration.makeModel = '';
-    selfRegistration.numberOfDays = '$_selectedDuration';
-    selfRegistration.reason = 'guests';
-    selfRegistration.notes = '';
-    selfRegistration.authBy = '';
-    selfRegistration.isArchived = '';
+  Registration createRegistration() {
+    var registration = Registration.def();
 
-    var splitAddress = _exemptionRequestProperty?.propertyAddress?.split(',');
+    registration.userType = 'Visitor';
+    registration.name = nameController.text;
+    registration.email = emailController.text;
+    registration.phone = phoneController.text;
+    registration.streetNumber = streetNumberController.text;
+    registration.streetName = streetNameController.text;
+    registration.city = cityController.text;
+    registration.plateNumber = plateController.text;
+    registration.province = _plateProvince;
+    registration.unitNumber = unitController.text;
+    registration.duration = _selectedDuration.toString();
+    registration.createdAt = DateTime.now().toUtc();
 
-    selfRegistration.streetNumber = splitAddress?[0] ?? '0';
-    selfRegistration.streetName = 'test';
-    selfRegistration.streetSuffix = '';
-    selfRegistration.address =
-        _exemptionRequestProperty?.propertyAddress ?? 'Error getting addresss';
-
-    return selfRegistration;
+    return registration;
   }
 
-  _verifyAddress() {
-    var propertyID = sessionCubit.checkIfValidProperty(
-        cityController.text.toLowerCase(),
-        addressController.text.toLowerCase());
+  // Exemption createExemption() {
+  //   var selfRegistration = Exemption.def();
+  //   selfRegistration.regDate = DateTime.now().toUtc();
+  //   selfRegistration.plateID =
+  //       '${plateController.text.toUpperCase().replaceAll(' ', '')}_${_plateProvince}';
+  //   selfRegistration.propertyID = _exemptionRequestProperty?.propertyID2;
+  //   selfRegistration.startDate = DateTime.now().toUtc();
+  //   selfRegistration.endDate =
+  //       DateTime.now().add(Duration(days: _selectedDuration)).toUtc();
+  //   selfRegistration.unitNumber = '';
+  //   selfRegistration.email = emailController.text;
+  //   selfRegistration.phone = phoneController.text;
+  //   selfRegistration.name = nameController.text;
+  //   selfRegistration.makeModel = '';
+  //   selfRegistration.numberOfDays = '$_selectedDuration';
+  //   selfRegistration.reason = 'guests';
+  //   selfRegistration.notes = '';
+  //   selfRegistration.authBy = '';
+  //   selfRegistration.isArchived = '';
 
-    if (propertyID != null) {
-      setState(() {
-        _exemptionRequestProperty = sessionCubit.getPropertyFromID(propertyID);
-        _prefs?.setString(_propertyIDKey, propertyID);
-      });
-    }
-  }
+  //   var splitAddress = _exemptionRequestProperty?.propertyAddress?.split(',');
+
+  //   selfRegistration.streetNumber = splitAddress?[0] ?? '0';
+  //   selfRegistration.streetName = 'test';
+  //   selfRegistration.streetSuffix = '';
+  //   selfRegistration.address =
+  //       _exemptionRequestProperty?.propertyAddress ?? 'Error getting addresss';
+
+  //   return selfRegistration;
+  // }
+
+  // _verifyAddress() {
+  //   var propertyID = sessionCubit.checkIfValidProperty(
+  //       cityController.text.toLowerCase(),
+  //       addressController.text.toLowerCase());
+
+  //   if (propertyID != null) {
+  //     setState(() {
+  //       _exemptionRequestProperty = sessionCubit.getPropertyFromID(propertyID);
+  //       _prefs?.setString(_propertyIDKey, propertyID);
+  //     });
+  //   }
+  // }
 
   // _verifyProvince() {
   //   if (!isValidProvince(plateProvinceController.text)) {
@@ -552,11 +591,16 @@ class InitialState extends State<Initial> {
   // }
 
   _verifyLicencePlate() async {
-    if (isValidPlate(plateController.text.toUpperCase().replaceAll(' ', ''))) {
-      unauthorizedPlateMessage =
-          sessionCubit.isPlateBlacklisted(licencePlate: plateController.text);
+    if (plateController.text == '') {
+      return;
     } else {
-      unauthorizedPlateMessage = "Licence Plate contains invalid characters";
+      if (isValidPlate(
+          plateController.text.toUpperCase().replaceAll(' ', ''))) {
+        unauthorizedPlateMessage =
+            sessionCubit.isPlateBlacklisted(licencePlate: plateController.text);
+      } else {
+        unauthorizedPlateMessage = "Licence Plate contains invalid characters";
+      }
     }
   }
 
@@ -566,7 +610,7 @@ class InitialState extends State<Initial> {
       emailController.text = '';
       phoneController.text = '';
       cityController.text = '';
-      addressController.text = '';
+      streetNameController.text = '';
       plateController.text = '';
       unitController.text = '';
       _plateProvince = 'ON';
@@ -576,7 +620,7 @@ class InitialState extends State<Initial> {
 
   _submitPressed() {
     if (_exemptionRequestProperty == null) {
-      _verifyAddress();
+      // _verifyAddress();
     }
 
     _verifyLicencePlate();
@@ -587,12 +631,16 @@ class InitialState extends State<Initial> {
           '$unauthorizedPlateMessage');
     } else {
       if (nameController.text != '' &&
-          emailController.text != '' &&
-          phoneController.text != '' &&
-          plateController.text != '' &&
-          _exemptionRequestProperty != null) {
+              emailController.text != '' &&
+              phoneController.text != '' &&
+              plateController.text != '' &&
+              cityController.text != '' &&
+              streetNameController.text != ''
+
+          // _exemptionRequestProperty != null
+          ) {
         _storeInfoPreferences();
-        final exemption = createExemption();
+        final exemption = createRegistration();
         databaseManager.createExemption(exemption);
 
         openDialog(
@@ -605,9 +653,9 @@ class InitialState extends State<Initial> {
       } else {
         openDialog(
             context,
-            'Please select Plate and Location',
-            'Please ensure you have filled out the address form correctly',
-            'Please ensure you have filled out the address form correctly');
+            'Ensure forms are not empty and correct',
+            'Please ensure you have filled out all forms correctly',
+            'Please ensure you have filled out all forms correctly');
       }
     }
   }

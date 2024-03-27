@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/exemption.dart';
+import 'package:r2park_flutter_dev/models/registration.dart';
 import 'package:r2park_flutter_dev/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -143,8 +144,20 @@ class DatabaseManager {
     prefs.remove('${user.email}locations');
   }
 
-  Future<void> createExemption(Exemption exemption) async {
-    var jsonExemption = exemption.toJson();
+  Future<void> createExemption(Registration registration) async {
+    var jsonExemption = registration.toJson();
+
+    var url = Uri.https('dev.r2p.live', '/services/registry_index/');
+    final response = await http.post(
+      url,
+      // headers: {"Content-Type": "application/json"},
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(registration),
+    );
+
+    print("💜💜 ${response.body}");
 
     print("Exemption Created: ${jsonExemption}");
   }
