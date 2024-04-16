@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
+import 'package:r2park_flutter_dev/Managers/validation_manager.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Screens/auth/login/login.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
-import 'package:r2park_flutter_dev/models/exemption.dart';
 import 'package:r2park_flutter_dev/models/registration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -39,7 +38,7 @@ class InitialState extends State<Initial> {
   int _selectedDuration = 1;
   Property? _exemptionRequestProperty;
   Property? _previousProperty;
-  String? unauthorizedPlateMessage;
+  String formFailedValidationMessage = '';
 
   final _nameKey = 'initialName';
   final _emailKey = 'initialEmail';
@@ -593,18 +592,25 @@ class InitialState extends State<Initial> {
   //   }
   // }
 
-  _verifyLicencePlate() async {
+  _verifyLicencePlate() {
     if (plateController.text == '') {
       return;
     } else {
       if (isValidPlate(
           plateController.text.toUpperCase().replaceAll(' ', ''))) {
-        unauthorizedPlateMessage =
-            sessionCubit.isPlateBlacklisted(licencePlate: plateController.text);
+        formFailedValidationMessage = sessionCubit.isPlateBlacklisted(
+                licencePlate: plateController.text) ??
+            '';
       } else {
-        unauthorizedPlateMessage = "Licence Plate contains invalid characters";
+        formFailedValidationMessage +=
+            "Licence Plate contains invalid characters";
       }
     }
+  }
+
+  _verifyForm() {
+    formFailedValidationMessage += validateEmail(emailController.text.trim());
+    formFailedValidationMessage += validateName(nameController.text.trim());
   }
 
   _resetInterface() {
@@ -622,16 +628,12 @@ class InitialState extends State<Initial> {
   }
 
   _submitPressed() {
-    if (_exemptionRequestProperty == null) {
-      // _verifyAddress();
-    }
-
     _verifyLicencePlate();
-    // _verifyProvince();
+    _verifyForm();
 
-    if (unauthorizedPlateMessage != null) {
-      openDialog(context, 'Request Unsuccessful', '$unauthorizedPlateMessage',
-          '$unauthorizedPlateMessage');
+    if (formFailedValidationMessage.isNotEmpty) {
+      openDialog(context, 'Request Unsuccessful',
+          '$formFailedValidationMessage', '$formFailedValidationMessage');
     } else {
       if (nameController.text != '' &&
               emailController.text != '' &&

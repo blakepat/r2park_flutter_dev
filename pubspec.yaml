@@ -38,6 +38,7 @@ dependencies:
   flutter_bloc: ^8.1.2
   shared_preferences: ^2.0.20
   easy_search_bar: ^2.5.0
+  email_validator: ^2.1.16
   http:
   toast:
   google_fonts:
