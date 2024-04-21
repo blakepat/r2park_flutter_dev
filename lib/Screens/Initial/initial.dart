@@ -575,7 +575,8 @@ class InitialState extends State<Initial> {
     registration.userType = 'Visitor';
     registration.name = nameController.text.trim();
     registration.email = emailController.text.trim();
-    registration.phone = phoneController.text.trim().replaceAll('-', '');
+    registration.phone =
+        phoneController.text.trim().replaceAll('-', '').replaceAll(' ', '');
     registration.streetNumber = streetNumberController.text.trim();
     registration.streetName = streetNameController.text;
     registration.city = _city;
