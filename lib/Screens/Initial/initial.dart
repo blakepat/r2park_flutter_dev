@@ -573,15 +573,15 @@ class InitialState extends State<Initial> {
     var registration = Registration.def();
 
     registration.userType = 'Visitor';
-    registration.name = nameController.text;
-    registration.email = emailController.text;
-    registration.phone = phoneController.text;
-    registration.streetNumber = streetNumberController.text;
+    registration.name = nameController.text.trim();
+    registration.email = emailController.text.trim();
+    registration.phone = phoneController.text.trim().replaceAll('-', '');
+    registration.streetNumber = streetNumberController.text.trim();
     registration.streetName = streetNameController.text;
     registration.city = _city;
-    registration.plateNumber = plateController.text;
+    registration.plateNumber = plateController.text.trim();
     registration.province = _plateProvince;
-    registration.unitNumber = unitController.text;
+    registration.unitNumber = unitController.text.trim();
     registration.duration = _selectedDuration.toString();
     registration.createdAt = DateTime.now().toUtc();
 
@@ -657,6 +657,8 @@ class InitialState extends State<Initial> {
   _verifyForm() {
     formFailedValidationMessage += validateEmail(emailController.text.trim());
     formFailedValidationMessage += validateName(nameController.text.trim());
+    formFailedValidationMessage +=
+        validateMobile(phoneController.text.trim().replaceAll('-', ''));
   }
 
   _resetInterface() {

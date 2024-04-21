@@ -9,6 +9,20 @@ bool isValidLocationCityOrProvince(String location) {
   return RegExp(r'^[A-Za-z0-9_.]+$').hasMatch(location);
 }
 
+String validateMobile(String value) {
+  String pattern = r'(^(?:[+0]9)?[0-9]{10}$)';
+  RegExp regExp = new RegExp(pattern);
+  String errorMessage = '';
+
+  if (value.length == 0) {
+    errorMessage = 'Please enter mobile number';
+  } else if (!regExp.hasMatch(value)) {
+    errorMessage = 'Please enter valid mobile number';
+  }
+
+  return errorMessage;
+}
+
 String validateName(String name) {
   String errorMessage = '';
 
