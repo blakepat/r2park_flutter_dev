@@ -7,6 +7,8 @@ import 'package:r2park_flutter_dev/Managers/validation_manager.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Screens/auth/login/login.dart';
+import 'package:r2park_flutter_dev/models/city.dart';
+import 'package:r2park_flutter_dev/models/database_response_message.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/registration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,12 +35,18 @@ class InitialState extends State<Initial> {
   TextEditingController plateController = TextEditingController();
   // TextEditingController plateProvinceController = TextEditingController();
   var _plateProvince = 'ON';
+  var _city = 'AURORA';
 
   final secondaryColor = Colors.green[900]!;
   int _selectedDuration = 1;
   Property? _exemptionRequestProperty;
   Property? _previousProperty;
   String formFailedValidationMessage = '';
+
+  DatabaseResponseMessage databaseResponseMessage =
+      DatabaseResponseMessage.def();
+
+  ScrollController scrollController = ScrollController();
 
   final _nameKey = 'initialName';
   final _emailKey = 'initialEmail';
@@ -122,7 +130,7 @@ class InitialState extends State<Initial> {
                   child: Row(children: [
                     _createUnitField(),
                     SizedBox(width: 12),
-                    _createCityField(),
+                    _createCityDropDownMenu(),
                   ]),
                 ),
                 Padding(
@@ -206,6 +214,44 @@ class InitialState extends State<Initial> {
             icon: Icons.location_city_rounded, labelName: 'City'),
       ),
     );
+  }
+
+  Widget _createCityDropDownMenu() {
+    return Expanded(
+        flex: 4,
+        child: DropdownButtonFormField(
+          isExpanded: true,
+          hint: Text(
+            _city,
+            style: kInitialTextLabelStyle,
+          ),
+          // alignment: Alignment.center,
+          decoration: InputDecoration(
+            labelText: "City",
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(width: 2, color: Colors.grey),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(width: 2, color: Colors.green),
+            ),
+          ),
+          menuMaxHeight: 400,
+          dropdownColor: Colors.blueGrey,
+          items: sessionCubit.cities?.map((city) {
+            return DropdownMenuItem(
+                child: Text(city.description ?? ''), value: city);
+          }).toList(),
+          onChanged: cityDropdownCallback,
+        ));
+  }
+
+  void cityDropdownCallback(City? selectedValue) {
+    setState(() {
+      print(selectedValue?.description);
+      _city = selectedValue?.description ?? '';
+    });
   }
 
   Widget _createUnitField() {
@@ -532,7 +578,7 @@ class InitialState extends State<Initial> {
     registration.phone = phoneController.text;
     registration.streetNumber = streetNumberController.text;
     registration.streetName = streetNameController.text;
-    registration.city = cityController.text;
+    registration.city = _city;
     registration.plateNumber = plateController.text;
     registration.province = _plateProvince;
     registration.unitNumber = unitController.text;
@@ -618,7 +664,7 @@ class InitialState extends State<Initial> {
       nameController.text = '';
       emailController.text = '';
       phoneController.text = '';
-      cityController.text = '';
+      _city = 'AURORA';
       streetNameController.text = '';
       plateController.text = '';
       unitController.text = '';
@@ -627,7 +673,7 @@ class InitialState extends State<Initial> {
     });
   }
 
-  _submitPressed() {
+  _submitPressed() async {
     _verifyLicencePlate();
     _verifyForm();
 
@@ -639,26 +685,26 @@ class InitialState extends State<Initial> {
               emailController.text != '' &&
               phoneController.text != '' &&
               plateController.text != '' &&
-              cityController.text != '' &&
               streetNameController.text != ''
 
           // _exemptionRequestProperty != null
           ) {
         _storeInfoPreferences();
         final exemption = createRegistration();
-        databaseManager.createExemption(exemption);
+        databaseResponseMessage =
+            await databaseManager.createExemption(exemption);
 
         openDialog(
             context,
-            '✅ Request Submitted Successfully',
-            'Thank you for using R2Park! Enjoy your visit!',
-            'Thank you for using R2Park! Enjoy your visit!');
+            '✅ ${databaseResponseMessage.message ?? ''}',
+            databaseResponseMessage.description,
+            databaseResponseMessage.description ?? '');
 
         _resetInterface();
       } else {
         openDialog(
             context,
-            'Ensure forms are not empty and correct',
+            'One or more forms left blank',
             'Please ensure you have filled out all forms correctly',
             'Please ensure you have filled out all forms correctly');
       }

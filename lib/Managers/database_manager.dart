@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:r2park_flutter_dev/models/city.dart';
+import 'package:r2park_flutter_dev/models/database_response_message.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/exemption.dart';
 import 'package:r2park_flutter_dev/models/registration.dart';
@@ -30,13 +32,29 @@ class DatabaseManager {
     var response = await http.get(url);
     final data = await json.decode(response.body);
 
-    print("${response.statusCode}: ${response.body}");
+    // print("${response.statusCode}: ${response.body}");
 
     List jsonUsers = data["data"];
 
     users = jsonUsers.map((entry) => User.convertFromJson(entry)).toList();
 
     return users;
+  }
+
+  Future<List<City>> getCities() async {
+    List<City> cities = [];
+
+    var url = Uri.https('dev.r2p.live', '/services/cities');
+    var response = await http.get(url);
+    final data = await json.decode(response.body);
+
+    print("${response.statusCode}: ${response.body}");
+
+    List jsonCities = data['data'];
+
+    cities = jsonCities.map((entry) => City.convertFromJson(entry)).toList();
+
+    return cities;
   }
 
   Future<void> getDataFromPostman() async {
@@ -144,7 +162,8 @@ class DatabaseManager {
     prefs.remove('${user.email}locations');
   }
 
-  Future<void> createExemption(Registration registration) async {
+  Future<DatabaseResponseMessage> createExemption(
+      Registration registration) async {
     var jsonExemption = registration.toJson();
 
     var url = Uri.https('dev.r2p.live', '/services/registry_index/');
@@ -157,8 +176,18 @@ class DatabaseManager {
       body: jsonEncode(registration),
     );
 
-    print("💜💜 ${response.body}");
+    // print("💜💜 ${response.body}");
 
-    print("Exemption Created: ${jsonExemption}");
+    var jsonMessageReponse = json.decode(response.body.toString());
+
+    var databaseResponseMessage =
+        DatabaseResponseMessage.convertFromJson(jsonMessageReponse);
+
+    print(
+        "💜💜 ${databaseResponseMessage.message}\n ${databaseResponseMessage.description}");
+
+    // print("Exemption Created: ${jsonExemption}");
+
+    return databaseResponseMessage;
   }
 }
