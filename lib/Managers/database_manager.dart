@@ -190,4 +190,26 @@ class DatabaseManager {
 
     return databaseResponseMessage;
   }
+
+  Future<void> createLog(Registration registration) async {
+    var jsonExemption = registration.toJson();
+
+    var url = Uri.https('dev.r2p.live', '/services/registry_log/');
+    final response = await http.post(
+      url,
+      // headers: {"Content-Type": "application/json"},
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(registration),
+    );
+
+    // print("💜💜 ${response.body}");
+
+    var jsonMessageReponse = json.decode(response.body.toString());
+
+    print("💜💜 ${jsonMessageReponse.toString()}");
+
+    // print("Exemption Created: ${jsonExemption}");
+  }
 }

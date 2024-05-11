@@ -45,6 +45,22 @@ class Registration {
     createdAt = DateTime.now().toUtc();
   }
 
+  Registration.log() {
+    id = null;
+    userType = 'Log';
+    name = 'Empty';
+    email = 'Empty';
+    phone = 'Empty';
+    streetNumber = 'Empty';
+    streetName = 'Empty';
+    city = 'Empty';
+    plateNumber = 'Empty';
+    province = 'Empty';
+    unitNumber = 'Empty';
+    duration = 'Empty';
+    createdAt = DateTime.now().toUtc();
+  }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
 

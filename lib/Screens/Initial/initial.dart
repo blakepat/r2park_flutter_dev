@@ -42,6 +42,7 @@ class InitialState extends State<Initial> {
   Property? _exemptionRequestProperty;
   Property? _previousProperty;
   String formFailedValidationMessage = '';
+  bool agreedToTermsAndConditions = false;
 
   DatabaseResponseMessage databaseResponseMessage =
       DatabaseResponseMessage.def();
@@ -155,6 +156,8 @@ class InitialState extends State<Initial> {
                 ),
                 _createPreviousPropertyView(),
                 _durationInput(height: screenHeight, width: screenWidth),
+                _createTermsAndConditionsText(),
+                _createTermsAndConditionsCheckbox(),
                 _submitButton(),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -445,6 +448,61 @@ class InitialState extends State<Initial> {
         ));
   }
 
+  Widget _createTermsAndConditionsText() {
+    return Column(
+      children: [
+        Row(
+          children: const [
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4),
+              child: Text(
+                'Terms and Conditions',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                textAlign: TextAlign.left,
+              ),
+            ),
+            Spacer()
+          ],
+        ),
+        Container(
+          decoration: BoxDecoration(
+              color: Colors.black26,
+              border: Border.all(color: Colors.white30),
+              borderRadius: BorderRadius.all(Radius.circular(8))),
+          height: 120,
+          child: Padding(
+              padding: EdgeInsets.all(8),
+              child: SingleChildScrollView(
+                child: Text(termsAndConditions),
+              )),
+        ),
+      ],
+    );
+  }
+
+  Widget _createTermsAndConditionsCheckbox() {
+    return Expanded(
+      flex: 1,
+      child: CheckboxListTile(
+          title: Text('I agree to terms and conditions'),
+          value: agreedToTermsAndConditions,
+          onChanged: (newValue) {
+            if (newValue != null) {
+              setState(() {
+                print(newValue);
+                agreedToTermsAndConditions = newValue;
+              });
+            }
+            logFormsForErrorChecking();
+          }),
+    );
+  }
+
+  void logFormsForErrorChecking() async {
+    Registration log = createLog();
+    await databaseManager.createLog(log);
+  }
+
   // Widget _submitButton() {
   //   return Padding(
   //     padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -589,6 +647,38 @@ class InitialState extends State<Initial> {
     return registration;
   }
 
+  Registration createLog() {
+    var registration = Registration.log();
+
+    registration.name = nameController.text.isEmpty
+        ? registration.name
+        : nameController.text.trim();
+    registration.email = emailController.text.isEmpty
+        ? registration.email
+        : emailController.text.trim();
+    registration.phone = phoneController.text.isEmpty
+        ? registration.phone
+        : phoneController.text.trim().replaceAll('-', '').replaceAll(' ', '');
+    registration.streetNumber = streetNumberController.text.isEmpty
+        ? registration.streetNumber
+        : streetNumberController.text.trim();
+    registration.streetName = streetNameController.text.isEmpty
+        ? registration.streetName
+        : streetNameController.text;
+    registration.city = _city;
+    registration.plateNumber = plateController.text.isEmpty
+        ? registration.plateNumber
+        : plateController.text.trim();
+    registration.province = _plateProvince;
+    registration.unitNumber = unitController.text.isEmpty
+        ? registration.unitNumber
+        : unitController.text.trim();
+    registration.duration = _selectedDuration.toString();
+    registration.createdAt = DateTime.now().toUtc();
+
+    return registration;
+  }
+
   // Exemption createExemption() {
   //   var selfRegistration = Exemption.def();
   //   selfRegistration.regDate = DateTime.now().toUtc();
@@ -660,6 +750,8 @@ class InitialState extends State<Initial> {
     formFailedValidationMessage += validateName(nameController.text.trim());
     formFailedValidationMessage +=
         validateMobile(phoneController.text.trim().replaceAll('-', ''));
+    formFailedValidationMessage +=
+        validateTermsAndConditions(agreedToTermsAndConditions);
   }
 
   _resetInterface() {
@@ -672,6 +764,7 @@ class InitialState extends State<Initial> {
       plateController.text = '';
       unitController.text = '';
       _plateProvince = 'ON';
+      agreedToTermsAndConditions = false;
       _exemptionRequestProperty = null;
     });
   }

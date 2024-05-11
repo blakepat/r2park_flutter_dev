@@ -15,9 +15,9 @@ String validateMobile(String value) {
   String errorMessage = '';
 
   if (value.length == 0) {
-    errorMessage = 'Please enter mobile number';
+    errorMessage = '• Please enter mobile number\n';
   } else if (!regExp.hasMatch(value)) {
-    errorMessage = 'Please enter valid mobile number';
+    errorMessage = '• Please enter valid mobile number\n';
   }
 
   return errorMessage;
@@ -27,7 +27,7 @@ String validateName(String name) {
   String errorMessage = '';
 
   if (name.length < 3) {
-    errorMessage += 'Name must be longer than 3 characters.\n';
+    errorMessage += '• Name must be longer than 3 characters.\n';
   }
   if (name.contains(RegExp(r'[!@#%^&*(),$.?":{}|<>]'))) {
     errorMessage += '• name cannot include special characters.\n';
@@ -40,7 +40,7 @@ String validateEmail(String email) {
   String errorMessage = '';
 
   if (email.length < 3) {
-    errorMessage += 'email must be longer than 3 characters.\n';
+    errorMessage += '• email must be longer than 3 characters.\n';
   }
   if (!email.contains('@')) {
     errorMessage += '• @ symbol is missing.\n';
@@ -52,16 +52,26 @@ String validateEmail(String email) {
   return errorMessage;
 }
 
+String validateTermsAndConditions(bool agreed) {
+  String errorMessage = '';
+
+  if (!agreed) {
+    errorMessage += '• Please read and agree to terms and conditions\n';
+  }
+
+  return errorMessage;
+}
+
 String validatePassword(String password) {
   // Reset error message
   String errorMessage = '';
   // Password length greater than 6
   if (password.length < 6) {
-    errorMessage += 'Password must be longer than 6 characters.\n';
+    errorMessage += '• Password must be longer than 6 characters.\n';
   }
   // Password length less than 26
   if (password.length > 25) {
-    errorMessage += 'Password cannot be longer than 25 characters.\n';
+    errorMessage += '• Password cannot be longer than 25 characters.\n';
   }
   // Contains at least one uppercase letter
   if (!password.contains(RegExp(r'[A-Z]'))) {
