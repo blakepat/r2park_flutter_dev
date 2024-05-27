@@ -81,7 +81,6 @@ class _MyAppState extends State<MyApp> {
     if (_cities.isEmpty) {
       setState(() {
         _cities = cities;
-        print(_cities[0].description);
       });
     }
   }

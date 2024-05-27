@@ -5,6 +5,7 @@ import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
 import 'package:r2park_flutter_dev/Managers/validation_manager.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
+import 'package:r2park_flutter_dev/Screens/Initial/terms_and_conditions.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Screens/auth/login/login.dart';
 import 'package:r2park_flutter_dev/models/city.dart';
@@ -156,7 +157,7 @@ class InitialState extends State<Initial> {
                 ),
                 _createPreviousPropertyView(),
                 _durationInput(height: screenHeight, width: screenWidth),
-                _createTermsAndConditionsText(),
+                // _createTermsAndConditionsText(),
                 _createTermsAndConditionsCheckbox(),
                 _submitButton(),
                 Padding(
@@ -252,7 +253,6 @@ class InitialState extends State<Initial> {
 
   void cityDropdownCallback(City? selectedValue) {
     setState(() {
-      print(selectedValue?.description);
       _city = selectedValue?.description ?? '';
     });
   }
@@ -481,20 +481,28 @@ class InitialState extends State<Initial> {
   }
 
   Widget _createTermsAndConditionsCheckbox() {
-    return Expanded(
-      flex: 1,
-      child: CheckboxListTile(
-          title: Text('I agree to terms and conditions'),
-          value: agreedToTermsAndConditions,
-          onChanged: (newValue) {
-            if (newValue != null) {
-              setState(() {
-                print(newValue);
-                agreedToTermsAndConditions = newValue;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 24),
+      child: Container(
+        decoration: BoxDecoration(
+            color: Colors.black26,
+            border: Border.all(color: Colors.white30),
+            borderRadius: BorderRadius.all(Radius.circular(8))),
+        child: CheckboxListTile(
+            title: Text('Read and Agree to Terms and Conditions'),
+            value: agreedToTermsAndConditions,
+            onChanged: (newValue) {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(
+                      builder: (context) => TermsAndConditionsPage()))
+                  .then((value) {
+                setState(() {
+                  agreedToTermsAndConditions = value;
+                });
               });
-            }
-            logFormsForErrorChecking();
-          }),
+              logFormsForErrorChecking();
+            }),
+      ),
     );
   }
 

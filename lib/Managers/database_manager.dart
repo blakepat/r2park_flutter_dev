@@ -48,7 +48,7 @@ class DatabaseManager {
     var response = await http.get(url);
     final data = await json.decode(response.body);
 
-    print("${response.statusCode}: ${response.body}");
+    // print("${response.statusCode}: ${response.body}");
 
     List jsonCities = data['data'];
 
@@ -60,7 +60,7 @@ class DatabaseManager {
   Future<void> getDataFromPostman() async {
     var url = Uri.https('dev.r2p.live', '/services/registry_index');
     var response = await http.get(url);
-    print(json.decode(response.body));
+    // print(json.decode(response.body));
   }
 
   Future<List<Property>> getPropertiesFromJson() async {
@@ -166,6 +166,8 @@ class DatabaseManager {
       Registration registration) async {
     var jsonExemption = registration.toJson();
 
+    print(jsonExemption);
+
     var url = Uri.https('dev.r2p.live', '/services/registry_index/');
     final response = await http.post(
       url,
@@ -194,6 +196,8 @@ class DatabaseManager {
   Future<void> createLog(Registration registration) async {
     var jsonExemption = registration.toJson();
 
+    print(jsonExemption);
+
     var url = Uri.https('dev.r2p.live', '/services/registry_log/');
     final response = await http.post(
       url,
@@ -204,11 +208,9 @@ class DatabaseManager {
       body: jsonEncode(registration),
     );
 
-    // print("💜💜 ${response.body}");
+    print("✅ ${response.body}");
 
-    var jsonMessageReponse = json.decode(response.body.toString());
-
-    print("💜💜 ${jsonMessageReponse.toString()}");
+    // var jsonMessageReponse = json.decode(response.body.toString());
 
     // print("Exemption Created: ${jsonExemption}");
   }
