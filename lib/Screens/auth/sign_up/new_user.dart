@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
+import 'package:r2park_flutter_dev/Managers/validation_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
 import 'package:r2park_flutter_dev/Screens/auth/sign_up/confirm_email.dart';
-import 'package:r2park_flutter_dev/main.dart';
 import '../../../models/user.dart';
 
 // ignore: must_be_immutable
@@ -43,7 +43,7 @@ class NewUserState extends State<NewUser> {
   final _address1TextFieldController = TextEditingController();
   final _unitNumberTextFieldController = TextEditingController();
   final _cityTextFieldController = TextEditingController();
-  final _provinceTextFieldController = TextEditingController();
+  var _province = 'ON';
   final _postalCodeTextFieldController = TextEditingController();
   final _companyAddressTextFieldController = TextEditingController();
   final _companyCityTextFieldController = TextEditingController();
@@ -56,7 +56,6 @@ class NewUserState extends State<NewUser> {
   bool address1Validate = true;
   bool address2Validate = true;
   bool cityValidate = true;
-  bool provinceValidate = true;
   bool postalCodeValidate = true;
   bool companyAddressValidate = true;
   bool companyCityValidate = true;
@@ -84,8 +83,8 @@ class NewUserState extends State<NewUser> {
     _address1TextFieldController.text = widget.user?.address ?? '';
     _unitNumberTextFieldController.text = widget.user?.unitNumber ?? '';
     _cityTextFieldController.text = widget.user?.city ?? '';
-    _provinceTextFieldController.text =
-        widget.user?.province?.toUpperCase() ?? '';
+    _province = widget.user?.province?.toUpperCase() ?? 'ON';
+    _province.isEmpty ? {_province = 'ON'} : '';
     _postalCodeTextFieldController.text = widget.user?.postalCode ?? '';
     _companyAddressTextFieldController.text = widget.user?.companyAddress ?? '';
     _companyCityTextFieldController.text = widget.user?.companyId ?? '';
@@ -103,7 +102,7 @@ class NewUserState extends State<NewUser> {
     _address1TextFieldController.dispose();
     _unitNumberTextFieldController.dispose();
     _cityTextFieldController.dispose();
-    _provinceTextFieldController.dispose();
+    _province = "ON";
     _postalCodeTextFieldController.dispose();
     _companyAddressTextFieldController.dispose();
     _companyCityTextFieldController.dispose();
@@ -204,20 +203,21 @@ class NewUserState extends State<NewUser> {
           SizedBox(
             height: 4,
           ),
-          Row(
-            children: [
-              Expanded(
-                  child: _textField('Province (ON, AB)',
-                      _provinceTextFieldController, provinceValidate,
-                      maxLength: 2, errorText: errorText)),
-              SizedBox(
-                width: 12,
-              ),
-              Expanded(
-                child: _textField('PostalCode', _postalCodeTextFieldController,
-                    postalCodeValidate),
-              )
-            ],
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                Expanded(flex: 2, child: _createPlateProvinceDropDownMenu()),
+                SizedBox(
+                  width: 12,
+                ),
+                Expanded(
+                  flex: 3,
+                  child: _textField('PostalCode',
+                      _postalCodeTextFieldController, postalCodeValidate),
+                )
+              ],
+            ),
           ),
           Row(
             children: [
@@ -272,6 +272,42 @@ class NewUserState extends State<NewUser> {
     );
   }
 
+  Widget _createPlateProvinceDropDownMenu() {
+    return Expanded(
+        flex: 2,
+        child: DropdownButtonFormField(
+          hint: Text(
+            "Province",
+            style: kInitialTextLabelStyle,
+          ),
+          // alignment: Alignment.center,
+          decoration: InputDecoration(
+            labelText: "Province",
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(width: 2, color: Colors.grey),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(width: 2, color: Colors.green),
+            ),
+          ),
+          menuMaxHeight: 400,
+          dropdownColor: Colors.blueGrey,
+          items: statesAndProvinces,
+          value: _province,
+          onChanged: dropdownCallback,
+        ));
+  }
+
+  void dropdownCallback(dynamic selectedValue) {
+    if (selectedValue is String) {
+      setState(() {
+        _province = selectedValue;
+      });
+    }
+  }
+
   Widget _createUpdateButton() {
     return Container(
       height: 40,
@@ -303,7 +339,7 @@ class NewUserState extends State<NewUser> {
               widget.user?.address = _address1TextFieldController.text;
               widget.user?.unitNumber = _unitNumberTextFieldController.text;
               widget.user?.city = _cityTextFieldController.text;
-              widget.user?.province = _provinceTextFieldController.text;
+              widget.user?.province = _province;
               widget.user?.postalCode = _postalCodeTextFieldController.text;
               widget.user?.companyAddress = "";
               widget.user?.companyId = "";
@@ -391,7 +427,6 @@ class NewUserState extends State<NewUser> {
         address1Validate &&
         address2Validate &&
         cityValidate &&
-        provinceValidate &&
         postalCodeValidate &&
         password1Validate &&
         password2Validate;
@@ -414,11 +449,6 @@ class NewUserState extends State<NewUser> {
       isNullOrEmpty(_cityTextFieldController.text)
           ? cityValidate = false
           : cityValidate = true;
-      isNullOrEmpty(_provinceTextFieldController.text)
-          ? provinceValidate = false
-          : isValidProvince(_provinceTextFieldController.text)
-              ? provinceValidate = true
-              : ({provinceValidate = false, errorText = "Invalid Province"});
       isNullOrEmpty(_postalCodeTextFieldController.text)
           ? postalCodeValidate = false
           : postalCodeValidate = true;

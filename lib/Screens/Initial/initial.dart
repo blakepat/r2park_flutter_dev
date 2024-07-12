@@ -3,11 +3,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
+import 'package:r2park_flutter_dev/Managers/validation_manager.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
+import 'package:r2park_flutter_dev/Screens/Initial/terms_and_conditions.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Screens/auth/login/login.dart';
+import 'package:r2park_flutter_dev/models/city.dart';
+import 'package:r2park_flutter_dev/models/database_response_message.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
-import 'package:r2park_flutter_dev/models/exemption.dart';
+import 'package:r2park_flutter_dev/models/registration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Initial extends StatefulWidget {
@@ -27,16 +31,24 @@ class InitialState extends State<Initial> {
   TextEditingController phoneController = TextEditingController();
   TextEditingController cityController = TextEditingController();
   TextEditingController unitController = TextEditingController();
-  TextEditingController addressController = TextEditingController();
+  TextEditingController streetNameController = TextEditingController();
+  TextEditingController streetNumberController = TextEditingController();
   TextEditingController plateController = TextEditingController();
   // TextEditingController plateProvinceController = TextEditingController();
   var _plateProvince = 'ON';
+  var _city = 'AURORA';
 
   final secondaryColor = Colors.green[900]!;
   int _selectedDuration = 1;
   Property? _exemptionRequestProperty;
   Property? _previousProperty;
-  String? unauthorizedPlateMessage;
+  String formFailedValidationMessage = '';
+  bool agreedToTermsAndConditions = false;
+
+  DatabaseResponseMessage databaseResponseMessage =
+      DatabaseResponseMessage.def();
+
+  ScrollController scrollController = ScrollController();
 
   final _nameKey = 'initialName';
   final _emailKey = 'initialEmail';
@@ -114,15 +126,24 @@ class InitialState extends State<Initial> {
                 _createNameField(),
                 _createEmailField(),
                 _createPhoneField(),
-                _createCityField(),
+                _createDivider(),
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: Row(children: [
                     _createUnitField(),
                     SizedBox(width: 12),
-                    _createAddressField(),
+                    _createCityDropDownMenu(),
                   ]),
                 ),
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Row(children: [
+                    _createStreetNumberField(),
+                    SizedBox(width: 12),
+                    _createStreetNameField(),
+                  ]),
+                ),
+                _createDivider(),
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: Row(
@@ -136,8 +157,13 @@ class InitialState extends State<Initial> {
                 ),
                 _createPreviousPropertyView(),
                 _durationInput(height: screenHeight, width: screenWidth),
+                // _createTermsAndConditionsText(),
+                _createTermsAndConditionsCheckbox(),
                 _submitButton(),
-                _createDivider(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: _createDivider(),
+                ),
                 _footerTextView(),
                 _createClearButton()
               ])),
@@ -184,8 +210,8 @@ class InitialState extends State<Initial> {
   }
 
   Widget _createCityField() {
-    return Container(
-      padding: EdgeInsets.all(10),
+    return Expanded(
+      flex: 4,
       child: TextField(
         controller: cityController,
         decoration: textFieldDecoration(
@@ -194,9 +220,46 @@ class InitialState extends State<Initial> {
     );
   }
 
+  Widget _createCityDropDownMenu() {
+    return Expanded(
+        flex: 4,
+        child: DropdownButtonFormField(
+          isExpanded: true,
+          hint: Text(
+            _city,
+            style: kInitialTextLabelStyle,
+          ),
+          // alignment: Alignment.center,
+          decoration: InputDecoration(
+            labelText: "City",
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(width: 2, color: Colors.grey),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(width: 2, color: Colors.green),
+            ),
+          ),
+          menuMaxHeight: 400,
+          dropdownColor: Colors.blueGrey,
+          items: sessionCubit.cities?.map((city) {
+            return DropdownMenuItem(
+                child: Text(city.description ?? ''), value: city);
+          }).toList(),
+          onChanged: cityDropdownCallback,
+        ));
+  }
+
+  void cityDropdownCallback(City? selectedValue) {
+    setState(() {
+      _city = selectedValue?.description ?? '';
+    });
+  }
+
   Widget _createUnitField() {
     return Expanded(
-      flex: 1,
+      flex: 2,
       child: TextField(
         controller: unitController,
         decoration: textFieldDecoration(icon: Icons.numbers, labelName: 'Unit'),
@@ -204,13 +267,24 @@ class InitialState extends State<Initial> {
     );
   }
 
-  Widget _createAddressField() {
+  Widget _createStreetNumberField() {
     return Expanded(
-      flex: 2,
+      flex: 3,
       child: TextField(
-        controller: addressController,
+        controller: streetNumberController,
         decoration:
-            textFieldDecoration(icon: Icons.location_on, labelName: 'Address'),
+            textFieldDecoration(icon: Icons.house, labelName: 'Street #'),
+      ),
+    );
+  }
+
+  Widget _createStreetNameField() {
+    return Expanded(
+      flex: 5,
+      child: TextField(
+        controller: streetNameController,
+        decoration: textFieldDecoration(
+            icon: Icons.location_on, labelName: 'Street Name'),
       ),
     );
   }
@@ -374,6 +448,69 @@ class InitialState extends State<Initial> {
         ));
   }
 
+  Widget _createTermsAndConditionsText() {
+    return Column(
+      children: [
+        Row(
+          children: const [
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4),
+              child: Text(
+                'Terms and Conditions',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                textAlign: TextAlign.left,
+              ),
+            ),
+            Spacer()
+          ],
+        ),
+        Container(
+          decoration: BoxDecoration(
+              color: Colors.black26,
+              border: Border.all(color: Colors.white30),
+              borderRadius: BorderRadius.all(Radius.circular(8))),
+          height: 120,
+          child: Padding(
+              padding: EdgeInsets.all(8),
+              child: SingleChildScrollView(
+                child: Text(termsAndConditions),
+              )),
+        ),
+      ],
+    );
+  }
+
+  Widget _createTermsAndConditionsCheckbox() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 24),
+      child: Container(
+        decoration: BoxDecoration(
+            color: Colors.black26,
+            border: Border.all(color: Colors.white30),
+            borderRadius: BorderRadius.all(Radius.circular(8))),
+        child: CheckboxListTile(
+            title: Text('Read and Agree to Terms and Conditions'),
+            value: agreedToTermsAndConditions,
+            onChanged: (newValue) {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(
+                      builder: (context) => TermsAndConditionsPage()))
+                  .then((value) {
+                setState(() {
+                  agreedToTermsAndConditions = value;
+                });
+              });
+              logFormsForErrorChecking();
+            }),
+      ),
+    );
+  }
+
+  void logFormsForErrorChecking() async {
+    Registration log = createLog();
+    await databaseManager.createLog(log);
+  }
+
   // Widget _submitButton() {
   //   return Padding(
   //     padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -413,13 +550,10 @@ class InitialState extends State<Initial> {
   }
 
   Widget _createDivider() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Divider(
-        color: Colors.grey[600],
-        indent: 40,
-        endIndent: 40,
-      ),
+    return Divider(
+      color: Colors.grey[600],
+      indent: 40,
+      endIndent: 40,
     );
   }
 
@@ -501,49 +635,101 @@ class InitialState extends State<Initial> {
     _prefs?.setString(_unitNumberKey, unitController.text);
   }
 
-  Exemption createExemption() {
-    var selfRegistration = Exemption.def();
-    selfRegistration.regDate = DateTime.now().toUtc();
-    selfRegistration.plateID =
-        '${plateController.text.toUpperCase().replaceAll(' ', '')}_${_plateProvince}';
-    selfRegistration.propertyID = _exemptionRequestProperty?.propertyID2;
-    selfRegistration.startDate = DateTime.now().toUtc();
-    selfRegistration.endDate =
-        DateTime.now().add(Duration(days: _selectedDuration)).toUtc();
-    selfRegistration.unitNumber = '';
-    selfRegistration.email = emailController.text;
-    selfRegistration.phone = phoneController.text;
-    selfRegistration.name = nameController.text;
-    selfRegistration.makeModel = '';
-    selfRegistration.numberOfDays = '$_selectedDuration';
-    selfRegistration.reason = 'guests';
-    selfRegistration.notes = '';
-    selfRegistration.authBy = '';
-    selfRegistration.isArchived = '';
+  Registration createRegistration() {
+    var registration = Registration.def();
 
-    var splitAddress = _exemptionRequestProperty?.propertyAddress?.split(',');
+    registration.userType = 'Visitor';
+    registration.name = nameController.text.trim();
+    registration.email = emailController.text.trim();
+    registration.phone =
+        phoneController.text.trim().replaceAll('-', '').replaceAll(' ', '');
+    registration.streetNumber = streetNumberController.text.trim();
+    registration.streetName = streetNameController.text;
+    registration.city = _city;
+    registration.plateNumber = plateController.text.trim();
+    registration.province = _plateProvince;
+    registration.unitNumber = unitController.text.trim();
+    registration.duration = _selectedDuration.toString();
+    registration.createdAt = DateTime.now().toUtc();
 
-    selfRegistration.streetNumber = splitAddress?[0] ?? '0';
-    selfRegistration.streetName = 'test';
-    selfRegistration.streetSuffix = '';
-    selfRegistration.address =
-        _exemptionRequestProperty?.propertyAddress ?? 'Error getting addresss';
-
-    return selfRegistration;
+    return registration;
   }
 
-  _verifyAddress() {
-    var propertyID = sessionCubit.checkIfValidProperty(
-        cityController.text.toLowerCase(),
-        addressController.text.toLowerCase());
+  Registration createLog() {
+    var registration = Registration.log();
 
-    if (propertyID != null) {
-      setState(() {
-        _exemptionRequestProperty = sessionCubit.getPropertyFromID(propertyID);
-        _prefs?.setString(_propertyIDKey, propertyID);
-      });
-    }
+    registration.name = nameController.text.isEmpty
+        ? registration.name
+        : nameController.text.trim();
+    registration.email = emailController.text.isEmpty
+        ? registration.email
+        : emailController.text.trim();
+    registration.phone = phoneController.text.isEmpty
+        ? registration.phone
+        : phoneController.text.trim().replaceAll('-', '').replaceAll(' ', '');
+    registration.streetNumber = streetNumberController.text.isEmpty
+        ? registration.streetNumber
+        : streetNumberController.text.trim();
+    registration.streetName = streetNameController.text.isEmpty
+        ? registration.streetName
+        : streetNameController.text;
+    registration.city = _city;
+    registration.plateNumber = plateController.text.isEmpty
+        ? registration.plateNumber
+        : plateController.text.trim();
+    registration.province = _plateProvince;
+    registration.unitNumber = unitController.text.isEmpty
+        ? registration.unitNumber
+        : unitController.text.trim();
+    registration.duration = _selectedDuration.toString();
+    registration.createdAt = DateTime.now().toUtc();
+
+    return registration;
   }
+
+  // Exemption createExemption() {
+  //   var selfRegistration = Exemption.def();
+  //   selfRegistration.regDate = DateTime.now().toUtc();
+  //   selfRegistration.plateID =
+  //       '${plateController.text.toUpperCase().replaceAll(' ', '')}_${_plateProvince}';
+  //   selfRegistration.propertyID = _exemptionRequestProperty?.propertyID2;
+  //   selfRegistration.startDate = DateTime.now().toUtc();
+  //   selfRegistration.endDate =
+  //       DateTime.now().add(Duration(days: _selectedDuration)).toUtc();
+  //   selfRegistration.unitNumber = '';
+  //   selfRegistration.email = emailController.text;
+  //   selfRegistration.phone = phoneController.text;
+  //   selfRegistration.name = nameController.text;
+  //   selfRegistration.makeModel = '';
+  //   selfRegistration.numberOfDays = '$_selectedDuration';
+  //   selfRegistration.reason = 'guests';
+  //   selfRegistration.notes = '';
+  //   selfRegistration.authBy = '';
+  //   selfRegistration.isArchived = '';
+
+  //   var splitAddress = _exemptionRequestProperty?.propertyAddress?.split(',');
+
+  //   selfRegistration.streetNumber = splitAddress?[0] ?? '0';
+  //   selfRegistration.streetName = 'test';
+  //   selfRegistration.streetSuffix = '';
+  //   selfRegistration.address =
+  //       _exemptionRequestProperty?.propertyAddress ?? 'Error getting addresss';
+
+  //   return selfRegistration;
+  // }
+
+  // _verifyAddress() {
+  //   var propertyID = sessionCubit.checkIfValidProperty(
+  //       cityController.text.toLowerCase(),
+  //       addressController.text.toLowerCase());
+
+  //   if (propertyID != null) {
+  //     setState(() {
+  //       _exemptionRequestProperty = sessionCubit.getPropertyFromID(propertyID);
+  //       _prefs?.setString(_propertyIDKey, propertyID);
+  //     });
+  //   }
+  // }
 
   // _verifyProvince() {
   //   if (!isValidProvince(plateProvinceController.text)) {
@@ -551,13 +737,29 @@ class InitialState extends State<Initial> {
   //   }
   // }
 
-  _verifyLicencePlate() async {
-    if (isValidPlate(plateController.text.toUpperCase().replaceAll(' ', ''))) {
-      unauthorizedPlateMessage =
-          sessionCubit.isPlateBlacklisted(licencePlate: plateController.text);
+  _verifyLicencePlate() {
+    if (plateController.text == '') {
+      return;
     } else {
-      unauthorizedPlateMessage = "Licence Plate contains invalid characters";
+      if (isValidPlate(
+          plateController.text.toUpperCase().replaceAll(' ', ''))) {
+        formFailedValidationMessage = sessionCubit.isPlateBlacklisted(
+                licencePlate: plateController.text) ??
+            '';
+      } else {
+        formFailedValidationMessage +=
+            "Licence Plate contains invalid characters";
+      }
     }
+  }
+
+  _verifyForm() {
+    formFailedValidationMessage += validateEmail(emailController.text.trim());
+    formFailedValidationMessage += validateName(nameController.text.trim());
+    formFailedValidationMessage +=
+        validateMobile(phoneController.text.trim().replaceAll('-', ''));
+    formFailedValidationMessage +=
+        validateTermsAndConditions(agreedToTermsAndConditions);
   }
 
   _resetInterface() {
@@ -565,49 +767,50 @@ class InitialState extends State<Initial> {
       nameController.text = '';
       emailController.text = '';
       phoneController.text = '';
-      cityController.text = '';
-      addressController.text = '';
+      _city = 'AURORA';
+      streetNameController.text = '';
       plateController.text = '';
       unitController.text = '';
       _plateProvince = 'ON';
+      agreedToTermsAndConditions = false;
       _exemptionRequestProperty = null;
     });
   }
 
-  _submitPressed() {
-    if (_exemptionRequestProperty == null) {
-      _verifyAddress();
-    }
-
+  _submitPressed() async {
     _verifyLicencePlate();
-    // _verifyProvince();
+    _verifyForm();
 
-    if (unauthorizedPlateMessage != null) {
-      openDialog(context, 'Request Unsuccessful', '$unauthorizedPlateMessage',
-          '$unauthorizedPlateMessage');
+    if (formFailedValidationMessage.isNotEmpty) {
+      openDialog(context, 'Request Unsuccessful',
+          '$formFailedValidationMessage', '$formFailedValidationMessage');
     } else {
       if (nameController.text != '' &&
-          emailController.text != '' &&
-          phoneController.text != '' &&
-          plateController.text != '' &&
-          _exemptionRequestProperty != null) {
+              emailController.text != '' &&
+              phoneController.text != '' &&
+              plateController.text != '' &&
+              streetNameController.text != ''
+
+          // _exemptionRequestProperty != null
+          ) {
         _storeInfoPreferences();
-        final exemption = createExemption();
-        databaseManager.createExemption(exemption);
+        final exemption = createRegistration();
+        databaseResponseMessage =
+            await databaseManager.createExemption(exemption);
 
         openDialog(
             context,
-            '✅ Request Submitted Successfully',
-            'Thank you for using R2Park! Enjoy your visit!',
-            'Thank you for using R2Park! Enjoy your visit!');
+            '✅ ${databaseResponseMessage.message ?? ''}',
+            databaseResponseMessage.description,
+            databaseResponseMessage.description ?? '');
 
         _resetInterface();
       } else {
         openDialog(
             context,
-            'Please select Plate and Location',
-            'Please ensure you have filled out the address form correctly',
-            'Please ensure you have filled out the address form correctly');
+            'One or more forms left blank',
+            'Please ensure you have filled out all forms correctly',
+            'Please ensure you have filled out all forms correctly');
       }
     }
   }

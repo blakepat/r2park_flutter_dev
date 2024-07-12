@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:r2park_flutter_dev/models/city.dart';
+import 'package:r2park_flutter_dev/models/database_response_message.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/exemption.dart';
+import 'package:r2park_flutter_dev/models/registration.dart';
 import 'package:r2park_flutter_dev/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -29,7 +32,7 @@ class DatabaseManager {
     var response = await http.get(url);
     final data = await json.decode(response.body);
 
-    print("${response.statusCode}: ${response.body}");
+    // print("${response.statusCode}: ${response.body}");
 
     List jsonUsers = data["data"];
 
@@ -38,10 +41,26 @@ class DatabaseManager {
     return users;
   }
 
+  Future<List<City>> getCities() async {
+    List<City> cities = [];
+
+    var url = Uri.https('dev.r2p.live', '/services/cities');
+    var response = await http.get(url);
+    final data = await json.decode(response.body);
+
+    // print("${response.statusCode}: ${response.body}");
+
+    List jsonCities = data['data'];
+
+    cities = jsonCities.map((entry) => City.convertFromJson(entry)).toList();
+
+    return cities;
+  }
+
   Future<void> getDataFromPostman() async {
     var url = Uri.https('dev.r2p.live', '/services/registry_index');
     var response = await http.get(url);
-    print(json.decode(response.body));
+    // print(json.decode(response.body));
   }
 
   Future<List<Property>> getPropertiesFromJson() async {
@@ -143,9 +162,56 @@ class DatabaseManager {
     prefs.remove('${user.email}locations');
   }
 
-  Future<void> createExemption(Exemption exemption) async {
-    var jsonExemption = exemption.toJson();
+  Future<DatabaseResponseMessage> createExemption(
+      Registration registration) async {
+    var jsonExemption = registration.toJson();
 
-    print("Exemption Created: ${jsonExemption}");
+    print(jsonExemption);
+
+    var url = Uri.https('dev.r2p.live', '/services/registry_index/');
+    final response = await http.post(
+      url,
+      // headers: {"Content-Type": "application/json"},
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(registration),
+    );
+
+    // print("💜💜 ${response.body}");
+
+    var jsonMessageReponse = json.decode(response.body.toString());
+
+    var databaseResponseMessage =
+        DatabaseResponseMessage.convertFromJson(jsonMessageReponse);
+
+    print(
+        "💜💜 ${databaseResponseMessage.message}\n ${databaseResponseMessage.description}");
+
+    // print("Exemption Created: ${jsonExemption}");
+
+    return databaseResponseMessage;
+  }
+
+  Future<void> createLog(Registration registration) async {
+    var jsonExemption = registration.toJson();
+
+    print(jsonExemption);
+
+    var url = Uri.https('dev.r2p.live', '/services/registry_log/');
+    final response = await http.post(
+      url,
+      // headers: {"Content-Type": "application/json"},
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(registration),
+    );
+
+    print("✅ ${response.body}");
+
+    // var jsonMessageReponse = json.decode(response.body.toString());
+
+    // print("Exemption Created: ${jsonExemption}");
   }
 }

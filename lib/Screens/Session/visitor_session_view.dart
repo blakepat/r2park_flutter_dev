@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
+import 'package:r2park_flutter_dev/Managers/validation_manager.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/exemption.dart';
+import 'package:r2park_flutter_dev/models/registration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Managers/helper_functions.dart';
 import '../../main.dart';
@@ -692,35 +694,55 @@ class VisitorSessionScreen extends State<VisitorSessionView>
         ));
   }
 
-  Exemption createExemption() {
-    var selfRegistration = Exemption.def();
-    selfRegistration.regDate = DateTime.now().toUtc();
-    selfRegistration.plateID = _selectedLicensePlate;
-    selfRegistration.propertyID = _selectedAddressID;
-    selfRegistration.startDate = DateTime.now().toUtc();
-    selfRegistration.endDate =
-        DateTime.now().add(Duration(days: _selectedDuration)).toUtc();
-    selfRegistration.unitNumber = '';
-    selfRegistration.email = user.email;
-    selfRegistration.phone = user.mobileNumber;
-    selfRegistration.name = '${user.fullName}';
-    selfRegistration.makeModel = '';
-    selfRegistration.numberOfDays = '$_selectedDuration';
-    selfRegistration.reason = 'guests';
-    selfRegistration.notes = '';
-    selfRegistration.authBy = '';
-    selfRegistration.isArchived = '';
+  Registration createRegistration() {
+    var registration = Registration.def();
 
-    var splitAddress = _selectedproperty?.propertyAddress?.split(',');
+    registration.userType = 'Visitor';
+    registration.name = user.fullName;
+    registration.email = user.fullName;
+    registration.phone = user.mobileNumber;
+    registration.streetNumber = '';
+    registration.streetName =
+        _selectedproperty?.propertyAddress ?? 'Error selecting address';
+    registration.city = cityController.text;
+    registration.plateNumber = plateController.text;
+    registration.province = '';
+    registration.unitNumber = unitController.text;
+    registration.duration = _selectedDuration.toString();
+    registration.createdAt = DateTime.now().toUtc();
 
-    selfRegistration.streetNumber = splitAddress?[0] ?? '0';
-    selfRegistration.streetName = 'test';
-    selfRegistration.streetSuffix = '';
-    selfRegistration.address =
-        _selectedproperty?.propertyAddress ?? 'Error getting addresss';
-
-    return selfRegistration;
+    return registration;
   }
+
+  // Exemption createExemption() {
+  //   var selfRegistration = Exemption.def();
+  //   selfRegistration.regDate = DateTime.now().toUtc();
+  //   selfRegistration.plateID = _selectedLicensePlate;
+  //   selfRegistration.propertyID = _selectedAddressID;
+  //   selfRegistration.startDate = DateTime.now().toUtc();
+  //   selfRegistration.endDate =
+  //       DateTime.now().add(Duration(days: _selectedDuration)).toUtc();
+  //   selfRegistration.unitNumber = '';
+  //   selfRegistration.email = user.email;
+  //   selfRegistration.phone = user.mobileNumber;
+  //   selfRegistration.name = '${user.fullName}';
+  //   selfRegistration.makeModel = '';
+  //   selfRegistration.numberOfDays = '$_selectedDuration';
+  //   selfRegistration.reason = 'guests';
+  //   selfRegistration.notes = '';
+  //   selfRegistration.authBy = '';
+  //   selfRegistration.isArchived = '';
+
+  //   var splitAddress = _selectedproperty?.propertyAddress?.split(',');
+
+  //   selfRegistration.streetNumber = splitAddress?[0] ?? '0';
+  //   selfRegistration.streetName = 'test';
+  //   selfRegistration.streetSuffix = '';
+  //   selfRegistration.address =
+  //       _selectedproperty?.propertyAddress ?? 'Error getting addresss';
+
+  //   return selfRegistration;
+  // }
 
   _verifyLicencePlate() async {
     unauthorizedPlateMessage =
@@ -735,10 +757,10 @@ class VisitorSessionScreen extends State<VisitorSessionView>
       openDialog(context, 'Request Unsuccessful', '$unauthorizedPlateMessage',
           '$unauthorizedPlateMessage');
     } else {
-      final exemption = createExemption();
+      final registration = createRegistration();
 
       if (_selectedAddressID != '' && _selectedLicensePlate != '') {
-        databaseManager.createExemption(exemption);
+        databaseManager.createExemption(registration);
 
         openDialog(
             context,

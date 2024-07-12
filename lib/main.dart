@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/app_navigator.dart';
+import 'package:r2park_flutter_dev/models/city.dart';
 import 'package:r2park_flutter_dev/models/user.dart';
 import 'Screens/Session/session_cubit.dart';
 import 'Screens/auth/auth_utilities/auth_repo.dart';
@@ -24,6 +25,7 @@ class _MyAppState extends State<MyApp> {
 
   List<User> _users = [];
   List<Property> _properties = [];
+  List<City> _cities = [];
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +49,8 @@ class _MyAppState extends State<MyApp> {
                     create: (context) => SessionCubit(
                         properties: _properties,
                         authRepo: context.read<AuthRepo>(),
-                        users: _users),
+                        users: _users,
+                        cities: _cities),
                     child: AppNavigator(),
                   ),
                 );
@@ -59,6 +62,7 @@ class _MyAppState extends State<MyApp> {
     // var users = await databaseManager.getUsersFromJson();
     var properties = await databaseManager.getPropertiesFromJson();
     var users = await databaseManager.getUsersFromDevelopment();
+    var cities = await databaseManager.getCities();
 
     // print(testUsers.length);
 
@@ -71,6 +75,12 @@ class _MyAppState extends State<MyApp> {
     if (_properties.isEmpty) {
       setState(() {
         _properties = properties;
+      });
+    }
+
+    if (_cities.isEmpty) {
+      setState(() {
+        _cities = cities;
       });
     }
   }

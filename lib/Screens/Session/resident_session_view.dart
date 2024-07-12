@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
+import 'package:r2park_flutter_dev/Managers/validation_manager.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
+import 'package:r2park_flutter_dev/models/registration.dart';
 import 'package:r2park_flutter_dev/models/visitor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../main.dart';
@@ -448,38 +450,58 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
         ));
   }
 
-  Exemption createExemption() {
-    var selfRegistration = Exemption.def();
-    selfRegistration.regDate = DateTime.now().toUtc();
-    selfRegistration.plateID = _selectedVisitor == null
-        ? plateController.text.toUpperCase().replaceAll(' ', '')
-        : _selectedVisitor?.plateNumber;
-    selfRegistration.propertyID = residence!.propertyID2;
-    selfRegistration.startDate = DateTime.now().toUtc();
-    selfRegistration.endDate =
-        DateTime.now().add(Duration(days: _selectedDuration)).toUtc();
-    selfRegistration.unitNumber = '';
-    selfRegistration.email = user.email;
-    selfRegistration.phone = user.mobileNumber;
-    selfRegistration.name =
-        '${firstNameController.text} ${lastNameController.text}';
-    selfRegistration.makeModel = '';
-    selfRegistration.numberOfDays = '$_selectedDuration';
-    selfRegistration.reason = 'Visiting: ${user.fullName}';
-    selfRegistration.notes = '';
-    selfRegistration.authBy = '';
-    selfRegistration.isArchived = '';
+  Registration createRegistration() {
+    var registration = Registration.def();
 
-    var splitAddress = residence?.propertyAddress?.split(',');
+    registration.userType = 'Visitor';
+    registration.name = user.fullName;
+    registration.email = user.fullName;
+    registration.phone = user.mobileNumber;
+    registration.streetNumber = '';
+    registration.streetName =
+        residence?.propertyAddress ?? 'error getting address';
+    registration.city = residence?.propertyAddress ?? 'error getting city';
+    registration.plateNumber = plateController.text;
+    registration.province = '';
+    registration.unitNumber = '';
+    registration.duration = _selectedDuration.toString();
+    registration.createdAt = DateTime.now().toUtc();
 
-    selfRegistration.streetNumber = splitAddress?[0] ?? '0';
-    selfRegistration.streetName = 'test';
-    selfRegistration.streetSuffix = '';
-    selfRegistration.address =
-        residence?.propertyAddress ?? 'Error getting addresss';
-
-    return selfRegistration;
+    return registration;
   }
+
+  // Exemption createExemption() {
+  //   var selfRegistration = Exemption.def();
+  //   selfRegistration.regDate = DateTime.now().toUtc();
+  //   selfRegistration.plateID = _selectedVisitor == null
+  //       ? plateController.text.toUpperCase().replaceAll(' ', '')
+  //       : _selectedVisitor?.plateNumber;
+  //   selfRegistration.propertyID = residence!.propertyID2;
+  //   selfRegistration.startDate = DateTime.now().toUtc();
+  //   selfRegistration.endDate =
+  //       DateTime.now().add(Duration(days: _selectedDuration)).toUtc();
+  //   selfRegistration.unitNumber = '';
+  //   selfRegistration.email = user.email;
+  //   selfRegistration.phone = user.mobileNumber;
+  //   selfRegistration.name =
+  //       '${firstNameController.text} ${lastNameController.text}';
+  //   selfRegistration.makeModel = '';
+  //   selfRegistration.numberOfDays = '$_selectedDuration';
+  //   selfRegistration.reason = 'Visiting: ${user.fullName}';
+  //   selfRegistration.notes = '';
+  //   selfRegistration.authBy = '';
+  //   selfRegistration.isArchived = '';
+
+  //   var splitAddress = residence?.propertyAddress?.split(',');
+
+  //   selfRegistration.streetNumber = splitAddress?[0] ?? '0';
+  //   selfRegistration.streetName = 'test';
+  //   selfRegistration.streetSuffix = '';
+  //   selfRegistration.address =
+  //       residence?.propertyAddress ?? 'Error getting addresss';
+
+  //   return selfRegistration;
+  // }
 
   _verifyLicencePlate() async {
     if (_selectedVisitor != null) {
@@ -509,8 +531,8 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
     } else {
       //if its a previous visitor licence plate has already been verified, create exemption
       if (_selectedVisitor != null) {
-        final exemption = createExemption();
-        databaseManager.createExemption(exemption);
+        final registration = createRegistration();
+        databaseManager.createExemption(registration);
         openDialog(
             context,
             '✅ Registration Successful',
@@ -520,7 +542,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
       } else {
         //if not a previous visitor check licence plate
         if (isValidPlate(plateController.text.toUpperCase().trim())) {
-          final exemption = createExemption();
+          final registration = createRegistration();
           //ensure form is filled out properly
           if (firstNameController.text != '' &&
               lastNameController.text != '' &&
@@ -533,7 +555,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
                     plateController.text.toUpperCase().replaceAll(' ', ''));
             sessionCubit.saveVisitor(visitor: visitor, user: user);
             //create exemption!
-            databaseManager.createExemption(exemption);
+            databaseManager.createExemption(registration);
 
             openDialog(
                 context,
