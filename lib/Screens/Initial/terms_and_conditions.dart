@@ -15,63 +15,54 @@ class TermsAndConditionsState extends State<TermsAndConditionsPage> {
     return Scaffold(
         body: SafeArea(
             child: Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                "Terms and Conditions",
-                style: TextStyle(fontSize: 36, fontWeight: FontWeight.w500),
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                  color: Colors.black26,
-                  border: Border.all(color: Colors.white30),
-                  borderRadius: BorderRadius.all(Radius.circular(8))),
-              // height: 120,
-              child: Padding(
-                  padding: EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
                   child: SingleChildScrollView(
-                    child: Text(termsAndConditions),
-                  )),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GradientButton(
-                      onPressed: agreeToTermsAndConditions,
-                      borderRadius: BorderRadius.circular(20),
-                      child: Text(
-                        'Agree',
-                        style: kButtonTextStyle,
-                      )),
-                  Container(width: 100),
-                  GradientButton(
-                      onPressed: declineTermsAndConditions,
-                      borderRadius: BorderRadius.circular(20),
-                      child: Text(
-                        'Decline',
-                        style: kButtonTextStyle,
-                      ))
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    )));
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            "Terms and Conditions",
+                            style: TextStyle(
+                                fontSize: 36, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black26,
+                            border: Border.all(color: Colors.white30),
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxHeight: 500, // Set the maximum height here
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.all(8),
+                              child: SingleChildScrollView(
+                                child: Text(termsAndConditions),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: GradientButton(
+                              onPressed: ExitTermsAndConditions,
+                              borderRadius: BorderRadius.circular(20),
+                              child: Text(
+                                'Close',
+                                style: kButtonTextStyle,
+                              )),
+                        )
+                      ],
+                    ),
+                  ),
+                ))));
   }
 
-  void agreeToTermsAndConditions() {
-    Navigator.of(context).pop(true);
-  }
-
-  void declineTermsAndConditions() {
-    Navigator.of(context).pop(false);
+  void ExitTermsAndConditions() {
+    Navigator.of(context).pop();
   }
 }

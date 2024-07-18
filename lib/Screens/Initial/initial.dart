@@ -13,6 +13,7 @@ import 'package:r2park_flutter_dev/models/database_response_message.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/registration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Initial extends StatefulWidget {
   final SessionCubit sessionCubit;
@@ -31,12 +32,15 @@ class InitialState extends State<Initial> {
   TextEditingController phoneController = TextEditingController();
   TextEditingController cityController = TextEditingController();
   TextEditingController unitController = TextEditingController();
-  TextEditingController streetNameController = TextEditingController();
-  TextEditingController streetNumberController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
+  // TextEditingController streetNumberController = TextEditingController();
   TextEditingController plateController = TextEditingController();
   // TextEditingController plateProvinceController = TextEditingController();
   var _plateProvince = 'ON';
-  var _city = 'AURORA';
+  var _city = 'Choose a City';
+  final _focusNode = FocusNode();
+
+  List<String> streetAddresses = [];
 
   final secondaryColor = Colors.green[900]!;
   int _selectedDuration = 1;
@@ -57,6 +61,8 @@ class InitialState extends State<Initial> {
   final _plateProvKey = 'initialPlateProvince';
   final _propertyIDKey = 'initialPropertyID';
   final _unitNumberKey = 'initialUnitNumber';
+
+  final Uri _url = Uri.parse('https://support.r2park.ca');
 
   var databaseManager = DatabaseManager();
   SharedPreferences? _prefs;
@@ -110,73 +116,158 @@ class InitialState extends State<Initial> {
             ),
           ),
           actions: [
-            TextButton(
-                onPressed: _loginPressed,
-                child: Text(
-                  'Login',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
-                ))
+            // TextButton(
+            //     onPressed: _loginPressed,
+            //     child: Text(
+            //       'Login',
+            //       style: TextStyle(color: Colors.white, fontSize: 18),
+            //     ))
           ],
         ),
         body: SafeArea(
           child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-              child: ListView(children: [
-                _createInfoView(),
-                _createNameField(),
-                _createEmailField(),
-                _createPhoneField(),
-                _createDivider(),
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Row(children: [
-                    _createUnitField(),
-                    SizedBox(width: 12),
-                    _createCityDropDownMenu(),
+              child: Stack(
+                children: [
+                  ListView(children: [
+                    _createInfoView(),
+                    _createNameField(),
+                    _createEmailField(),
+                    _createPhoneField(),
+                    _createDivider(),
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Row(children: [
+                        _createUnitField(),
+                        SizedBox(width: 12),
+                        _createCityDropDownMenu(),
+                      ]),
+                    ),
+                    // Padding(
+                    //   padding: const EdgeInsets.all(8),
+                    //   child: Row(children: [
+                    //     _createStreetNumberField(),
+                    //     SizedBox(width: 12),
+                    //     _createStreetNameField(),
+                    //   ]),
+                    // ),
+                    Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: _createAddressField()),
+                    _createDivider(),
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Row(
+                        children: [
+                          _createPlateField(),
+                          SizedBox(width: 12),
+                          // _createPlateProvinceField()
+                          _createPlateProvinceDropDownMenu()
+                        ],
+                      ),
+                    ),
+                    _createPreviousPropertyView(),
+                    _durationInput(height: screenHeight, width: screenWidth),
+                    // _createTermsAndConditionsText(),
+                    _createTermsAndConditionsCheckbox(),
+                    _createReadTermsAndConditionsButton(),
+                    _submitButton(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: _createDivider(),
+                    ),
+                    _footerTextView(),
+                    _createClearButton()
                   ]),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Row(children: [
-                    _createStreetNumberField(),
-                    SizedBox(width: 12),
-                    _createStreetNameField(),
-                  ]),
-                ),
-                _createDivider(),
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Row(
-                    children: [
-                      _createPlateField(),
-                      SizedBox(width: 12),
-                      // _createPlateProvinceField()
-                      _createPlateProvinceDropDownMenu()
-                    ],
-                  ),
-                ),
-                _createPreviousPropertyView(),
-                _durationInput(height: screenHeight, width: screenWidth),
-                // _createTermsAndConditionsText(),
-                _createTermsAndConditionsCheckbox(),
-                _submitButton(),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: _createDivider(),
-                ),
-                _footerTextView(),
-                _createClearButton()
-              ])),
+                  _createSupportButton(),
+                ],
+              )),
         ));
+  }
+
+  // Future<void> _launchInBrowser(Uri url) async {
+  //   if (!await launchUrl(
+  //     url,
+  //     mode: LaunchMode.externalApplication,
+  //   )) {
+  //     throw Exception('Could not launch $url');
+  //   }
+  // }
+
+  Future<void> _launchInBrowserView(Uri url) async {
+    if (!await launchUrl(url, mode: LaunchMode.inAppBrowserView)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
+  // Future<void> _launchInWebView(Uri url) async {
+  //   if (!await launchUrl(url, mode: LaunchMode.inAppWebView)) {
+  //     throw Exception('Could not launch $url');
+  //   }
+  // }
+
+  // Future<void> _launchInAppWithBrowserOptions(Uri url) async {
+  //   if (!await launchUrl(
+  //     url,
+  //     mode: LaunchMode.inAppBrowserView,
+  //     browserConfiguration: const BrowserConfiguration(showTitle: true),
+  //   )) {
+  //     throw Exception('Could not launch $url');
+  //   }
+  // }
+
+  Widget _createSupportButton() {
+    return Column(
+      children: [
+        Spacer(),
+        Row(
+          children: [
+            Spacer(),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  _launchInBrowserView(_url);
+                },
+                child: Icon(Icons.support_agent, color: Colors.white),
+                style: ElevatedButton.styleFrom(
+                  shape: CircleBorder(side: BorderSide(color: Colors.white)),
+                  padding: EdgeInsets.all(20),
+                  backgroundColor: Colors.green, // <-- Button color
+                  foregroundColor: Colors.red, // <-- Splash color
+                ),
+              ),
+            )
+          ],
+        ),
+      ],
+    );
   }
 
   Widget _createInfoView() {
     return Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Container(
-            padding: EdgeInsets.fromLTRB(32, 0, 10, 0),
-            child: Text('Register your vehicle:',
-                style: GoogleFonts.montserrat(fontSize: 32))));
+        padding: const EdgeInsets.fromLTRB(40, 20, 40, 20),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Container(
+              padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: tertiaryColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.5),
+                    spreadRadius: 5,
+                    blurRadius: 7,
+                    offset: Offset(0, 3), // changes position of shadow
+                  ),
+                ],
+              ),
+              alignment: Alignment.center,
+              // padding: EdgeInsets.fromLTRB(32, 0, 10, 0),
+              child: Text('REGISTER YOUR VEHICLE',
+                  style: GoogleFonts.montserrat(fontSize: 28))),
+        ));
   }
 
   Widget _createNameField() {
@@ -252,8 +343,11 @@ class InitialState extends State<Initial> {
   }
 
   void cityDropdownCallback(City? selectedValue) {
-    setState(() {
+    setState(() async {
       _city = selectedValue?.description ?? '';
+      streetAddresses = await databaseManager
+          .getAddressesForCity(selectedValue?.description ?? '');
+      addressController.text = '';
     });
   }
 
@@ -267,25 +361,60 @@ class InitialState extends State<Initial> {
     );
   }
 
-  Widget _createStreetNumberField() {
-    return Expanded(
-      flex: 3,
-      child: TextField(
-        controller: streetNumberController,
-        decoration:
-            textFieldDecoration(icon: Icons.house, labelName: 'Street #'),
-      ),
-    );
-  }
-
-  Widget _createStreetNameField() {
-    return Expanded(
-      flex: 5,
-      child: TextField(
-        controller: streetNameController,
-        decoration: textFieldDecoration(
-            icon: Icons.location_on, labelName: 'Street Name'),
-      ),
+  Widget _createAddressField() {
+    return RawAutocomplete<String>(
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        if (textEditingValue.text == '') {
+          return const Iterable<String>.empty();
+        }
+        return streetAddresses.where((String option) {
+          return option.contains(textEditingValue.text.toLowerCase());
+        });
+      },
+      textEditingController: addressController,
+      focusNode: _focusNode,
+      onSelected: (String selection) {
+        debugPrint('You just selected $selection');
+        addressController.text = selection;
+      },
+      fieldViewBuilder: (BuildContext context,
+          TextEditingController addressController,
+          FocusNode focusNode,
+          VoidCallback onFieldSubmitted) {
+        return TextField(
+          controller: addressController,
+          focusNode: focusNode,
+          decoration: textFieldDecoration(
+              icon: Icons.location_on, labelName: 'Address'),
+        );
+      },
+      optionsViewBuilder: (BuildContext context,
+          void Function(String) onSelected, Iterable<String> options) {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Material(
+            elevation: 4.0,
+            child: SizedBox(
+              height: 200.0,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8.0),
+                itemCount: options.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final String option = options.elementAt(index);
+                  return GestureDetector(
+                    onTap: () {
+                      onSelected(option);
+                    },
+                    child: ListTile(
+                      title: Text(option),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -448,60 +577,68 @@ class InitialState extends State<Initial> {
         ));
   }
 
-  Widget _createTermsAndConditionsText() {
-    return Column(
-      children: [
-        Row(
-          children: const [
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 4),
-              child: Text(
-                'Terms and Conditions',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                textAlign: TextAlign.left,
-              ),
-            ),
-            Spacer()
-          ],
-        ),
-        Container(
-          decoration: BoxDecoration(
-              color: Colors.black26,
-              border: Border.all(color: Colors.white30),
-              borderRadius: BorderRadius.all(Radius.circular(8))),
-          height: 120,
-          child: Padding(
-              padding: EdgeInsets.all(8),
-              child: SingleChildScrollView(
-                child: Text(termsAndConditions),
-              )),
-        ),
-      ],
-    );
-  }
+  // Widget _createTermsAndConditionsText() {
+  //   return Column(
+  //     children: [
+  //       Row(
+  //         children: const [
+  //           Padding(
+  //             padding: EdgeInsets.symmetric(vertical: 4),
+  //             child: Text(
+  //               'Terms and Conditions',
+  //               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+  //               textAlign: TextAlign.left,
+  //             ),
+  //           ),
+  //           Spacer()
+  //         ],
+  //       ),
+  //       Container(
+  //         decoration: BoxDecoration(
+  //             color: Colors.black26,
+  //             border: Border.all(color: Colors.white30),
+  //             borderRadius: BorderRadius.all(Radius.circular(8))),
+  //         height: 120,
+  //         child: Padding(
+  //             padding: EdgeInsets.all(8),
+  //             child: SingleChildScrollView(
+  //               child: Text(termsAndConditions),
+  //             )),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _createTermsAndConditionsCheckbox() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 24),
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
       child: Container(
         decoration: BoxDecoration(
             color: Colors.black26,
             border: Border.all(color: Colors.white30),
             borderRadius: BorderRadius.all(Radius.circular(8))),
         child: CheckboxListTile(
-            title: Text('Read and Agree to Terms and Conditions'),
+            title: Text('Agree to Terms and Conditions'),
             value: agreedToTermsAndConditions,
             onChanged: (newValue) {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(
-                      builder: (context) => TermsAndConditionsPage()))
-                  .then((value) {
-                setState(() {
-                  agreedToTermsAndConditions = value;
-                });
+              setState(() {
+                agreedToTermsAndConditions = newValue!;
               });
               logFormsForErrorChecking();
             }),
+      ),
+    );
+  }
+
+  Widget _createReadTermsAndConditionsButton() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 24),
+      child: TextButton(
+        child: Text('Terms and Conditions'),
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => TermsAndConditionsPage()));
+        },
       ),
     );
   }
@@ -643,8 +780,8 @@ class InitialState extends State<Initial> {
     registration.email = emailController.text.trim();
     registration.phone =
         phoneController.text.trim().replaceAll('-', '').replaceAll(' ', '');
-    registration.streetNumber = streetNumberController.text.trim();
-    registration.streetName = streetNameController.text;
+    registration.streetNumber = '';
+    registration.streetName = addressController.text;
     registration.city = _city;
     registration.plateNumber = plateController.text.trim();
     registration.province = _plateProvince;
@@ -667,12 +804,10 @@ class InitialState extends State<Initial> {
     registration.phone = phoneController.text.isEmpty
         ? registration.phone
         : phoneController.text.trim().replaceAll('-', '').replaceAll(' ', '');
-    registration.streetNumber = streetNumberController.text.isEmpty
-        ? registration.streetNumber
-        : streetNumberController.text.trim();
-    registration.streetName = streetNameController.text.isEmpty
+    registration.streetNumber = '';
+    registration.streetName = addressController.text.isEmpty
         ? registration.streetName
-        : streetNameController.text;
+        : addressController.text;
     registration.city = _city;
     registration.plateNumber = plateController.text.isEmpty
         ? registration.plateNumber
@@ -767,8 +902,7 @@ class InitialState extends State<Initial> {
       nameController.text = '';
       emailController.text = '';
       phoneController.text = '';
-      _city = 'AURORA';
-      streetNameController.text = '';
+      addressController.text = '';
       plateController.text = '';
       unitController.text = '';
       _plateProvince = 'ON';
@@ -789,7 +923,8 @@ class InitialState extends State<Initial> {
               emailController.text != '' &&
               phoneController.text != '' &&
               plateController.text != '' &&
-              streetNameController.text != ''
+              addressController.text != '' &&
+              _city != 'Choose a City'
 
           // _exemptionRequestProperty != null
           ) {

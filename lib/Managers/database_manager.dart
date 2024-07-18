@@ -5,6 +5,7 @@ import 'package:r2park_flutter_dev/models/database_response_message.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/exemption.dart';
 import 'package:r2park_flutter_dev/models/registration.dart';
+import 'package:r2park_flutter_dev/models/street_address.dart';
 import 'package:r2park_flutter_dev/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -54,7 +55,32 @@ class DatabaseManager {
 
     cities = jsonCities.map((entry) => City.convertFromJson(entry)).toList();
 
+    var placeholderCity = City.def();
+    placeholderCity.description = 'Choose a City';
+
+    cities.insert(0, placeholderCity);
+
     return cities;
+  }
+
+  Future<List<String>> getAddressesForCity(String city) async {
+    List<StreetAddress> addresses = [];
+
+    var url = Uri.https('dev.r2p.live', '/services/public_street/$city');
+    var response = await http.get(url);
+    final data = await json.decode(response.body);
+
+    // print("${response.statusCode}: ${response.body}");
+
+    List jsonStreetAddresses = data['data'];
+
+    addresses = jsonStreetAddresses
+        .map((entry) => StreetAddress.convertFromJson(entry))
+        .toList();
+    final List<String> street_addresses =
+        addresses.map((address) => address.street_address ?? '').toList();
+
+    return street_addresses;
   }
 
   Future<void> getDataFromPostman() async {
@@ -178,7 +204,7 @@ class DatabaseManager {
       body: jsonEncode(registration),
     );
 
-    // print("💜💜 ${response.body}");
+    print("💜💜 ${response.body}");
 
     var jsonMessageReponse = json.decode(response.body.toString());
 
@@ -188,7 +214,7 @@ class DatabaseManager {
     print(
         "💜💜 ${databaseResponseMessage.message}\n ${databaseResponseMessage.description}");
 
-    // print("Exemption Created: ${jsonExemption}");
+    print("Exemption Created: ${jsonExemption}");
 
     return databaseResponseMessage;
   }

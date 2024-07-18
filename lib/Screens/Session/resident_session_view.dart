@@ -503,6 +503,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
   //   return selfRegistration;
   // }
 
+
   _verifyLicencePlate() async {
     if (_selectedVisitor != null) {
       unauthorizedPlateMessage = sessionCubit.isPlateBlacklisted(
