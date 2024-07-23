@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
@@ -423,6 +424,7 @@ class InitialState extends State<Initial> {
       flex: 5,
       child: TextField(
         controller: plateController,
+        inputFormatters: [UpperCaseTextFormatter()],
         decoration:
             textFieldDecoration(icon: Icons.abc, labelName: 'Licence Plate'),
       ),
@@ -948,5 +950,16 @@ class InitialState extends State<Initial> {
             'Please ensure you have filled out all forms correctly');
       }
     }
+  }
+}
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    return TextEditingValue(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
+    );
   }
 }
