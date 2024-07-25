@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:r2park_flutter_dev/models/city.dart';
 import 'package:r2park_flutter_dev/models/database_response_message.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
-import 'package:r2park_flutter_dev/models/exemption.dart';
 import 'package:r2park_flutter_dev/models/registration.dart';
 import 'package:r2park_flutter_dev/models/street_address.dart';
 import 'package:r2park_flutter_dev/models/user.dart';
@@ -77,17 +76,17 @@ class DatabaseManager {
     addresses = jsonStreetAddresses
         .map((entry) => StreetAddress.convertFromJson(entry))
         .toList();
-    final List<String> street_addresses =
+    final List<String> streetAddress =
         addresses.map((address) => address.street_address ?? '').toList();
 
-    return street_addresses;
+    return streetAddress;
   }
 
-  Future<void> getDataFromPostman() async {
-    var url = Uri.https('dev.r2p.live', '/services/registry_index');
-    var response = await http.get(url);
-    // print(json.decode(response.body));
-  }
+  // Future<void> getDataFromPostman() async {
+  //   var url = Uri.https('dev.r2p.live', '/services/registry_index');
+  //   // var response = await http.get(url);
+  //   // print(json.decode(response.body));
+  // }
 
   Future<List<Property>> getPropertiesFromJson() async {
     List<Property> properties = [];
@@ -96,7 +95,7 @@ class DatabaseManager {
         await rootBundle.loadString('assets/r2park_table.json');
     final data = await json.decode(response);
 
-    print("✅✅GET PROPERTIES: ${response}");
+    // print("✅✅GET PROPERTIES: ${response}");
 
     List jsonProperties = data["properties"];
 
@@ -217,7 +216,7 @@ class DatabaseManager {
     print(
         "💜💜 ${databaseResponseMessage.message}\n ${databaseResponseMessage.description}");
 
-    print("Exemption Created: ${jsonExemption}");
+    print("Exemption Created: $jsonExemption");
 
     return databaseResponseMessage;
   }

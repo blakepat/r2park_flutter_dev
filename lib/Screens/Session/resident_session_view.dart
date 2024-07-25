@@ -9,8 +9,6 @@ import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/registration.dart';
 import 'package:r2park_flutter_dev/models/visitor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../main.dart';
-import '../../models/exemption.dart';
 import '../../models/user.dart';
 
 class ResidentSessionView extends StatefulWidget {
@@ -166,6 +164,7 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
                                     borderRadius: BorderRadius.circular(8)),
                                 tileColor: secondaryColor,
                                 title: Text(
+                                  // ignore: unnecessary_string_interpolations
                                   '${visitor.name.toUpperCase()}',
                                   style: TextStyle(
                                       color: Colors.white,
@@ -502,7 +501,6 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
 
   //   return selfRegistration;
   // }
-
 
   _verifyLicencePlate() async {
     if (_selectedVisitor != null) {

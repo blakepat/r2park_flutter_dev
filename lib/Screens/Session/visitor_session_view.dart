@@ -5,11 +5,9 @@ import 'package:r2park_flutter_dev/Managers/validation_manager.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
-import 'package:r2park_flutter_dev/models/exemption.dart';
 import 'package:r2park_flutter_dev/models/registration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Managers/helper_functions.dart';
-import '../../main.dart';
 import '../../models/user.dart';
 
 class VisitorSessionView extends StatefulWidget {

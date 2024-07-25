@@ -5,17 +5,17 @@ import 'package:r2park_flutter_dev/Screens/Initial/initial.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_state.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/loading_view.dart';
 import 'package:r2park_flutter_dev/Screens/Session/tab_session_view.dart';
-import 'package:r2park_flutter_dev/main.dart';
 import 'Screens/Session/session_cubit.dart';
 
 class AppNavigator extends StatelessWidget {
-  AppNavigator({super.key});
+  const AppNavigator({super.key});
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      backgroundColor: Color(0xff121212),
+      backgroundColor: backgroundGreyColor,
       body: Center(
         child:
             BlocBuilder<SessionCubit, SessionState>(builder: (context, state) {
@@ -49,11 +49,14 @@ class AppNavigator extends StatelessWidget {
                             //     ],
                             //     child:
                             MaterialApp(
-                      title: 'Login Flutter',
+                      title: 'R2Park - Register to Park',
                       theme: ThemeData(
-                          appBarTheme: AppBarTheme(color: Colors.blueGrey[800]),
+                          appBarTheme: AppBarTheme(
+                              color: Colors.blueGrey[900],
+                              systemOverlayStyle: statusBarStyle),
                           brightness: Brightness.dark,
                           primaryColor: primaryColor,
+
                           // inputDecorationTheme: InputDecorationTheme(
                           //     filled: true, fillColor: Colors.grey[850]),
                           colorScheme: ColorScheme.dark(
@@ -89,8 +92,10 @@ class AppNavigator extends StatelessWidget {
                       //           ],
                       child: MaterialApp(
                         theme: ThemeData(
-                            appBarTheme:
-                                AppBarTheme(color: Colors.blueGrey[800]),
+                            appBarTheme: AppBarTheme(
+                                color: Colors.blueGrey[800],
+                                backgroundColor: primaryColor,
+                                systemOverlayStyle: statusBarStyle),
                             brightness: Brightness.dark,
                             primaryColor: Colors.blueGrey[800],
                             colorScheme: ColorScheme.dark(

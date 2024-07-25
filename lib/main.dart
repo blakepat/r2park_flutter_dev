@@ -30,6 +30,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        title: 'R2Park',
         home: StreamBuilder(
             stream: Stream.fromFuture(getData()),
             builder: (context, snapshot) {

@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 Color primaryColor = Colors.blue[900]!;
 Color secondaryColor = Colors.green[900]!;
 Color tertiaryColor = Color.fromARGB(100, 0, 150, 136);
+Color backgroundGreyColor = Color(0xff121212);
+Color? backgroundBlueGreyColor = Colors.blueGrey[900];
+
+var statusBarStyle = SystemUiOverlayStyle(
+  systemNavigationBarColor: backgroundBlueGreyColor, // navigation bar color
+  statusBarColor: backgroundBlueGreyColor, // status bar color
+);
 
 String kInitialInfoText =
     'please contact Parking Support at the following telephone numbers during regular business hours \n(M-F 9:00am - 5:00pm) or e-mail anytime.';
@@ -20,6 +28,8 @@ InputDecoration textFieldDecoration({icon: Icons, labelName: String}) {
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       // borderSide: BorderSide(width: 0, style: BorderStyle.none)),
       labelText: labelName,
+      fillColor: Colors.black26,
+      filled: true,
       labelStyle: kInitialTextLabelStyle,
       icon: Icon(icon));
 }

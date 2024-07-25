@@ -99,6 +99,7 @@ class InitialState extends State<Initial> {
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
         appBar: AppBar(
+          systemOverlayStyle: statusBarStyle,
           leadingWidth: 180,
           toolbarHeight: 80,
           leading: Transform.scale(
@@ -127,59 +128,72 @@ class InitialState extends State<Initial> {
         ),
         body: SafeArea(
           child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
               child: Stack(
                 children: [
-                  ListView(children: [
-                    _createInfoView(),
-                    _createNameField(),
-                    _createEmailField(),
-                    _createPhoneField(),
-                    _createDivider(),
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Row(children: [
-                        _createUnitField(),
-                        SizedBox(width: 12),
-                        _createCityDropDownMenu(),
-                      ]),
-                    ),
-                    // Padding(
-                    //   padding: const EdgeInsets.all(8),
-                    //   child: Row(children: [
-                    //     _createStreetNumberField(),
-                    //     SizedBox(width: 12),
-                    //     _createStreetNameField(),
-                    //   ]),
-                    // ),
-                    Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: _createAddressField()),
-                    _createDivider(),
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        children: [
-                          _createPlateField(),
-                          SizedBox(width: 12),
-                          // _createPlateProvinceField()
-                          _createPlateProvinceDropDownMenu()
-                        ],
+                  Container(color: backgroundBlueGreyColor),
+                  CustomPaint(
+                    painter:
+                        _WaveCustomPaint(backgroundColor: backgroundGreyColor),
+                    size: Size.infinite,
+                  ),
+                  Column(
+                    children: [
+                      _createInfoView(),
+                      Expanded(
+                        child: ListView(children: [
+                          _createNameField(),
+                          _createEmailField(),
+                          _createPhoneField(),
+                          _createDivider(),
+                          Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Row(children: [
+                              _createUnitField(),
+                              SizedBox(width: 12),
+                              _createCityDropDownMenu(),
+                            ]),
+                          ),
+                          // Padding(
+                          //   padding: const EdgeInsets.all(8),
+                          //   child: Row(children: [
+                          //     _createStreetNumberField(),
+                          //     SizedBox(width: 12),
+                          //     _createStreetNameField(),
+                          //   ]),
+                          // ),
+                          Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: _createAddressField()),
+                          _createDivider(),
+                          Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Row(
+                              children: [
+                                _createPlateField(),
+                                SizedBox(width: 12),
+                                // _createPlateProvinceField()
+                                _createPlateProvinceDropDownMenu()
+                              ],
+                            ),
+                          ),
+                          _createPreviousPropertyView(),
+                          _durationInput(
+                              height: screenHeight, width: screenWidth),
+                          // _createTermsAndConditionsText(),
+                          _createTermsAndConditionsCheckbox(),
+                          _createReadTermsAndConditionsButton(),
+                          _submitButton(),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: _createDivider(),
+                          ),
+                          _footerTextView(),
+                          _createClearButton()
+                        ]),
                       ),
-                    ),
-                    _createPreviousPropertyView(),
-                    _durationInput(height: screenHeight, width: screenWidth),
-                    // _createTermsAndConditionsText(),
-                    _createTermsAndConditionsCheckbox(),
-                    _createReadTermsAndConditionsButton(),
-                    _submitButton(),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: _createDivider(),
-                    ),
-                    _footerTextView(),
-                    _createClearButton()
-                  ]),
+                    ],
+                  ),
                   _createSupportButton(),
                 ],
               )),
@@ -230,13 +244,14 @@ class InitialState extends State<Initial> {
                 onPressed: () {
                   _launchInBrowserView(_url);
                 },
-                child: Icon(Icons.support_agent, color: Colors.white),
                 style: ElevatedButton.styleFrom(
                   shape: CircleBorder(side: BorderSide(color: Colors.white)),
                   padding: EdgeInsets.all(20),
                   backgroundColor: Colors.green, // <-- Button color
-                  foregroundColor: Colors.red, // <-- Splash color
+                  foregroundColor: Colors.red,
+                  // <-- Splash color
                 ),
+                child: Icon(Icons.support_agent, color: Colors.white),
               ),
             )
           ],
@@ -247,7 +262,7 @@ class InitialState extends State<Initial> {
 
   Widget _createInfoView() {
     return Padding(
-        padding: const EdgeInsets.fromLTRB(40, 20, 40, 20),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
         child: FittedBox(
           fit: BoxFit.scaleDown,
           child: Container(
@@ -324,6 +339,8 @@ class InitialState extends State<Initial> {
           // alignment: Alignment.center,
           decoration: InputDecoration(
             labelText: "City",
+            fillColor: Colors.black12,
+            filled: true,
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(width: 2, color: Colors.grey),
@@ -459,6 +476,8 @@ class InitialState extends State<Initial> {
           ),
           // alignment: Alignment.center,
           decoration: InputDecoration(
+            fillColor: Colors.black12,
+            filled: true,
             labelText: "Plate Province",
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -634,7 +653,7 @@ class InitialState extends State<Initial> {
 
   Widget _createReadTermsAndConditionsButton() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 24),
+      padding: const EdgeInsets.fromLTRB(8, 0, 8, 20),
       child: TextButton(
         child: Text('Terms and Conditions'),
         onPressed: () {
@@ -918,8 +937,12 @@ class InitialState extends State<Initial> {
     _verifyForm();
 
     if (formFailedValidationMessage.isNotEmpty) {
-      openDialog(context, 'Request Unsuccessful',
-          '$formFailedValidationMessage', '$formFailedValidationMessage');
+      openDialog(
+          context,
+          'Request Unsuccessful',
+          // ignore: unnecessary_string_interpolations
+          '$formFailedValidationMessage',
+          '$formFailedValidationMessage');
     } else {
       if (nameController.text != '' &&
               emailController.text != '' &&
@@ -962,4 +985,35 @@ class UpperCaseTextFormatter extends TextInputFormatter {
       selection: newValue.selection,
     );
   }
+}
+
+class _WaveCustomPaint extends CustomPainter {
+  Color backgroundColor;
+  _WaveCustomPaint({required this.backgroundColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    var painter = Paint()
+      ..color = backgroundColor
+      ..strokeWidth = 1
+      ..style = PaintingStyle.fill;
+    var path = Path();
+    var height = size.height;
+    var width = size.width;
+
+    path.moveTo(0, height / 3 + height / 5);
+    var des1 = width / 4;
+    var des2 = height / 3 + height / 10; //height/5 /2
+    path.quadraticBezierTo(des1, des2, width / 2, height / 3 + height / 10);
+    path.quadraticBezierTo(
+        width / 2 + width / 4, height / 3 + height / 10, width, height / 3);
+    path.lineTo(width, height);
+    path.lineTo(0, height);
+    path.lineTo(0, height / 3 + height / 5);
+    path.close();
+    canvas.drawPath(path, painter);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
