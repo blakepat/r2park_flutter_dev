@@ -48,7 +48,7 @@ class DatabaseManager {
     var response = await http.get(url);
     final data = await json.decode(response.body);
 
-    // print("✅✅GET CITIES: ${response.statusCode}: ${response.body}");
+    print("✅✅GET CITIES: ${response.statusCode}: ${response.body}");
 
     List jsonCities = data['data'];
 
@@ -69,7 +69,7 @@ class DatabaseManager {
     var response = await http.get(url);
     final data = await json.decode(response.body);
 
-    // print("✅✅GET ADDRESSES FOR CITY: ${response.statusCode}: ${response.body}");
+    print("✅✅GET ADDRESSES FOR CITY: ${response.statusCode}: ${response.body}");
 
     List jsonStreetAddresses = data['data'];
 

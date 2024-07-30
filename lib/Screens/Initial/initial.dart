@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -164,7 +166,7 @@ class InitialState extends State<Initial> {
                           // ),
                           Padding(
                               padding: const EdgeInsets.all(8),
-                              child: _createAddressField()),
+                              child: _createAddressField(screenWidth - 100)),
                           _createDivider(),
                           Padding(
                             padding: const EdgeInsets.all(8),
@@ -379,14 +381,16 @@ class InitialState extends State<Initial> {
     );
   }
 
-  Widget _createAddressField() {
+  Widget _createAddressField(double width) {
     return RawAutocomplete<String>(
       optionsBuilder: (TextEditingValue textEditingValue) {
         if (textEditingValue.text == '') {
           return const Iterable<String>.empty();
         }
         return streetAddresses.where((String option) {
-          return option.contains(textEditingValue.text.toLowerCase());
+          return option
+              .toLowerCase()
+              .contains(textEditingValue.text.toLowerCase());
         });
       },
       textEditingController: addressController,
@@ -408,26 +412,35 @@ class InitialState extends State<Initial> {
       },
       optionsViewBuilder: (BuildContext context,
           void Function(String) onSelected, Iterable<String> options) {
-        return Align(
-          alignment: Alignment.topLeft,
-          child: Material(
-            elevation: 4.0,
-            child: SizedBox(
-              height: 200.0,
-              child: ListView.builder(
-                padding: const EdgeInsets.all(8.0),
-                itemCount: options.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final String option = options.elementAt(index);
-                  return GestureDetector(
-                    onTap: () {
-                      onSelected(option);
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(36, 0, 0, 0),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              borderRadius: BorderRadius.circular(12),
+              elevation: 4.0,
+              child: SizedBox(
+                height: 200.0,
+                child: Container(
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(12)),
+                  width: min(width, 600),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(8.0),
+                    itemCount: options.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final String option = options.elementAt(index);
+                      return GestureDetector(
+                        onTap: () {
+                          onSelected(option);
+                        },
+                        child: ListTile(
+                          title: Text(option),
+                        ),
+                      );
                     },
-                    child: ListTile(
-                      title: Text(option),
-                    ),
-                  );
-                },
+                  ),
+                ),
               ),
             ),
           ),
