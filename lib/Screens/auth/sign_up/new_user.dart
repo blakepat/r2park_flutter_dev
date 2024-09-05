@@ -10,6 +10,7 @@ import 'package:r2park_flutter_dev/Managers/validation_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
 import 'package:r2park_flutter_dev/Screens/auth/sign_up/confirm_email.dart';
+import 'package:r2park_flutter_dev/models/role.dart';
 import '../../../models/user.dart';
 
 // ignore: must_be_immutable
@@ -45,10 +46,6 @@ class NewUserState extends State<NewUser> {
   final _cityTextFieldController = TextEditingController();
   var _province = 'ON';
   final _postalCodeTextFieldController = TextEditingController();
-  final _companyAddressTextFieldController = TextEditingController();
-  final _companyCityTextFieldController = TextEditingController();
-  final _password1TextFieldController = TextEditingController();
-  final _password2TextFieldController = TextEditingController();
 
   bool emailValidate = true;
   bool fullNameValidate = true;
@@ -57,15 +54,12 @@ class NewUserState extends State<NewUser> {
   bool address2Validate = true;
   bool cityValidate = true;
   bool postalCodeValidate = true;
-  bool companyAddressValidate = true;
-  bool companyCityValidate = true;
-  bool password1Validate = true;
-  bool password2Validate = true;
 
   bool isNewUser = true;
   String newPass = '0';
   String errorText = "";
   String passwordInadequateMessage = "";
+  var _role = 'Choose a Role';
 
   NewUserState(
       {required this.isManagerScreen, this.loggedInUser, this.sessionCubit});
@@ -77,6 +71,8 @@ class NewUserState extends State<NewUser> {
     isNewUser = checkifNewUser(widget.user ?? User.def());
     widget.user ??= User.def();
 
+    print("💜💜 ${sessionCubit?.roles}");
+
     _emailTextFieldController.text = widget.user?.email ?? '';
     _fullNameTextFieldController.text = widget.user?.fullName ?? '';
     _mobileNumberTextFieldController.text = widget.user?.mobileNumber ?? '';
@@ -86,10 +82,6 @@ class NewUserState extends State<NewUser> {
     _province = widget.user?.province?.toUpperCase() ?? 'ON';
     _province.isEmpty ? {_province = 'ON'} : '';
     _postalCodeTextFieldController.text = widget.user?.postalCode ?? '';
-    _companyAddressTextFieldController.text = widget.user?.companyAddress ?? '';
-    _companyCityTextFieldController.text = widget.user?.companyId ?? '';
-    _password1TextFieldController.text = widget.user?.password ?? '';
-    _password2TextFieldController.text = widget.user?.password ?? '';
   }
 
   @override
@@ -104,10 +96,6 @@ class NewUserState extends State<NewUser> {
     _cityTextFieldController.dispose();
     _province = "ON";
     _postalCodeTextFieldController.dispose();
-    _companyAddressTextFieldController.dispose();
-    _companyCityTextFieldController.dispose();
-    _password1TextFieldController.dispose();
-    _password2TextFieldController.dispose();
   }
 
   @override
@@ -160,6 +148,7 @@ class NewUserState extends State<NewUser> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          _createRoleDropdown(),
           isNewUser
               ? _textField('Email', _emailTextFieldController, emailValidate)
               : Padding(
@@ -219,40 +208,6 @@ class NewUserState extends State<NewUser> {
               ],
             ),
           ),
-          Row(
-            children: [
-              Expanded(
-                  flex: 3,
-                  child: _textField(
-                      'Company Address',
-                      _companyAddressTextFieldController,
-                      companyAddressValidate)),
-              SizedBox(
-                width: 12,
-              ),
-              Expanded(
-                flex: 2,
-                child: _textField('Company City',
-                    _companyCityTextFieldController, companyCityValidate),
-              )
-            ],
-          ),
-          SizedBox(
-            height: 4,
-          ),
-          isManagerScreen
-              ? SizedBox(height: 2)
-              : _textField(
-                  'Password', _password1TextFieldController, password1Validate,
-                  hideText: true),
-          SizedBox(
-            height: 4,
-          ),
-          checkifNewUser(widget.user ?? User.def())
-              ? _textField('Confirm Password', _password2TextFieldController,
-                  password2Validate,
-                  passwordConfirmField: true, hideText: true)
-              : SizedBox(height: 2),
           SizedBox(
             height: 30,
           ),
@@ -272,9 +227,46 @@ class NewUserState extends State<NewUser> {
     );
   }
 
+  Widget _createRoleDropdown() {
+    return DropdownButtonFormField(
+      isExpanded: true,
+      hint: Text(
+        _role,
+        style: kInitialTextLabelStyle,
+      ),
+      // alignment: Alignment.center,
+      decoration: InputDecoration(
+        labelText: "Role",
+        fillColor: Colors.black12,
+        filled: true,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(width: 2, color: Colors.grey),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(width: 2, color: Colors.green),
+        ),
+      ),
+      menuMaxHeight: 400,
+      dropdownColor: Colors.blueGrey,
+      items: sessionCubit?.roles?.map((role) {
+        return DropdownMenuItem(child: Text(role.name ?? ''), value: role);
+      }).toList(),
+      onChanged: roleDropdownCallback,
+    );
+  }
+
+  void roleDropdownCallback(Role? selectedValue) {
+    setState(() {
+      print(selectedValue?.name ?? '');
+      _role = selectedValue?.name ?? '';
+    });
+  }
+
   Widget _createPlateProvinceDropDownMenu() {
-    return Expanded(
-        flex: 2,
+    return Padding(
+        padding: EdgeInsets.all(8),
         child: DropdownButtonFormField(
           hint: Text(
             "Province",
@@ -318,9 +310,6 @@ class NewUserState extends State<NewUser> {
             ? Text('Create', style: TextStyle(color: Colors.white))
             : Text('Update', style: TextStyle(color: Colors.white)),
         onPressed: () {
-          passwordInadequateMessage =
-              validatePassword(_password1TextFieldController.text);
-
           if (passwordInadequateMessage.isNotEmpty) {
             openDialog(context, 'Insufficient Password',
                 passwordInadequateMessage, passwordInadequateMessage);
@@ -341,18 +330,11 @@ class NewUserState extends State<NewUser> {
               widget.user?.city = _cityTextFieldController.text;
               widget.user?.province = _province;
               widget.user?.postalCode = _postalCodeTextFieldController.text;
-              widget.user?.companyAddress = "";
-              widget.user?.companyId = "";
-              widget.user?.password = _password1TextFieldController.text;
 
               //if address matches property assign property ID to user
               var propertyID = sessionCubit?.checkIfValidProperty(
                   _cityTextFieldController.text.toLowerCase(),
                   _address1TextFieldController.text.toLowerCase());
-
-              var companyID = sessionCubit?.checkIfValidProperty(
-                  _companyCityTextFieldController.text.toLowerCase(),
-                  _companyAddressTextFieldController.text.toLowerCase());
 
               if (propertyID != null) {
                 widget.user?.propertyId = propertyID;
@@ -363,16 +345,6 @@ class NewUserState extends State<NewUser> {
                       '✅ User Created!',
                       "You can now login! Your address matches one of our properties, we have sent a request to your property manager to give you residence access!",
                       "You can now login! Your address matches one of our properties, we have sent a request to your property manager to give you residence access!");
-                }
-              } else if (companyID != null) {
-                widget.user?.companyId = companyID;
-
-                if (isNewUser) {
-                  openDialog(
-                      context,
-                      '✅ User Created!',
-                      "You can now login! Your company address matches one of our properties, we have sent a request to your manager!",
-                      "You can now login! Your company address matches one of our properties, we have sent a request to your manager!");
                 }
               } else {
                 if (isNewUser) {
@@ -427,9 +399,7 @@ class NewUserState extends State<NewUser> {
         address1Validate &&
         address2Validate &&
         cityValidate &&
-        postalCodeValidate &&
-        password1Validate &&
-        password2Validate;
+        postalCodeValidate;
   }
 
   _validateTextFields() {
@@ -452,14 +422,6 @@ class NewUserState extends State<NewUser> {
       isNullOrEmpty(_postalCodeTextFieldController.text)
           ? postalCodeValidate = false
           : postalCodeValidate = true;
-      isNullOrEmpty(_password1TextFieldController.text)
-          ? password1Validate = false
-          : password1Validate = true;
-      if (checkifNewUser(widget.user ?? User.def())) {
-        _password1TextFieldController.text == _password2TextFieldController.text
-            ? password2Validate = true
-            : password2Validate = false;
-      }
     });
   }
 

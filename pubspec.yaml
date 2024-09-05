@@ -1,5 +1,5 @@
 name: r2park_flutter_dev
-description: A new Flutter project.
+description: R2Park.com offers a comprehensive Parking Enforcement Software solution that connects enforcement service providers with property owners to eliminate parking problems. Authorized registered vehicles can occupy designated spots, and visitors can easily register their vehicles for temporary parking through our online form. Learn more about our Parking Policy and how to register vehicles parked in guest parking.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,48 +6,39 @@ import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
 import 'package:r2park_flutter_dev/Managers/validation_manager.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
+import 'package:r2park_flutter_dev/Screens/Initial/initial.dart';
 import 'package:r2park_flutter_dev/Screens/Initial/terms_and_conditions.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Screens/auth/login/login.dart';
-import 'package:r2park_flutter_dev/Screens/employee_registration/employee_registration.dart';
-import 'package:r2park_flutter_dev/models/city.dart';
 import 'package:r2park_flutter_dev/models/database_response_message.dart';
-import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/registration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class Initial extends StatefulWidget {
+class EmployeeRegistration extends StatefulWidget {
   final SessionCubit sessionCubit;
   @override
   // ignore: no_logic_in_create_state
-  InitialState createState() => InitialState(sessionCubit: sessionCubit);
+  EmployeeRegistrationState createState() =>
+      EmployeeRegistrationState(sessionCubit: sessionCubit);
 
-  const Initial({super.key, required this.sessionCubit});
+  const EmployeeRegistration({super.key, required this.sessionCubit});
 }
 
-class InitialState extends State<Initial> {
+class EmployeeRegistrationState extends State<EmployeeRegistration> {
   final SessionCubit sessionCubit;
 
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
-  TextEditingController cityController = TextEditingController();
-  TextEditingController unitController = TextEditingController();
-  TextEditingController addressController = TextEditingController();
-  // TextEditingController streetNumberController = TextEditingController();
   TextEditingController plateController = TextEditingController();
-  // TextEditingController plateProvinceController = TextEditingController();
+  TextEditingController accessCodeController = TextEditingController();
   var _plateProvince = 'ON';
-  var _city = 'Choose a City';
-  final _focusNode = FocusNode();
 
   List<String> streetAddresses = [];
 
   final secondaryColor = Colors.green[900]!;
   int _selectedDuration = 1;
-  Property? _exemptionRequestProperty;
-  Property? _previousProperty;
   String formFailedValidationMessage = '';
   bool agreedToTermsAndConditions = false;
   bool selectedFromList = false;
@@ -64,15 +53,13 @@ class InitialState extends State<Initial> {
   final _phoneKey = 'initialPhone';
   final _plateKey = 'initialPlate';
   final _plateProvKey = 'initialPlateProvince';
-  final _propertyIDKey = 'initialPropertyID';
-  final _unitNumberKey = 'initialUnitNumber';
 
   final Uri _url = Uri.parse('https://support.r2park.ca');
 
   var databaseManager = DatabaseManager();
   SharedPreferences? _prefs;
 
-  InitialState({required this.sessionCubit});
+  EmployeeRegistrationState({required this.sessionCubit});
 
   @override
   void initState() {
@@ -86,15 +73,7 @@ class InitialState extends State<Initial> {
     emailController.text = _prefs?.getString(_emailKey) ?? '';
     phoneController.text = _prefs?.getString(_phoneKey) ?? '';
     plateController.text = _prefs?.getString(_plateKey) ?? '';
-    unitController.text = _prefs?.getString(_unitNumberKey) ?? '';
     _plateProvince = _prefs?.getString(_plateProvKey) ?? 'ON';
-
-    final propertyID = _prefs?.getString(_propertyIDKey);
-    if (propertyID != null) {
-      setState(() {
-        _previousProperty = sessionCubit.getPropertyFromID(propertyID);
-      });
-    }
   }
 
   @override
@@ -122,13 +101,12 @@ class InitialState extends State<Initial> {
             ),
           ),
           actions: [
-                   TextButton(
-                onPressed: _employeePressed,
+            TextButton(
+                onPressed: _visitorPressed,
                 child: Text(
-                  'Employee',
+                  'Visitor',
                   style: TextStyle(color: Colors.white, fontSize: 18),
-                ))
-          ,
+                )),
             TextButton(
                 onPressed: _loginPressed,
                 child: Text(
@@ -157,25 +135,7 @@ class InitialState extends State<Initial> {
                           _createEmailField(),
                           _createPhoneField(),
                           _createDivider(),
-                          Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Row(children: [
-                              _createUnitField(),
-                              SizedBox(width: 12),
-                              _createCityDropDownMenu(),
-                            ]),
-                          ),
-                          // Padding(
-                          //   padding: const EdgeInsets.all(8),
-                          //   child: Row(children: [
-                          //     _createStreetNumberField(),
-                          //     SizedBox(width: 12),
-                          //     _createStreetNameField(),
-                          //   ]),
-                          // ),
-                          Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: _createAddressField(screenWidth - 100)),
+                          _createAccessCodeField(),
                           _createDivider(),
                           Padding(
                             padding: const EdgeInsets.all(8),
@@ -188,7 +148,6 @@ class InitialState extends State<Initial> {
                               ],
                             ),
                           ),
-                          _createPreviousPropertyView(),
                           _durationInput(
                               height: screenHeight, width: screenWidth),
                           // _createTermsAndConditionsText(),
@@ -225,22 +184,6 @@ class InitialState extends State<Initial> {
       throw Exception('Could not launch $url');
     }
   }
-
-  // Future<void> _launchInWebView(Uri url) async {
-  //   if (!await launchUrl(url, mode: LaunchMode.inAppWebView)) {
-  //     throw Exception('Could not launch $url');
-  //   }
-  // }
-
-  // Future<void> _launchInAppWithBrowserOptions(Uri url) async {
-  //   if (!await launchUrl(
-  //     url,
-  //     mode: LaunchMode.inAppBrowserView,
-  //     browserConfiguration: const BrowserConfiguration(showTitle: true),
-  //   )) {
-  //     throw Exception('Could not launch $url');
-  //   }
-  // }
 
   Widget _createSupportButton() {
     return Column(
@@ -292,7 +235,7 @@ class InitialState extends State<Initial> {
               ),
               alignment: Alignment.center,
               // padding: EdgeInsets.fromLTRB(32, 0, 10, 0),
-              child: Text('Visitior Registration',
+              child: Text('Employee Registration',
                   style: GoogleFonts.montserrat(fontSize: 28))),
         ));
   }
@@ -327,146 +270,14 @@ class InitialState extends State<Initial> {
     );
   }
 
-  Widget _createCityField() {
-    return Expanded(
-      flex: 4,
+  Widget _createAccessCodeField() {
+    return Container(
+      padding: EdgeInsets.all(10),
       child: TextField(
-        controller: cityController,
+        controller: phoneController,
         decoration: textFieldDecoration(
-            icon: Icons.location_city_rounded, labelName: 'City'),
+            icon: Icons.numbers_outlined, labelName: 'Access Code'),
       ),
-    );
-  }
-
-  Widget _createCityDropDownMenu() {
-    return Expanded(
-        flex: 4,
-        child: DropdownButtonFormField(
-          isExpanded: true,
-          hint: Text(
-            _city,
-            style: kInitialTextLabelStyle,
-          ),
-          // alignment: Alignment.center,
-          decoration: InputDecoration(
-            labelText: "City",
-            fillColor: Colors.black12,
-            filled: true,
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(width: 2, color: Colors.grey),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(width: 2, color: Colors.green),
-            ),
-          ),
-          menuMaxHeight: 400,
-          dropdownColor: Colors.blueGrey,
-          items: sessionCubit.cities?.map((city) {
-            return DropdownMenuItem(
-                child: Text(city.description ?? ''), value: city);
-          }).toList(),
-          onChanged: cityDropdownCallback,
-        ));
-  }
-
-  void cityDropdownCallback(City? selectedValue) {
-    setState(() async {
-      _city = selectedValue?.description ?? '';
-      streetAddresses = await databaseManager
-          .getAddressesForCity(selectedValue?.description ?? '');
-      addressController.text = '';
-    });
-  }
-
-  Widget _createUnitField() {
-    return Expanded(
-      flex: 2,
-      child: TextField(
-        controller: unitController,
-        decoration: textFieldDecoration(icon: Icons.numbers, labelName: 'Unit'),
-      ),
-    );
-  }
-
-  Widget _createAddressField(double width) {
-    return RawAutocomplete<String>(
-      optionsBuilder: (TextEditingValue textEditingValue) {
-        selectedFromList = false;
-        if (textEditingValue.text == '' || textEditingValue.text.length < 3) {
-          return const Iterable<String>.empty();
-        }
-
-        // var split = textEditingValue.text.toLowerCase().split(' ');
-        //
-        // List<String> matches = streetAddresses.where((String option) {
-        //   return split.every((word) {
-        //     return option.toLowerCase().contains(word);
-        //   });
-        // }).toList();
-        // return matches;
-        return streetAddresses.where((String option) {
-          return option
-              .toLowerCase()
-              .contains(textEditingValue.text.toLowerCase());
-        });
-      },
-      textEditingController: addressController,
-      focusNode: _focusNode,
-      onSelected: (String selection) {
-        debugPrint('You just selected $selection');
-        addressController.text = selection;
-        selectedFromList = true;
-      },
-      fieldViewBuilder: (BuildContext context,
-          TextEditingController addressController,
-          FocusNode focusNode,
-          VoidCallback onFieldSubmitted) {
-        return TextField(
-          controller: addressController,
-          focusNode: focusNode,
-          decoration: textFieldDecoration(
-              icon: Icons.location_on, labelName: 'Address'),
-        );
-      },
-      optionsViewBuilder: (BuildContext context,
-          void Function(String) onSelected, Iterable<String> options) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(36, 0, 0, 0),
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: Material(
-              borderRadius: BorderRadius.circular(12),
-              elevation: 4.0,
-              child: SizedBox(
-                height: null,
-                child: Container(
-                  decoration:
-                      BoxDecoration(borderRadius: BorderRadius.circular(12)),
-                  width: min(width, 600),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.all(8.0),
-                    itemCount: options.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final String option = options.elementAt(index);
-                      return GestureDetector(
-                        onTap: () {
-                          onSelected(option);
-                        },
-                        child: ListTile(
-                          title: Text(option),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -481,24 +292,6 @@ class InitialState extends State<Initial> {
       ),
     );
   }
-
-  // const IconData(0xe1d7, fontFamily: 'MaterialIcons'),
-
-  // Widget _createPlateProvinceField() {
-  //   return Expanded(
-  //     flex: 4,
-  //     child: TextField(
-  //       maxLength: 2,
-  //       controller: plateProvinceController,
-  //       decoration: InputDecoration(
-  //           counterText: "",
-  //           border: OutlineInputBorder(),
-  //           labelText: 'Plate Prov. (ON, AB)',
-  //           labelStyle: kInitialTextLabelStyle,
-  //           icon: Icon(Icons.sort_by_alpha_rounded)),
-  //     ),
-  //   );
-  // }
 
   Widget _createPlateProvinceDropDownMenu() {
     return Expanded(
@@ -535,43 +328,6 @@ class InitialState extends State<Initial> {
       setState(() {
         _plateProvince = selectedValue;
       });
-    }
-  }
-
-  Widget _createPreviousPropertyView() {
-    if (_previousProperty != null) {
-      return Container(
-        padding: EdgeInsets.all(4),
-        child: Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: CheckboxListTile(
-            tileColor: Colors.black26,
-            checkboxShape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: BorderSide(
-                    color: Colors.green, style: BorderStyle.solid, width: 2)),
-            title: Text(
-              _previousProperty?.propertyAddress ?? '',
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: BorderSide(
-                    color: Colors.green, style: BorderStyle.solid, width: 4)),
-            value: _exemptionRequestProperty == _previousProperty,
-            onChanged: (newValue) {
-              if (newValue != null) {
-                newValue
-                    ? setState(
-                        () => _exemptionRequestProperty = _previousProperty)
-                    : setState(() => _exemptionRequestProperty = null);
-              }
-            },
-          ),
-        ),
-      );
-    } else {
-      return SizedBox();
     }
   }
 
@@ -632,38 +388,6 @@ class InitialState extends State<Initial> {
         ));
   }
 
-  // Widget _createTermsAndConditionsText() {
-  //   return Column(
-  //     children: [
-  //       Row(
-  //         children: const [
-  //           Padding(
-  //             padding: EdgeInsets.symmetric(vertical: 4),
-  //             child: Text(
-  //               'Terms and Conditions',
-  //               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-  //               textAlign: TextAlign.left,
-  //             ),
-  //           ),
-  //           Spacer()
-  //         ],
-  //       ),
-  //       Container(
-  //         decoration: BoxDecoration(
-  //             color: Colors.black26,
-  //             border: Border.all(color: Colors.white30),
-  //             borderRadius: BorderRadius.all(Radius.circular(8))),
-  //         height: 120,
-  //         child: Padding(
-  //             padding: EdgeInsets.all(8),
-  //             child: SingleChildScrollView(
-  //               child: Text(termsAndConditions),
-  //             )),
-  //       ),
-  //     ],
-  //   );
-  // }
-
   Widget _createTermsAndConditionsCheckbox() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
@@ -702,9 +426,7 @@ class InitialState extends State<Initial> {
     if (nameController.text != '' &&
             emailController.text != '' &&
             phoneController.text != '' &&
-            plateController.text != '' &&
-            _city != 'Choose a City' &&
-            addressController.text != ''
+            plateController.text != ''
 
         // _exemptionRequestProperty != null
         ) {
@@ -712,30 +434,6 @@ class InitialState extends State<Initial> {
       await databaseManager.createLog(log);
     }
   }
-
-  // Widget _submitButton() {
-  //   return Padding(
-  //     padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-  //     child: Directionality(
-  //       textDirection: TextDirection.rtl,
-  //       child: Stack(
-  //         children: [ElevatedButton.icon(
-  //           style: ElevatedButton.styleFrom(backgroundColor: secondaryColor),
-  //           onPressed: () => _submitPressed(),
-  //           label: Text(
-  //             '  Submit  ',
-  //             style: TextStyle(color: Colors.white, fontSize: 18),
-  //           ),
-  //           icon: Icon(
-  //             Icons.arrow_back_ios,
-  //             color: Colors.white,
-  //           ),
-
-  //         ),
-  //       ]),
-  //     ),
-  //   );
-  // }
 
   Widget _submitButton() {
     return Padding(
@@ -809,13 +507,18 @@ class InitialState extends State<Initial> {
     _prefs?.remove(_phoneKey);
     _prefs?.remove(_plateKey);
     _prefs?.remove(_plateProvKey);
-    _prefs?.remove(_propertyIDKey);
-    _prefs?.remove(_unitNumberKey);
+
     _resetInterface();
-    setState(() {
-      _exemptionRequestProperty = null;
-      _previousProperty = null;
-    });
+  }
+
+  _visitorPressed() {
+    Navigator.of(context)
+        .push(MaterialPageRoute(
+          builder: (context) => Initial(
+            sessionCubit: sessionCubit,
+          ),
+        ))
+        .then((value) => getPreferences());
   }
 
   _loginPressed() {
@@ -828,23 +531,12 @@ class InitialState extends State<Initial> {
         .then((value) => getPreferences());
   }
 
-  _employeePressed() {
-    Navigator.of(context)
-        .push(MaterialPageRoute(
-          builder: (context) => EmployeeRegistration(
-            sessionCubit: sessionCubit,
-          ),
-        ))
-        .then((value) => getPreferences());
-  }
-
   _storeInfoPreferences() {
     _prefs?.setString(_nameKey, nameController.text);
     _prefs?.setString(_emailKey, emailController.text);
     _prefs?.setString(_phoneKey, phoneController.text);
     _prefs?.setString(_plateKey, plateController.text);
     _prefs?.setString(_plateProvKey, _plateProvince);
-    _prefs?.setString(_unitNumberKey, unitController.text);
   }
 
   Registration createRegistration() {
@@ -856,11 +548,8 @@ class InitialState extends State<Initial> {
     registration.phone =
         phoneController.text.trim().replaceAll('-', '').replaceAll(' ', '');
     registration.streetNumber = '';
-    registration.streetName = addressController.text;
-    registration.city = _city;
     registration.plateNumber = plateController.text.trim();
     registration.province = _plateProvince;
-    registration.unitNumber = unitController.text.trim();
     registration.duration = _selectedDuration.toString();
     registration.createdAt = DateTime.now().toUtc();
 
@@ -875,72 +564,15 @@ class InitialState extends State<Initial> {
     registration.phone =
         phoneController.text.trim().replaceAll('-', '').replaceAll(' ', '');
     registration.streetNumber = '';
-    registration.streetName = addressController.text.isEmpty
-        ? registration.streetName
-        : addressController.text;
-    registration.city = _city;
     registration.plateNumber = plateController.text.isEmpty
         ? registration.plateNumber
         : plateController.text.trim();
     registration.province = _plateProvince;
-    registration.unitNumber = unitController.text.isEmpty
-        ? registration.unitNumber
-        : unitController.text.trim();
     registration.duration = _selectedDuration.toString();
     registration.createdAt = DateTime.now().toUtc();
 
     return registration;
   }
-
-  // Exemption createExemption() {
-  //   var selfRegistration = Exemption.def();
-  //   selfRegistration.regDate = DateTime.now().toUtc();
-  //   selfRegistration.plateID =
-  //       '${plateController.text.toUpperCase().replaceAll(' ', '')}_${_plateProvince}';
-  //   selfRegistration.propertyID = _exemptionRequestProperty?.propertyID2;
-  //   selfRegistration.startDate = DateTime.now().toUtc();
-  //   selfRegistration.endDate =
-  //       DateTime.now().add(Duration(days: _selectedDuration)).toUtc();
-  //   selfRegistration.unitNumber = '';
-  //   selfRegistration.email = emailController.text;
-  //   selfRegistration.phone = phoneController.text;
-  //   selfRegistration.name = nameController.text;
-  //   selfRegistration.makeModel = '';
-  //   selfRegistration.numberOfDays = '$_selectedDuration';
-  //   selfRegistration.reason = 'guests';
-  //   selfRegistration.notes = '';
-  //   selfRegistration.authBy = '';
-  //   selfRegistration.isArchived = '';
-
-  //   var splitAddress = _exemptionRequestProperty?.propertyAddress?.split(',');
-
-  //   selfRegistration.streetNumber = splitAddress?[0] ?? '0';
-  //   selfRegistration.streetName = 'test';
-  //   selfRegistration.streetSuffix = '';
-  //   selfRegistration.address =
-  //       _exemptionRequestProperty?.propertyAddress ?? 'Error getting addresss';
-
-  //   return selfRegistration;
-  // }
-
-  // _verifyAddress() {
-  //   var propertyID = sessionCubit.checkIfValidProperty(
-  //       cityController.text.toLowerCase(),
-  //       addressController.text.toLowerCase());
-
-  //   if (propertyID != null) {
-  //     setState(() {
-  //       _exemptionRequestProperty = sessionCubit.getPropertyFromID(propertyID);
-  //       _prefs?.setString(_propertyIDKey, propertyID);
-  //     });
-  //   }
-  // }
-
-  // _verifyProvince() {
-  //   if (!isValidProvince(plateProvinceController.text)) {
-  //     unauthorizedPlateMessage = "Province is invalid";
-  //   }
-  // }
 
   _verifyLicencePlate() {
     if (plateController.text == '') {
@@ -972,12 +604,9 @@ class InitialState extends State<Initial> {
       nameController.text = '';
       emailController.text = '';
       phoneController.text = '';
-      addressController.text = '';
       plateController.text = '';
-      unitController.text = '';
       _plateProvince = 'ON';
       agreedToTermsAndConditions = false;
-      _exemptionRequestProperty = null;
     });
   }
 
@@ -996,50 +625,27 @@ class InitialState extends State<Initial> {
       if (nameController.text != '' &&
               emailController.text != '' &&
               phoneController.text != '' &&
-              plateController.text != '' &&
-              _city != 'Choose a City'
+              plateController.text != ''
 
           // _exemptionRequestProperty != null
           ) {
-        if (addressController.text != '') {
-          Iterable<String> fill_address =
-              streetAddresses.where((String option) {
-            return option
-                .toLowerCase()
-                .contains(addressController.text.toLowerCase());
-          });
-          if (fill_address.length == 1) {
-            addressController.text = fill_address.first.toString();
-            selectedFromList = true;
-          }
+        if (accessCodeController.text != '') {
+          _storeInfoPreferences();
+          final exemption = createRegistration();
+          databaseResponseMessage =
+              await databaseManager.createExemption(exemption);
 
-          // bypass select form list
-          selectedFromList = true;
+          openDialog(
+              context,
+              '✅ ${databaseResponseMessage.message ?? ''}',
+              databaseResponseMessage.description,
+              databaseResponseMessage.description ?? '');
 
-          if (selectedFromList) {
-            _storeInfoPreferences();
-            final exemption = createRegistration();
-            databaseResponseMessage =
-                await databaseManager.createExemption(exemption);
-
-            openDialog(
-                context,
-                '✅ ${databaseResponseMessage.message ?? ''}',
-                databaseResponseMessage.description,
-                databaseResponseMessage.description ?? '');
-
-            if (databaseResponseMessage.message ==
-                    "Visitor Parking Registration Granted" ||
-                databaseResponseMessage.message ==
-                    "Visitor Parking Registration Denied") {
-              _resetInterface();
-            }
-          } else {
-            openDialog(
-                context,
-                'Invalid Street Address',
-                'Please type and select an address from the list provided.',
-                'Please type and select an address from the list provided.');
+          if (databaseResponseMessage.message ==
+                  "Visitor Parking Registration Granted" ||
+              databaseResponseMessage.message ==
+                  "Visitor Parking Registration Denied") {
+            _resetInterface();
           }
         } else {
           openDialog(

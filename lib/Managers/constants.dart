@@ -45,7 +45,7 @@ List<DropdownMenuItem<String>> statesAndProvinces = [
   DropdownMenuItem(value: 'NT', child: Text('NT')),
   DropdownMenuItem(value: 'NS', child: Text('NS')),
   DropdownMenuItem(value: 'NU', child: Text('NU')),
-  DropdownMenuItem(value: 'PE', child: Text('PE')),
+  DropdownMenuItem(value: 'PEI', child: Text('PEI')),
   DropdownMenuItem(value: 'QC', child: Text('QC')),
   DropdownMenuItem(value: 'SK', child: Text('SK')),
   DropdownMenuItem(value: 'YT', child: Text('YT')),

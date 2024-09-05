@@ -4,6 +4,7 @@ import 'package:r2park_flutter_dev/models/city.dart';
 import 'package:r2park_flutter_dev/models/database_response_message.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/registration.dart';
+import 'package:r2park_flutter_dev/models/role.dart';
 import 'package:r2park_flutter_dev/models/street_address.dart';
 import 'package:r2park_flutter_dev/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,6 +12,8 @@ import 'package:http/http.dart' as http;
 
 class DatabaseManager {
   final Future<SharedPreferences> preferences = SharedPreferences.getInstance();
+  // var baseUrl = 'r2park.biz';
+  var baseUrl = 'dev.r2p.live';
 
   // Future<List<User>> getUsersFromJson() async {
   //   List<User> users = [];
@@ -28,7 +31,7 @@ class DatabaseManager {
   Future<List<User>> getUsersFromDevelopment() async {
     List<User> users = [];
 
-    var url = Uri.https('dev.r2p.live', '/services/registry_index');
+    var url = Uri.https(baseUrl, '/services/registry_index');
     var response = await http.get(url);
     final data = await json.decode(response.body);
 
@@ -44,11 +47,11 @@ class DatabaseManager {
   Future<List<City>> getCities() async {
     List<City> cities = [];
 
-    var url = Uri.https('dev.r2p.live', '/services/cities');
+    var url = Uri.https(baseUrl, '/services/cities');
     var response = await http.get(url);
     final data = await json.decode(response.body);
 
-    print("✅✅GET CITIES: ${response.statusCode}: ${response.body}");
+    // print("✅✅GET CITIES: ${response.statusCode}: ${response.body}");
 
     List jsonCities = data['data'];
 
@@ -62,14 +65,35 @@ class DatabaseManager {
     return cities;
   }
 
-  Future<List<String>> getAddressesForCity(String city) async {
-    List<StreetAddress> addresses = [];
+  Future<List<Role>> getRoles() async {
+    List<Role> roles = [];
 
-    var url = Uri.https('dev.r2p.live', '/services/public_street/$city');
+    var url = Uri.https(baseUrl, '/services/contact_roles');
     var response = await http.get(url);
     final data = await json.decode(response.body);
 
-    print("✅✅GET ADDRESSES FOR CITY: ${response.statusCode}: ${response.body}");
+    print("✅✅GET ROLES: ${response.statusCode}: ${response.body}");
+
+    List jsonRoles = data['data'];
+
+    roles = jsonRoles.map((entry) => Role.convertFromJson(entry)).toList();
+
+    var placeholderCity = Role.def();
+    placeholderCity.name = 'Choose a Role';
+
+    roles.insert(0, placeholderCity);
+
+    return roles;
+  }
+
+  Future<List<String>> getAddressesForCity(String city) async {
+    List<StreetAddress> addresses = [];
+
+    var url = Uri.https(baseUrl, '/services/public_street/$city');
+    var response = await http.get(url);
+    final data = await json.decode(response.body);
+
+    // print("✅✅GET ADDRESSES FOR CITY: ${response.statusCode}: ${response.body}");
 
     List jsonStreetAddresses = data['data'];
 
@@ -83,7 +107,7 @@ class DatabaseManager {
   }
 
   // Future<void> getDataFromPostman() async {
-  //   var url = Uri.https('dev.r2p.live', '/services/registry_index');
+  //   var url = Uri.https(baseUrl, '/services/registry_index');
   //   // var response = await http.get(url);
   //   // print(json.decode(response.body));
   // }
@@ -131,7 +155,7 @@ class DatabaseManager {
     newUser.companyId = '';
     print(user.toJson());
 
-    var url = Uri.https('dev.r2p.live', '/services/registry_index/');
+    var url = Uri.https(baseUrl, '/services/registry_index/');
     final response = await http.post(
       url,
       // headers: {"Content-Type": "application/json"},
@@ -147,7 +171,7 @@ class DatabaseManager {
   Future<void> updateUser(User user) async {
     var userId = user.userId!;
 
-    var url = Uri.https('dev.r2p.live', '/services/registry_index/$userId');
+    var url = Uri.https(baseUrl, '/services/registry_index/$userId');
     final response = await http.put(
       url,
       // headers: {"Content-Type": "application/json"},
@@ -171,7 +195,7 @@ class DatabaseManager {
     var userId = user.userId!;
     deleteUserPreferences(user: user);
 
-    var url = Uri.https('dev.r2p.live', '/services/registry_index/$userId');
+    var url = Uri.https(baseUrl, '/services/registry_index/$userId');
     final response = await http.delete(
       url,
       // headers: {"Content-Type": "application/json"},
@@ -196,7 +220,7 @@ class DatabaseManager {
 
     print(jsonExemption);
 
-    var url = Uri.https('dev.r2p.live', '/services/registry_index/');
+    var url = Uri.https(baseUrl, '/services/registry_index/');
     final response = await http.post(
       url,
       // headers: {"Content-Type": "application/json"},
@@ -226,7 +250,7 @@ class DatabaseManager {
 
     print(jsonExemption);
 
-    var url = Uri.https('dev.r2p.live', '/services/registry_log/');
+    var url = Uri.https(baseUrl, '/services/registry_log/');
     final response = await http.post(
       url,
       // headers: {"Content-Type": "application/json"},

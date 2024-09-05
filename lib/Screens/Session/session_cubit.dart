@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:r2park_flutter_dev/models/city.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
+import 'package:r2park_flutter_dev/models/role.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/user.dart';
 import '../../models/visitor.dart';
@@ -12,11 +13,16 @@ class SessionCubit extends Cubit<SessionState> {
   List<User>? users;
   List<Property>? properties;
   List<City>? cities;
+  List<Role>? roles;
   List<String>? blacklistPlates;
   final Future<SharedPreferences> preferences = SharedPreferences.getInstance();
 
   SessionCubit(
-      {required this.authRepo, this.users, this.properties, this.cities})
+      {required this.authRepo,
+      this.users,
+      this.properties,
+      this.cities,
+      this.roles})
       : super(UnknownSessionState()) {
     attemptAutoLogin();
   }
