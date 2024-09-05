@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
-import 'package:r2park_flutter_dev/Managers/validation_manager.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
 import 'package:r2park_flutter_dev/Screens/auth/sign_up/confirm_email.dart';
@@ -108,152 +107,115 @@ class NewUserState extends State<NewUser> {
                   : Text('Update User'),
             )
           : null,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Center(
-            child: _inputData(context),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _textField(
-      String labelText, TextEditingController? controller, bool validate,
-      {bool passwordConfirmField = false,
-      bool hideText = false,
-      int? maxLength,
-      String errorText = ""}) {
-    return TextField(
-      maxLength: maxLength,
-      obscureText: hideText,
-      decoration: InputDecoration(
-          counterText: '',
-          labelText: labelText,
-          errorText: errorText.isEmpty
-              ? validate
-                  ? null
-                  : passwordConfirmField
-                      ? "Passwords do not match"
-                      : 'Field Can\'t be empty'
-              : errorText),
-      controller: controller,
-    );
-  }
-
-  Widget _inputData(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(12, 0, 12, 12),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: Column(
         children: [
-          _createRoleDropdown(),
-          isNewUser
-              ? _textField('Email', _emailTextFieldController, emailValidate)
-              : Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-                  child: Text(
-                    '${widget.user?.email}',
-                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 22),
+          Expanded(
+            child: ListView(
+              // mainAxisAlignment: MainAxisAlignment.start,
+              // crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _createRoleDropdown(),
+                isNewUser
+                    ? _createEmailField()
+                    : Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+                        child: Text(
+                          '${widget.user?.email}',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 22),
+                        ),
+                      ),
+                _createNameField(),
+                _createPhoneField(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                  child: Row(
+                    children: [_createUnitField(), _createAddressField()],
                   ),
                 ),
-          SizedBox(
-            height: 4,
-          ),
-          _textField(
-              'Full Name', _fullNameTextFieldController, fullNameValidate),
-          SizedBox(
-            height: 4,
-          ),
-          _textField('Mobile Number', _mobileNumberTextFieldController,
-              mobileNumberValidate),
-          SizedBox(
-            height: 4,
-          ),
-          Row(
-            children: [
-              SizedBox(
-                width: 80,
-                child: _textField(
-                    'Apt #', _unitNumberTextFieldController, address2Validate),
-              ),
-              SizedBox(width: 12),
-              Expanded(
-                child: _textField(
-                    'Address', _address1TextFieldController, address1Validate),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 4,
-          ),
-          _textField('City', _cityTextFieldController, cityValidate),
-          SizedBox(
-            height: 4,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              children: [
-                Expanded(flex: 2, child: _createPlateProvinceDropDownMenu()),
-                SizedBox(
-                  width: 12,
+                _createCityField(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Row(
+                    children: [
+                      _createPlateProvinceDropDownMenu(),
+                      _createPostalCodeField()
+                    ],
+                  ),
                 ),
-                Expanded(
-                  flex: 3,
-                  child: _textField('PostalCode',
-                      _postalCodeTextFieldController, postalCodeValidate),
-                )
+                Spacer(),
+                _createUpdateButton(),
+                SizedBox(height: 12),
+                if (isNewUser == false)
+                  TextButton(
+                      onPressed: () => isManagerScreen
+                          ? _showActionSheetForRemoveResident(context)
+                          : _showActionSheetForDelete(context),
+                      child: Text(
+                        isManagerScreen ? 'Remove Resident' : 'Delete Profile',
+                        style: TextStyle(color: Colors.red),
+                      ))
               ],
             ),
-          ),
-          SizedBox(
-            height: 30,
-          ),
-          _createUpdateButton(),
-          SizedBox(height: 12),
-          if (isNewUser == false)
-            TextButton(
-                onPressed: () => isManagerScreen
-                    ? _showActionSheetForRemoveResident(context)
-                    : _showActionSheetForDelete(context),
-                child: Text(
-                  isManagerScreen ? 'Remove Resident' : 'Delete Profile',
-                  style: TextStyle(color: Colors.red),
-                ))
+          )
         ],
       ),
     );
   }
 
+  // Widget _textField(
+  //     String labelText, TextEditingController? controller, bool validate,
+  //     {bool passwordConfirmField = false,
+  //     bool hideText = false,
+  //     int? maxLength,
+  //     String errorText = ""}) {
+  //   return TextField(
+  //     maxLength: maxLength,
+  //     obscureText: hideText,
+  //     decoration: InputDecoration(
+  //         counterText: '',
+  //         labelText: labelText,
+  //         errorText: errorText.isEmpty
+  //             ? validate
+  //                 ? null
+  //                 : passwordConfirmField
+  //                     ? "Passwords do not match"
+  //                     : 'Field Can\'t be empty'
+  //             : errorText),
+  //     controller: controller,
+  //   );
+  // }
+
   Widget _createRoleDropdown() {
-    return DropdownButtonFormField(
-      isExpanded: true,
-      hint: Text(
-        _role,
-        style: kInitialTextLabelStyle,
-      ),
-      // alignment: Alignment.center,
-      decoration: InputDecoration(
-        labelText: "Role",
-        fillColor: Colors.black12,
-        filled: true,
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(width: 2, color: Colors.grey),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 20, 8, 12),
+      child: DropdownButtonFormField(
+        isExpanded: true,
+        hint: Text(
+          _role,
+          style: kInitialTextLabelStyle,
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(width: 2, color: Colors.green),
+        // alignment: Alignment.center,
+        decoration: InputDecoration(
+          labelText: "Role",
+          fillColor: Colors.black12,
+          filled: true,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(width: 2, color: Colors.grey),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(width: 2, color: Colors.green),
+          ),
         ),
+        menuMaxHeight: 400,
+        dropdownColor: Colors.blueGrey,
+        items: sessionCubit?.roles?.map((role) {
+          return DropdownMenuItem(value: role, child: Text(role.name ?? ''));
+        }).toList(),
+        onChanged: roleDropdownCallback,
       ),
-      menuMaxHeight: 400,
-      dropdownColor: Colors.blueGrey,
-      items: sessionCubit?.roles?.map((role) {
-        return DropdownMenuItem(child: Text(role.name ?? ''), value: role);
-      }).toList(),
-      onChanged: roleDropdownCallback,
     );
   }
 
@@ -264,9 +226,81 @@ class NewUserState extends State<NewUser> {
     });
   }
 
-  Widget _createPlateProvinceDropDownMenu() {
+  Widget _createEmailField() {
     return Padding(
-        padding: EdgeInsets.all(8),
+      padding: EdgeInsets.all(10),
+      child: TextField(
+        controller: _emailTextFieldController,
+        decoration: textFieldDecoration(icon: Icons.email, labelName: 'Email'),
+      ),
+    );
+  }
+
+  Widget _createNameField() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+      child: TextField(
+        controller: _fullNameTextFieldController,
+        decoration: textFieldDecoration(icon: Icons.person, labelName: 'Name'),
+      ),
+    );
+  }
+
+  Widget _createPhoneField() {
+    return Padding(
+      padding: EdgeInsets.all(10),
+      child: TextField(
+        controller: _mobileNumberTextFieldController,
+        decoration: textFieldDecoration(icon: Icons.phone, labelName: 'Phone'),
+      ),
+    );
+  }
+
+  Widget _createUnitField() {
+    return Expanded(
+      flex: 2,
+      child: TextField(
+        controller: _unitNumberTextFieldController,
+        decoration: textFieldDecoration(icon: Icons.numbers, labelName: 'Unit'),
+      ),
+    );
+  }
+
+  Widget _createAddressField() {
+    return Expanded(
+      flex: 3,
+      child: TextField(
+        controller: _address1TextFieldController,
+        decoration:
+            textFieldDecoration(icon: Icons.house, labelName: 'Address'),
+      ),
+    );
+  }
+
+  Widget _createCityField() {
+    return Padding(
+      padding: EdgeInsets.all(8),
+      child: TextField(
+        controller: _cityTextFieldController,
+        decoration:
+            textFieldDecoration(icon: Icons.location_city, labelName: 'City'),
+      ),
+    );
+  }
+
+  Widget _createPostalCodeField() {
+    return Expanded(
+      flex: 2,
+      child: TextField(
+        controller: _postalCodeTextFieldController,
+        decoration: textFieldDecoration(icon: Icons.numbers, labelName: 'Unit'),
+      ),
+    );
+  }
+
+  Widget _createPlateProvinceDropDownMenu() {
+    return Expanded(
+        flex: 2,
         child: DropdownButtonFormField(
           hint: Text(
             "Province",
