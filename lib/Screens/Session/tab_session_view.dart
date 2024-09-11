@@ -36,7 +36,8 @@ class TabSessionScreen extends State<TabSessionView>
     super.initState();
 
     isResident = user.master_access_code != '';
-    isManager = user.register_as == "Manager" && user.master_access_code != '';
+    isManager = (user.register_as ?? '').contains("Manager") &&
+        user.master_access_code != '';
     _tabController = TabController(
         length: isResident ? (isManager ? 4 : 3) : 2, vsync: this);
   }

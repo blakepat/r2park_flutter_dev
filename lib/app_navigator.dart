@@ -94,7 +94,7 @@ class AppNavigator extends StatelessWidget {
                         theme: ThemeData(
                             appBarTheme: AppBarTheme(
                                 color: Colors.blueGrey[800],
-                                backgroundColor: primaryColor,
+                                // backgroundColor: primaryColor,
                                 systemOverlayStyle: statusBarStyle),
                             brightness: Brightness.dark,
                             primaryColor: Colors.blueGrey[800],
