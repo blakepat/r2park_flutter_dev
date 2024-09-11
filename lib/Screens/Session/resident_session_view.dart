@@ -48,8 +48,8 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
   @override
   void initState() {
     super.initState();
-    residence = sessionCubit.properties
-        ?.firstWhere((element) => element.propertyID == user.propertyId);
+    residence = sessionCubit.properties?.firstWhere(
+        (element) => element.propertyID == user.master_access_code);
 
     visitors = sessionCubit.preferences.then((SharedPreferences prefs) {
       return sessionCubit.getVisitors(user: user);
@@ -453,9 +453,9 @@ class ResidentSessionScreen extends State<ResidentSessionView> {
     var registration = Registration.def();
 
     registration.userType = 'Visitor';
-    registration.name = user.fullName;
-    registration.email = user.fullName;
-    registration.phone = user.mobileNumber;
+    registration.name = user.name;
+    registration.email = user.name;
+    registration.phone = user.mobile;
     registration.streetNumber = '';
     registration.streetName =
         residence?.propertyAddress ?? 'error getting address';

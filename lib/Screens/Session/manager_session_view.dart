@@ -36,12 +36,13 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
     super.initState();
 
     setState(() {
-      residentRequests =
-          sessionCubit.getResidentRequests(addressID: user.propertyId ?? '');
+      residentRequests = sessionCubit.getResidentRequests(
+          addressID: user.master_access_code ?? '');
 
-      residents = sessionCubit.getResidents(addressID: user.propertyId ?? '');
+      residents =
+          sessionCubit.getResidents(addressID: user.master_access_code ?? '');
 
-      residentNames = residents?.map((e) => '${e.fullName}').toList();
+      residentNames = residents?.map((e) => '${e.name}').toList();
     });
   }
 
@@ -195,7 +196,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                               ),
                               Text(
                                 e.unitNumber == null
-                                    ? e.address ?? ''
+                                    ? e.address1 ?? ''
                                     : e.unitNumber ?? '',
                                 style: TextStyle(
                                     color: Colors.white, fontSize: 32),
@@ -217,8 +218,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                             children: [
                               SizedBox(
                                 width: 150,
-                                child: Text(
-                                    '${e.fullName?.toUpperCase() ?? ''} ',
+                                child: Text('${e.name?.toUpperCase() ?? ''} ',
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16,
@@ -232,7 +232,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                               //         fontWeight: FontWeight.bold))
                             ]),
                       ),
-                      Text(e.mobileNumber ?? '',
+                      Text(e.mobile ?? '',
                           style: TextStyle(color: Colors.white60, fontSize: 14))
                     ],
                   ),
@@ -243,7 +243,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                       onPressed: () {
                         //TO:DO - change user authority level so its accepted / isConfirmed Variable
                         setState(() {
-                          e.userType = "Resident";
+                          e.register_as = "Resident";
                           databaseManager.updateUser(e);
                           sessionCubit.users?.removeWhere(
                               (element) => element.userId == e.userId);
@@ -271,8 +271,8 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                     child: IconButton(
                       onPressed: () {
                         setState(() {
-                          e.propertyId == '';
-                          e.userType = "Visitor";
+                          e.master_access_code == '';
+                          e.register_as = "Visitor";
                           databaseManager.updateUser(e);
                           sessionCubit.users?.removeWhere(
                               (element) => element.userId == e.userId);
@@ -325,7 +325,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
         //     false) ||
         // (element.lastName?.toLowerCase().contains(searchValue.trim()) ??
         //     false) ||
-        (element.address.toString().toLowerCase().contains(searchValue)));
+        (element.address1.toString().toLowerCase().contains(searchValue)));
     var listOfResidents = filteredResidents?.map((e) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(2, 4, 2, 4),
@@ -352,7 +352,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                     .then((value) {
                   setState(() {
                     residents = sessionCubit.getResidents(
-                        addressID: user.propertyId ?? '');
+                        addressID: user.master_access_code ?? '');
                   });
                 });
               },
@@ -378,7 +378,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                               ),
                               Text(
                                 e.unitNumber == null
-                                    ? e.address ?? ''
+                                    ? e.address1 ?? ''
                                     : e.unitNumber ?? '',
                                 style: TextStyle(
                                     color: Colors.white, fontSize: 32),
@@ -396,7 +396,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                       Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${e.fullName?.toUpperCase() ?? ''} ',
+                            Text('${e.name?.toUpperCase() ?? ''} ',
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -408,7 +408,7 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
                             //         fontSize: 16,
                             //         fontWeight: FontWeight.bold))
                           ]),
-                      Text(e.mobileNumber ?? '',
+                      Text(e.mobile ?? '',
                           style: TextStyle(color: Colors.white60, fontSize: 14))
                     ],
                   ),
@@ -441,6 +441,6 @@ class ManagerSessionScreen extends State<ManagerSessionView> {
   }
 
   String fullNameTrimmed(User user) {
-    return '${user.fullName?.toLowerCase().replaceAll(' ', '')}';
+    return '${user.name?.toLowerCase().replaceAll(' ', '')}';
   }
 }

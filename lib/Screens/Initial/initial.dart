@@ -11,7 +11,7 @@ import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
 import 'package:r2park_flutter_dev/Screens/Initial/terms_and_conditions.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Screens/auth/login/login.dart';
-import 'package:r2park_flutter_dev/Screens/employee_registration/employee_registration.dart';
+import 'package:r2park_flutter_dev/Screens/employee_registration/employee_registration_screen.dart';
 import 'package:r2park_flutter_dev/models/city.dart';
 import 'package:r2park_flutter_dev/models/database_response_message.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
@@ -122,13 +122,12 @@ class InitialState extends State<Initial> {
             ),
           ),
           actions: [
-                   TextButton(
+            TextButton(
                 onPressed: _employeePressed,
                 child: Text(
                   'Employee',
                   style: TextStyle(color: Colors.white, fontSize: 18),
-                ))
-          ,
+                )),
             TextButton(
                 onPressed: _loginPressed,
                 child: Text(
@@ -145,7 +144,7 @@ class InitialState extends State<Initial> {
                   Container(color: backgroundBlueGreyColor),
                   CustomPaint(
                     painter:
-                        _WaveCustomPaint(backgroundColor: backgroundGreyColor),
+                        WaveCustomPaint(backgroundColor: backgroundGreyColor),
                     size: Size.infinite,
                   ),
                   Column(
@@ -371,13 +370,14 @@ class InitialState extends State<Initial> {
         ));
   }
 
-  void cityDropdownCallback(City? selectedValue) {
-    setState(() async {
-      _city = selectedValue?.description ?? '';
-      streetAddresses = await databaseManager
-          .getAddressesForCity(selectedValue?.description ?? '');
-      addressController.text = '';
-    });
+  void cityDropdownCallback(City? selectedValue) async {
+    _city = selectedValue?.description ?? '';
+    streetAddresses = await databaseManager
+        .getAddressesForCity(selectedValue?.description ?? '')
+        .whenComplete(() => setState(() {
+              streetAddresses = streetAddresses;
+            }));
+    addressController.text = '';
   }
 
   Widget _createUnitField() {
@@ -831,7 +831,7 @@ class InitialState extends State<Initial> {
   _employeePressed() {
     Navigator.of(context)
         .push(MaterialPageRoute(
-          builder: (context) => EmployeeRegistration(
+          builder: (context) => EmployeeRegistrationScreen(
             sessionCubit: sessionCubit,
           ),
         ))
@@ -1070,9 +1070,9 @@ class UpperCaseTextFormatter extends TextInputFormatter {
   }
 }
 
-class _WaveCustomPaint extends CustomPainter {
+class WaveCustomPaint extends CustomPainter {
   Color backgroundColor;
-  _WaveCustomPaint({required this.backgroundColor});
+  WaveCustomPaint({required this.backgroundColor});
 
   @override
   void paint(Canvas canvas, Size size) {

@@ -11,21 +11,23 @@ import 'package:r2park_flutter_dev/Screens/Initial/terms_and_conditions.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Screens/auth/login/login.dart';
 import 'package:r2park_flutter_dev/models/database_response_message.dart';
+import 'package:r2park_flutter_dev/models/employee_registration.dart';
 import 'package:r2park_flutter_dev/models/registration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class EmployeeRegistration extends StatefulWidget {
+class EmployeeRegistrationScreen extends StatefulWidget {
   final SessionCubit sessionCubit;
   @override
   // ignore: no_logic_in_create_state
-  EmployeeRegistrationState createState() =>
-      EmployeeRegistrationState(sessionCubit: sessionCubit);
+  EmployeeRegistrationScreenState createState() =>
+      EmployeeRegistrationScreenState(sessionCubit: sessionCubit);
 
-  const EmployeeRegistration({super.key, required this.sessionCubit});
+  const EmployeeRegistrationScreen({super.key, required this.sessionCubit});
 }
 
-class EmployeeRegistrationState extends State<EmployeeRegistration> {
+class EmployeeRegistrationScreenState
+    extends State<EmployeeRegistrationScreen> {
   final SessionCubit sessionCubit;
 
   TextEditingController nameController = TextEditingController();
@@ -43,9 +45,6 @@ class EmployeeRegistrationState extends State<EmployeeRegistration> {
   bool agreedToTermsAndConditions = false;
   bool selectedFromList = false;
 
-  DatabaseResponseMessage databaseResponseMessage =
-      DatabaseResponseMessage.def();
-
   ScrollController scrollController = ScrollController();
 
   final _nameKey = 'initialName';
@@ -59,7 +58,7 @@ class EmployeeRegistrationState extends State<EmployeeRegistration> {
   var databaseManager = DatabaseManager();
   SharedPreferences? _prefs;
 
-  EmployeeRegistrationState({required this.sessionCubit});
+  EmployeeRegistrationScreenState({required this.sessionCubit});
 
   @override
   void initState() {
@@ -123,7 +122,7 @@ class EmployeeRegistrationState extends State<EmployeeRegistration> {
                   Container(color: backgroundBlueGreyColor),
                   CustomPaint(
                     painter:
-                        _WaveCustomPaint(backgroundColor: backgroundGreyColor),
+                        WaveCustomPaint(backgroundColor: backgroundGreyColor),
                     size: Size.infinite,
                   ),
                   Column(
@@ -274,7 +273,9 @@ class EmployeeRegistrationState extends State<EmployeeRegistration> {
     return Container(
       padding: EdgeInsets.all(10),
       child: TextField(
-        controller: phoneController,
+        textCapitalization: TextCapitalization.characters,
+        inputFormatters: [UpperCaseTextFormatter()],
+        controller: accessCodeController,
         decoration: textFieldDecoration(
             icon: Icons.numbers_outlined, labelName: 'Access Code'),
       ),
@@ -539,19 +540,16 @@ class EmployeeRegistrationState extends State<EmployeeRegistration> {
     _prefs?.setString(_plateProvKey, _plateProvince);
   }
 
-  Registration createRegistration() {
-    var registration = Registration.def();
+  EmployeeRegistration createRegistration() {
+    var registration = EmployeeRegistration.def();
 
-    registration.userType = 'Visitor';
-    registration.name = nameController.text.trim();
+    registration.full_name = nameController.text.trim();
     registration.email = emailController.text.trim();
     registration.phone =
         phoneController.text.trim().replaceAll('-', '').replaceAll(' ', '');
-    registration.streetNumber = '';
-    registration.plateNumber = plateController.text.trim();
+    registration.access_code = accessCodeController.text.trim();
+    registration.plate_number = plateController.text.trim();
     registration.province = _plateProvince;
-    registration.duration = _selectedDuration.toString();
-    registration.createdAt = DateTime.now().toUtc();
 
     return registration;
   }
@@ -632,21 +630,17 @@ class EmployeeRegistrationState extends State<EmployeeRegistration> {
         if (accessCodeController.text != '') {
           _storeInfoPreferences();
           final exemption = createRegistration();
-          databaseResponseMessage =
-              await databaseManager.createExemption(exemption);
+          final response =
+              await databaseManager.createEmployeeRegistration(exemption);
 
-          openDialog(
-              context,
-              '✅ ${databaseResponseMessage.message ?? ''}',
-              databaseResponseMessage.description,
-              databaseResponseMessage.description ?? '');
+          openDialog(context, '✅ Response', response, response);
 
-          if (databaseResponseMessage.message ==
-                  "Visitor Parking Registration Granted" ||
-              databaseResponseMessage.message ==
-                  "Visitor Parking Registration Denied") {
-            _resetInterface();
-          }
+          // if (databaseResponseMessage.message ==
+          //         "Visitor Parking Registration Granted" ||
+          //     databaseResponseMessage.message ==
+          //         "Visitor Parking Registration Denied") {
+          //   _resetInterface();
+          // }
         } else {
           openDialog(
               context,
@@ -665,44 +659,44 @@ class EmployeeRegistrationState extends State<EmployeeRegistration> {
   }
 }
 
-class UpperCaseTextFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    return TextEditingValue(
-      text: newValue.text.toUpperCase(),
-      selection: newValue.selection,
-    );
-  }
-}
+// class UpperCaseTextFormatter extends TextInputFormatter {
+//   @override
+//   TextEditingValue formatEditUpdate(
+//       TextEditingValue oldValue, TextEditingValue newValue) {
+//     return TextEditingValue(
+//       text: newValue.text.toUpperCase(),
+//       selection: newValue.selection,
+//     );
+//   }
+// }
 
-class _WaveCustomPaint extends CustomPainter {
-  Color backgroundColor;
-  _WaveCustomPaint({required this.backgroundColor});
+// class _WaveCustomPaint extends CustomPainter {
+//   Color backgroundColor;
+//   _WaveCustomPaint({required this.backgroundColor});
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    var painter = Paint()
-      ..color = backgroundColor
-      ..strokeWidth = 1
-      ..style = PaintingStyle.fill;
-    var path = Path();
-    var height = size.height;
-    var width = size.width;
+//   @override
+//   void paint(Canvas canvas, Size size) {
+//     var painter = Paint()
+//       ..color = backgroundColor
+//       ..strokeWidth = 1
+//       ..style = PaintingStyle.fill;
+//     var path = Path();
+//     var height = size.height;
+//     var width = size.width;
 
-    path.moveTo(0, height / 3 + height / 5);
-    var des1 = width / 4;
-    var des2 = height / 3 + height / 10; //height/5 /2
-    path.quadraticBezierTo(des1, des2, width / 2, height / 3 + height / 10);
-    path.quadraticBezierTo(
-        width / 2 + width / 4, height / 3 + height / 10, width, height / 3);
-    path.lineTo(width, height);
-    path.lineTo(0, height);
-    path.lineTo(0, height / 3 + height / 5);
-    path.close();
-    canvas.drawPath(path, painter);
-  }
+//     path.moveTo(0, height / 3 + height / 5);
+//     var des1 = width / 4;
+//     var des2 = height / 3 + height / 10; //height/5 /2
+//     path.quadraticBezierTo(des1, des2, width / 2, height / 3 + height / 10);
+//     path.quadraticBezierTo(
+//         width / 2 + width / 4, height / 3 + height / 10, width, height / 3);
+//     path.lineTo(width, height);
+//     path.lineTo(0, height);
+//     path.lineTo(0, height / 3 + height / 5);
+//     path.close();
+//     canvas.drawPath(path, painter);
+//   }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
+//   @override
+//   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+// }

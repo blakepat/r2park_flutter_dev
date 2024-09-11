@@ -1,90 +1,87 @@
 class User {
   String? userId;
-  String? userType;
-  String? propertyId;
+  String? register_as;
+  String? master_access_code;
   String? email;
-  String? fullName;
-  String? mobileNumber;
+  String? name;
+  String? mobile;
   String? unitNumber;
-  String? address;
+  String? address1;
   String? city;
   String? province;
   String? postalCode;
-  String? companyAddress;
-  String? companyId;
+  String? auth_level;
+  String? status;
   String? password;
 
   User(
       {required this.userId,
-      this.userType,
-      this.propertyId,
+      this.register_as,
+      this.master_access_code,
       this.email,
-      this.fullName,
-      this.mobileNumber,
+      this.name,
+      this.mobile,
       this.unitNumber,
-      this.address,
+      this.address1,
       this.city,
       this.province,
       this.postalCode,
-      this.companyAddress,
-      this.companyId,
+      this.auth_level,
+      this.status,
       this.password});
 
   User.def() {
     userId = null;
-    userType = "";
-    propertyId = "";
+    register_as = "";
+    master_access_code = "";
     email = "";
-    fullName = "";
-    mobileNumber = "";
+    name = "";
+    mobile = "";
     unitNumber = "";
-    address = "";
+    address1 = "";
     city = "";
     province = "";
     postalCode = "";
-    companyAddress = "";
-    companyId = "";
+    auth_level = "";
+    status = "";
     password = "";
   }
 
   factory User.convertFromJson(dynamic json) {
     final user = User.def();
 
-    user.userId = json['user_id'];
-    user.userType = json['user_type'];
-    user.propertyId = json['property_id'];
+    // user.userId = json['user_id'];
+    user.register_as = json['register_as'];
+    user.master_access_code = json['master_access_code'];
     user.email = json['email'];
-    user.fullName = json['full_name'];
-    user.mobileNumber = json['mobile_number'];
-    user.unitNumber = json['unit_number'];
-    user.address = json['address'];
+    user.name = json['name'];
+    user.mobile = json['mobile'];
+    // user.unitNumber = json['unit_number'];
+    user.address1 = json['address1'];
     user.city = json['city'];
     user.province = json['province'];
     user.postalCode = json['postal_code'];
-    user.companyAddress = json['address_address'];
-    user.companyId = json['company_id'];
-    user.password = json['password'];
-
+    user.auth_level = json['auth_level'];
+    user.status = json['status'];
     return user;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
 
-    data['user_id'] = userId;
-    data['user_type'] = userType;
-    data['property_id'] = propertyId;
+    // data['user_id'] = userId;
+    data['register_as'] = register_as;
     data['email'] = email;
-    data['full_name'] = fullName;
-    data['mobile_number'] = mobileNumber;
-    data['unit_number'] = unitNumber;
-    data['address'] = address;
+    data['name'] = name;
+    data['mobile'] = mobile;
+    data['master_access_code'] = master_access_code;
+    // data['unit_number'] = unitNumber;
     data['city'] = city;
-    data['province'] = province;
     data['postal_code'] = postalCode;
-    data['company_address'] = companyAddress;
-    data['company_id'] = companyId;
-    data['password'] = password;
+    data['address1'] = address1;
+    data['province'] = province;
+    data['auth_level'] = auth_level;
+    data['status'] = status;
 
     return data;
   }

@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
+import 'package:r2park_flutter_dev/Screens/Initial/initial.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
 import 'package:r2park_flutter_dev/Screens/auth/sign_up/confirm_email.dart';
+import 'package:r2park_flutter_dev/models/access_code_property.dart';
 import 'package:r2park_flutter_dev/models/role.dart';
 import '../../../models/user.dart';
 
@@ -43,6 +45,7 @@ class NewUserState extends State<NewUser> {
   final _address1TextFieldController = TextEditingController();
   final _unitNumberTextFieldController = TextEditingController();
   final _cityTextFieldController = TextEditingController();
+  final _accessCodeTextFieldController = TextEditingController();
   var _province = 'ON';
   final _postalCodeTextFieldController = TextEditingController();
 
@@ -60,6 +63,8 @@ class NewUserState extends State<NewUser> {
   String passwordInadequateMessage = "";
   var _role = 'Choose a Role';
 
+  AccessCodeProperty? accessCodeProperty;
+
   NewUserState(
       {required this.isManagerScreen, this.loggedInUser, this.sessionCubit});
 
@@ -73,9 +78,9 @@ class NewUserState extends State<NewUser> {
     print("💜💜 ${sessionCubit?.roles}");
 
     _emailTextFieldController.text = widget.user?.email ?? '';
-    _fullNameTextFieldController.text = widget.user?.fullName ?? '';
-    _mobileNumberTextFieldController.text = widget.user?.mobileNumber ?? '';
-    _address1TextFieldController.text = widget.user?.address ?? '';
+    _fullNameTextFieldController.text = widget.user?.name ?? '';
+    _mobileNumberTextFieldController.text = widget.user?.mobile ?? '';
+    _address1TextFieldController.text = widget.user?.address1 ?? '';
     _unitNumberTextFieldController.text = widget.user?.unitNumber ?? '';
     _cityTextFieldController.text = widget.user?.city ?? '';
     _province = widget.user?.province?.toUpperCase() ?? 'ON';
@@ -115,6 +120,7 @@ class NewUserState extends State<NewUser> {
               // crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _createRoleDropdown(),
+                _createAccessCodeField(),
                 isNewUser
                     ? _createEmailField()
                     : Padding(
@@ -135,7 +141,8 @@ class NewUserState extends State<NewUser> {
                 ),
                 _createCityField(),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Row(
                     children: [
                       _createPlateProvinceDropDownMenu(),
@@ -143,7 +150,7 @@ class NewUserState extends State<NewUser> {
                     ],
                   ),
                 ),
-                Spacer(),
+                SizedBox(height: 32),
                 _createUpdateButton(),
                 SizedBox(height: 12),
                 if (isNewUser == false)
@@ -226,6 +233,42 @@ class NewUserState extends State<NewUser> {
     });
   }
 
+  Widget _createAccessCodeField() {
+    return Padding(
+      padding: EdgeInsets.all(8),
+      child: TextField(
+        controller: _accessCodeTextFieldController,
+        textCapitalization: TextCapitalization.characters,
+        inputFormatters: [UpperCaseTextFormatter()],
+        decoration:
+            textFieldDecoration(icon: Icons.code, labelName: 'Access Code'),
+        onChanged: (value) async {
+          if (value.length == 6) {
+            accessCodeProperty = await databaseManager.checkAccessCode(value);
+
+            if (accessCodeProperty != null) {
+              setState(() {
+                addressSplitter(
+                    accessCodeProperty?.property_address ?? 'failed');
+                _province = accessCodeProperty?.province ?? 'ON';
+              });
+            }
+          }
+        },
+      ),
+    );
+  }
+
+  void addressSplitter(String address) {
+    var splitAddress = address.split(',');
+    _address1TextFieldController.text = splitAddress[0];
+    _cityTextFieldController.text = splitAddress[1];
+
+    var postalCode = splitAddress[2].split(' ');
+
+    _postalCodeTextFieldController.text = '${postalCode[2]} ${postalCode[3]}';
+  }
+
   Widget _createEmailField() {
     return Padding(
       padding: EdgeInsets.all(10),
@@ -269,10 +312,13 @@ class NewUserState extends State<NewUser> {
   Widget _createAddressField() {
     return Expanded(
       flex: 3,
-      child: TextField(
-        controller: _address1TextFieldController,
-        decoration:
-            textFieldDecoration(icon: Icons.house, labelName: 'Address'),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
+        child: TextField(
+          controller: _address1TextFieldController,
+          decoration:
+              textFieldDecoration(icon: Icons.house, labelName: 'Address'),
+        ),
       ),
     );
   }
@@ -291,9 +337,13 @@ class NewUserState extends State<NewUser> {
   Widget _createPostalCodeField() {
     return Expanded(
       flex: 2,
-      child: TextField(
-        controller: _postalCodeTextFieldController,
-        decoration: textFieldDecoration(icon: Icons.numbers, labelName: 'Unit'),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+        child: TextField(
+          controller: _postalCodeTextFieldController,
+          decoration: textFieldDecoration(
+              icon: Icons.abc_outlined, labelName: 'Postal Code'),
+        ),
       ),
     );
   }
@@ -309,6 +359,7 @@ class NewUserState extends State<NewUser> {
           // alignment: Alignment.center,
           decoration: InputDecoration(
             labelText: "Province",
+            icon: Icon(Icons.rectangle_rounded),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(width: 2, color: Colors.grey),
@@ -339,15 +390,11 @@ class NewUserState extends State<NewUser> {
       height: 40,
       padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
       child: ElevatedButton(
-        style: ElevatedButton.styleFrom(backgroundColor: secondaryColor),
-        child: checkifNewUser(widget.user ?? User.def())
-            ? Text('Create', style: TextStyle(color: Colors.white))
-            : Text('Update', style: TextStyle(color: Colors.white)),
-        onPressed: () {
-          if (passwordInadequateMessage.isNotEmpty) {
-            openDialog(context, 'Insufficient Password',
-                passwordInadequateMessage, passwordInadequateMessage);
-          } else {
+          style: ElevatedButton.styleFrom(backgroundColor: secondaryColor),
+          child: checkifNewUser(widget.user ?? User.def())
+              ? Text('Create', style: TextStyle(color: Colors.white))
+              : Text('Update', style: TextStyle(color: Colors.white)),
+          onPressed: () async {
             _validateTextFields();
 
             if (_textFieldsAreAllValid()) {
@@ -355,72 +402,29 @@ class NewUserState extends State<NewUser> {
                 widget.user = User.def();
                 widget.user?.email = _emailTextFieldController.text;
               }
-              widget.user?.fullName = _fullNameTextFieldController.text;
-              widget.user?.userType = 'visitor';
-              widget.user?.userId = "666";
-              widget.user?.mobileNumber = _mobileNumberTextFieldController.text;
-              widget.user?.address = _address1TextFieldController.text;
+              widget.user?.name = _fullNameTextFieldController.text;
+              widget.user?.register_as = _role;
+              widget.user?.master_access_code =
+                  _accessCodeTextFieldController.text.trim();
+              widget.user?.mobile = _mobileNumberTextFieldController.text;
+              widget.user?.address1 = _address1TextFieldController.text;
               widget.user?.unitNumber = _unitNumberTextFieldController.text;
               widget.user?.city = _cityTextFieldController.text;
               widget.user?.province = _province;
               widget.user?.postalCode = _postalCodeTextFieldController.text;
+              widget.user?.auth_level = '13';
+              widget.user?.status = '1';
 
-              //if address matches property assign property ID to user
-              var propertyID = sessionCubit?.checkIfValidProperty(
-                  _cityTextFieldController.text.toLowerCase(),
-                  _address1TextFieldController.text.toLowerCase());
+              final response = await databaseManager.createUser(widget.user!);
 
-              if (propertyID != null) {
-                widget.user?.propertyId = propertyID;
-
-                if (isNewUser) {
-                  openDialog(
-                      context,
-                      '✅ User Created!',
-                      "You can now login! Your address matches one of our properties, we have sent a request to your property manager to give you residence access!",
-                      "You can now login! Your address matches one of our properties, we have sent a request to your property manager to give you residence access!");
-                }
-              } else {
-                if (isNewUser) {
-                  openDialog(
-                      context,
-                      '✅ User Created!',
-                      "Thank you very using R2Park, sign in to register your vehicle!",
-                      "Thank you very using R2Park, sign in to register your vehicle!");
-                } else {
-                  openDialog(
-                      context,
-                      'Success ✅',
-                      "Your account has been updated!",
-                      "Your account has been updated!");
-                }
-              }
-              if (isNewUser) {
-                if (widget.user?.email != null) {
-                  setState(() {
-                    sendEmail(email: _emailTextFieldController.text);
-                  });
-
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(
-                          builder: (context) => ConfirmEmail(
-                                email: _emailTextFieldController.text,
-                                newPass: newPass,
-                              )))
-                      .then((value) => Navigator.of(context).pop(widget.user));
-                }
-              } else {
-                databaseManager.updateUser(widget.user!);
-              }
+              openDialog(context, '✅ User Created!', response, response);
             }
-          }
-        },
-      ),
+          }),
     );
   }
 
   checkifNewUser(User user) {
-    if (user.fullName == '') {
+    if (user.name == '') {
       return true;
     }
     return false;
@@ -509,9 +513,9 @@ class NewUserState extends State<NewUser> {
                 CupertinoActionSheetAction(
                   onPressed: () async {
                     User residentToRemove = loggedInUser!;
-                    residentToRemove.propertyId = "";
-                    residentToRemove.userType = "Visitor";
-                    residentToRemove.address = "";
+                    residentToRemove.master_access_code = "";
+                    residentToRemove.register_as = "Visitor";
+                    residentToRemove.address1 = "";
                     residentToRemove.unitNumber = "";
 
                     databaseManager.updateUser(residentToRemove);
@@ -532,39 +536,39 @@ class NewUserState extends State<NewUser> {
             ));
   }
 
-  final _random = Random();
-  String randomIntString(int min, int max) =>
-      '${min + _random.nextInt(max - min)}';
+  // final _random = Random();
+  // String randomIntString(int min, int max) =>
+  //     '${min + _random.nextInt(max - min)}';
 
-  sendEmail({
-    required String email,
-  }) async {
-    int min = 111111, max = 999999;
-    newPass = randomIntString(min, max);
+  // sendEmail({
+  //   required String email,
+  // }) async {
+  //   int min = 111111, max = 999999;
+  //   newPass = randomIntString(min, max);
 
-    const subject = 'Password Reset for R2Park';
-    final message =
-        'Thank you for using R2Park!\n\n the code to confirm your email is: $newPass \n\n';
+  //   const subject = 'Password Reset for R2Park';
+  //   final message =
+  //       'Thank you for using R2Park!\n\n the code to confirm your email is: $newPass \n\n';
 
-    const serviceId = 'service_r92qfro';
-    const templateId = 'template_3bcglw2';
-    const userId = 'O3E-2XbChA0kAiyXd';
+  //   const serviceId = 'service_r92qfro';
+  //   const templateId = 'template_3bcglw2';
+  //   const userId = 'O3E-2XbChA0kAiyXd';
 
-    final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
-    final _ = await http.post(url,
-        headers: {
-          'origin': 'http://localhost',
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-          'service_id': serviceId,
-          'template_id': templateId,
-          'user_id': userId,
-          'template_params': {
-            'user_email': email,
-            'user_subject': subject,
-            'user_message': message,
-          }
-        }));
-  }
+  //   final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
+  //   final _ = await http.post(url,
+  //       headers: {
+  //         'origin': 'http://localhost',
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: json.encode({
+  //         'service_id': serviceId,
+  //         'template_id': templateId,
+  //         'user_id': userId,
+  //         'template_params': {
+  //           'user_email': email,
+  //           'user_subject': subject,
+  //           'user_message': message,
+  //         }
+  //       }));
+  // }
 }

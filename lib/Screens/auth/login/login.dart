@@ -136,30 +136,30 @@ class LoginState extends State<Login> {
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                 child: GradientButton(
                     borderRadius: BorderRadius.circular(30),
-                    onPressed: () {
-                      if (users != null) {
-                        if (users!.any((element) =>
-                            element.email == usernameController.text)) {
-                          User user = users!.firstWhere((element) =>
-                              element.email == usernameController.text);
-                          if (user.password == passwordController.text) {
-                            sessionCubit.showSession(user);
-                            Navigator.of(context).pop(widget);
-                          } else {
-                            openDialog(
-                                context,
-                                'Invalid Data',
-                                'invalid password',
-                                'Make sure your username and password are correct');
-                          }
-                        } else {
-                          openDialog(
-                              context,
-                              'Invalid Credentials',
-                              'Make sure your username and password are correct',
-                              'Make sure your username and password are correct');
-                        }
+                    onPressed: () async {
+                      final response = await databaseManager.login(
+                          usernameController.text, passwordController.text);
+                      // if (users != null) {
+                      //   if (users!.any((element) =>
+                      //       element.email == usernameController.text)) {
+                      //     User user = users!.firstWhere((element) =>
+                      //         element.email == usernameController.text);
+                      if (response == 'Login Successfully') {
+                        var user = User.def();
+                        sessionCubit.showSession(user);
+                        Navigator.of(context).pop(widget);
+                      } else {
+                        openDialog(context, 'Invalid Data', 'invalid password',
+                            'Make sure your username and password are correct');
                       }
+                      // } else {
+                      //   openDialog(
+                      //       context,
+                      //       'Invalid Credentials',
+                      //       'Make sure your username and password are correct',
+                      //       'Make sure your username and password are correct');
+                      // }
+                      // }
                     },
                     child: Text(
                       'Login',

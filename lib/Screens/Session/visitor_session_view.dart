@@ -696,9 +696,9 @@ class VisitorSessionScreen extends State<VisitorSessionView>
     var registration = Registration.def();
 
     registration.userType = 'Visitor';
-    registration.name = user.fullName;
-    registration.email = user.fullName;
-    registration.phone = user.mobileNumber;
+    registration.name = user.name;
+    registration.email = user.name;
+    registration.phone = user.mobile;
     registration.streetNumber = '';
     registration.streetName =
         _selectedproperty?.propertyAddress ?? 'Error selecting address';
