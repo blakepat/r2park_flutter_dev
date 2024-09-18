@@ -20,6 +20,11 @@ TextStyle kInitialTextLabelStyle = TextStyle(
     fontSize: 14,
     textBaseline: TextBaseline.alphabetic);
 
+TextStyle kAccessCodeListStyle = TextStyle(
+  color: Colors.white,
+  fontSize: 12,
+);
+
 TextStyle kButtonTextStyle =
     TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white);
 

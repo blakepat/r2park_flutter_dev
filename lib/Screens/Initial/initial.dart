@@ -44,7 +44,6 @@ class InitialState extends State<Initial> {
   var _plateProvince = 'ON';
   var _city = 'Choose a City';
   final _focusNode = FocusNode();
-  String? masterAccessCode;
 
   List<String> streetAddresses = [];
 
@@ -82,7 +81,6 @@ class InitialState extends State<Initial> {
     getPreferences();
     // var url = Uri.parse('r2park.ca/c/H65263');
     var url = Uri.parse(Uri.base.origin);
-    print(url);
     WidgetsBinding.instance.addPostFrameCallback((_) => checkIfEmployee(url));
   }
 
@@ -90,8 +88,7 @@ class InitialState extends State<Initial> {
     // print(url);
     if (url.pathSegments.length > 2) {
       var urlType = url.pathSegments[1];
-      masterAccessCode = url.pathSegments[2];
-      print("MASTER ACCESS CODE: $masterAccessCode");
+      print('URL TYPE: $urlType');
       if (urlType == 'c') {
         _employeePressed();
       }
@@ -850,7 +847,6 @@ class InitialState extends State<Initial> {
     Navigator.of(context)
         .push(MaterialPageRoute(
           builder: (context) => EmployeeRegistrationScreen(
-            employeeAccessCode: masterAccessCode,
             sessionCubit: sessionCubit,
           ),
         ))

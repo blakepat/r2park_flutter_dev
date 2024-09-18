@@ -50,13 +50,13 @@ class User {
   factory User.convertFromJson(dynamic json) {
     final user = User.def();
 
-    // user.userId = json['user_id'];
+    user.userId = json['user_id'];
     user.register_as = json['register_as'];
     user.master_access_code = json['master_access_code'];
     user.email = json['email'];
     user.name = json['name'];
     user.mobile = json['mobile'];
-    // user.unitNumber = json['unit_number'];
+    user.unitNumber = json['unit_number'];
     user.address1 = json['address1'];
     user.city = json['city'];
     user.province = json['province'];

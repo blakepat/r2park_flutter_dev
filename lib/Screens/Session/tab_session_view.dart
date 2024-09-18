@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:r2park_flutter_dev/Screens/Session/resident_session_view.dart';
+import 'package:r2park_flutter_dev/Screens/Initial/initial.dart';
+import 'package:r2park_flutter_dev/Screens/Session/generate_code_view.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
-import 'package:r2park_flutter_dev/Screens/Session/visitor_session_view.dart';
 import '../../models/user.dart';
 import '../auth/sign_up/new_user.dart';
 import 'manager_session_view.dart';
@@ -34,12 +34,7 @@ class TabSessionScreen extends State<TabSessionView>
   @override
   void initState() {
     super.initState();
-
-    isResident = user.master_access_code != '';
-    isManager = (user.register_as ?? '').contains("Manager") &&
-        user.master_access_code != '';
-    _tabController = TabController(
-        length: isResident ? (isManager ? 4 : 3) : 2, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -64,21 +59,17 @@ class TabSessionScreen extends State<TabSessionView>
             children: [
               Padding(
                 padding: const EdgeInsets.all(0.0),
-                child:
-                    VisitorSessionView(user: user, sessionCubit: sessionCubit),
+                child: Initial(sessionCubit: sessionCubit),
               ),
-              if (isResident)
-                Padding(
-                  padding: const EdgeInsets.all(0.0),
-                  child: ResidentSessionView(
-                      user: user, sessionCubit: sessionCubit),
-                ),
-              if (isManager)
-                Padding(
-                  padding: const EdgeInsets.all(0.0),
-                  child: ManagerSessionView(
-                      user: user, sessionCubit: sessionCubit),
-                ),
+              Padding(
+                padding: const EdgeInsets.all(0.0),
+                child: GenerateCodeView(user: user, sessionCubit: sessionCubit),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(0.0),
+                child:
+                    ManagerSessionView(user: user, sessionCubit: sessionCubit),
+              ),
               Padding(
                 padding: const EdgeInsets.all(0.0),
                 child: NewUser(
@@ -101,11 +92,11 @@ class TabSessionScreen extends State<TabSessionView>
       if (_activeIndex == 0) {
         title = 'Register To Park';
       } else if (_activeIndex == 1) {
-        title = isResident ? 'Register a Vistor' : 'Update Profile';
+        title = 'Generate Access Codes';
       } else if (_activeIndex == 2) {
-        title = isManager ? 'Manage Residents' : 'Update Profile';
+        title = 'Registrations';
       } else {
-        title = 'Update Profile';
+        title = 'Update Password';
       }
     });
 
@@ -114,28 +105,18 @@ class TabSessionScreen extends State<TabSessionView>
       bottom: TabBar(
           controller: _tabController,
           tabAlignment: TabAlignment.center,
-          labelPadding: EdgeInsets.symmetric(
-              horizontal: isResident
-                  ? isManager
-                      ? screenWidth / 8 - 15
-                      : screenWidth / 6 - 15
-                  : screenWidth / 4 - 15),
+          labelPadding: EdgeInsets.symmetric(horizontal: screenWidth / 8 - 15),
           isScrollable: true,
-          tabs: [
+          tabs: const [
             Tab(
-              icon: Icon(Icons.create_rounded, color: Colors.white),
+              icon: Icon(Icons.home, color: Colors.white),
             ),
-            if (isResident)
-              Tab(
-                icon: Icon(Icons.people, color: Colors.white),
-              ),
-            if (isManager)
-              Tab(
-                icon: Icon(
-                  Icons.perm_contact_cal_sharp,
-                  color: Colors.white,
-                ),
-              ),
+            Tab(
+              icon: Icon(Icons.numbers, color: Colors.white),
+            ),
+            Tab(
+              icon: Icon(Icons.checklist, color: Colors.white),
+            ),
             Tab(
               icon: Icon(Icons.person, color: Colors.white),
             ),

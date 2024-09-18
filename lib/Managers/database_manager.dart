@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:r2park_flutter_dev/Screens/employee_registration/employee_registration_screen.dart';
 import 'package:r2park_flutter_dev/models/access_code_property.dart';
+import 'package:r2park_flutter_dev/models/access_code_request.dart';
 import 'package:r2park_flutter_dev/models/city.dart';
 import 'package:r2park_flutter_dev/models/database_response_message.dart';
 import 'package:r2park_flutter_dev/models/employee_registration.dart';
@@ -152,7 +153,7 @@ class DatabaseManager {
   //   print("New User: ${jsonUser}");
   // }
 
-  Future<String> login(String email, String password) async {
+  Future<User?> login(String email, String password) async {
     var loginUser = LoginUser(email: email.trim(), password: password.trim());
     final jsonUser = loginUser.toJson();
 
@@ -169,9 +170,36 @@ class DatabaseManager {
     );
 
     final data = await json.decode(response.body);
+    final userJSON = data['user_data'];
+
+    final user = User.convertFromJson(userJSON);
+    print(user.userId);
+
+    // print("DATA: $data");
+
+    return user;
+  }
+
+  Future<String> generateAccessCodes(
+      AccessCodeRequest accessCodeRequest) async {
+    final jsonRequest = accessCodeRequest.toJson();
+
+    print(jsonRequest);
+
+    var url = Uri.https(baseUrl, '/services/GenrateAccessCode/');
+    final response = await http.post(
+      url,
+      // headers: {"Content-Type": "application/json"},
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(jsonRequest),
+    );
+
+    final data = await json.decode(response.body);
     final responseString = data['message'];
 
-    print(responseString);
+    print("DATA: $data");
 
     return responseString;
   }

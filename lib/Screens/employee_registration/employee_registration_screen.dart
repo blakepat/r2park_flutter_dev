@@ -17,20 +17,17 @@ import 'package:url_launcher/url_launcher.dart';
 
 class EmployeeRegistrationScreen extends StatefulWidget {
   final SessionCubit sessionCubit;
-  final String? employeeAccessCode;
   @override
   // ignore: no_logic_in_create_state
   EmployeeRegistrationScreenState createState() =>
-      EmployeeRegistrationScreenState(sessionCubit: sessionCubit, employeeAccessCode: employeeAccessCode);
+      EmployeeRegistrationScreenState(sessionCubit: sessionCubit);
 
-  const EmployeeRegistrationScreen(
-      {super.key, required this.sessionCubit, this.employeeAccessCode});
+  const EmployeeRegistrationScreen({super.key, required this.sessionCubit});
 }
 
 class EmployeeRegistrationScreenState
     extends State<EmployeeRegistrationScreen> {
   final SessionCubit sessionCubit;
-  final String? employeeAccessCode;
 
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -60,24 +57,12 @@ class EmployeeRegistrationScreenState
   var databaseManager = DatabaseManager();
   SharedPreferences? _prefs;
 
-  EmployeeRegistrationScreenState(
-      {required this.sessionCubit, this.employeeAccessCode});
+  EmployeeRegistrationScreenState({required this.sessionCubit});
 
   @override
   void initState() {
     super.initState();
     getPreferences();
-    print(employeeAccessCode);
-    if (employeeAccessCode != null) {
-      populateFieldsForPropertyID(employeeAccessCode!);
-    }
-  }
-
-  void populateFieldsForPropertyID(String eac) {
-    print("Populate called");
-    setState(() {
-      accessCodeController.text = eac;
-    });
   }
 
   void getPreferences() async {

@@ -159,7 +159,7 @@ class NewUserState extends State<NewUser> {
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Row(
                     children: [
-                      _createPlateProvinceDropDownMenu(),
+                      _createProvinceDropDownMenu(),
                       _createPostalCodeField()
                     ],
                   ),
@@ -255,7 +255,7 @@ class NewUserState extends State<NewUser> {
         textCapitalization: TextCapitalization.characters,
         inputFormatters: [UpperCaseTextFormatter()],
         decoration:
-            textFieldDecoration(icon: Icons.code, labelName: 'Access Code'),
+            textFieldDecoration(icon: Icons.abc_rounded, labelName: 'Access Code'),
         // onChanged: (value) async {
         //   if (value.length == 6) {
         //     accessCodeProperty = await databaseManager.checkAccessCode(value);
@@ -356,13 +356,13 @@ class NewUserState extends State<NewUser> {
         child: TextField(
           controller: _postalCodeTextFieldController,
           decoration: textFieldDecoration(
-              icon: Icons.abc_outlined, labelName: 'Postal Code'),
+              icon: Icons.css, labelName: 'Postal Code'),
         ),
       ),
     );
   }
 
-  Widget _createPlateProvinceDropDownMenu() {
+  Widget _createProvinceDropDownMenu() {
     return Expanded(
         flex: 2,
         child: DropdownButtonFormField(
@@ -373,7 +373,7 @@ class NewUserState extends State<NewUser> {
           // alignment: Alignment.center,
           decoration: InputDecoration(
             labelText: "Province",
-            icon: Icon(Icons.rectangle_rounded),
+            icon: Icon(Icons.pin_drop),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(width: 2, color: Colors.grey),

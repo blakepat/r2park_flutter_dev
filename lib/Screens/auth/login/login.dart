@@ -137,15 +137,14 @@ class LoginState extends State<Login> {
                 child: GradientButton(
                     borderRadius: BorderRadius.circular(30),
                     onPressed: () async {
-                      final response = await databaseManager.login(
+                      final user = await databaseManager.login(
                           usernameController.text, passwordController.text);
                       // if (users != null) {
                       //   if (users!.any((element) =>
                       //       element.email == usernameController.text)) {
                       //     User user = users!.firstWhere((element) =>
                       //         element.email == usernameController.text);
-                      if (response == 'Login Successfully') {
-                        var user = User.def();
+                      if (user != null) {
                         sessionCubit.showSession(user);
                         Navigator.of(context).pop(widget);
                       } else {
