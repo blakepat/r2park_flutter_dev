@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
+import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
 import 'package:r2park_flutter_dev/Screens/Initial/initial.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
@@ -64,6 +65,7 @@ class NewUserState extends State<NewUser> {
   var _role = 'Choose a Role';
 
   AccessCodeProperty? accessCodeProperty;
+  FocusNode accessCodeFocus = FocusNode();
 
   NewUserState(
       {required this.isManagerScreen, this.loggedInUser, this.sessionCubit});
@@ -75,8 +77,6 @@ class NewUserState extends State<NewUser> {
     isNewUser = checkifNewUser(widget.user ?? User.def());
     widget.user ??= User.def();
 
-    print("💜💜 ${sessionCubit?.roles}");
-
     _emailTextFieldController.text = widget.user?.email ?? '';
     _fullNameTextFieldController.text = widget.user?.name ?? '';
     _mobileNumberTextFieldController.text = widget.user?.mobile ?? '';
@@ -86,6 +86,20 @@ class NewUserState extends State<NewUser> {
     _province = widget.user?.province?.toUpperCase() ?? 'ON';
     _province.isEmpty ? {_province = 'ON'} : '';
     _postalCodeTextFieldController.text = widget.user?.postalCode ?? '';
+
+    accessCodeFocus.addListener(() async {
+      print('🚒🚒');
+      if (!accessCodeFocus.hasFocus) {
+        accessCodeProperty = await databaseManager
+            .checkAccessCode(_accessCodeTextFieldController.text);
+        if (accessCodeProperty != null) {
+          setState(() {
+            addressSplitter(accessCodeProperty?.property_address ?? 'failed');
+            _province = accessCodeProperty?.province ?? 'ON';
+          });
+        }
+      }
+    });
   }
 
   @override
@@ -228,7 +242,6 @@ class NewUserState extends State<NewUser> {
 
   void roleDropdownCallback(Role? selectedValue) {
     setState(() {
-      print(selectedValue?.name ?? '');
       _role = selectedValue?.name ?? '';
     });
   }
@@ -238,23 +251,24 @@ class NewUserState extends State<NewUser> {
       padding: EdgeInsets.all(8),
       child: TextField(
         controller: _accessCodeTextFieldController,
+        focusNode: accessCodeFocus,
         textCapitalization: TextCapitalization.characters,
         inputFormatters: [UpperCaseTextFormatter()],
         decoration:
             textFieldDecoration(icon: Icons.code, labelName: 'Access Code'),
-        onChanged: (value) async {
-          if (value.length == 6) {
-            accessCodeProperty = await databaseManager.checkAccessCode(value);
+        // onChanged: (value) async {
+        //   if (value.length == 6) {
+        //     accessCodeProperty = await databaseManager.checkAccessCode(value);
 
-            if (accessCodeProperty != null) {
-              setState(() {
-                addressSplitter(
-                    accessCodeProperty?.property_address ?? 'failed');
-                _province = accessCodeProperty?.province ?? 'ON';
-              });
-            }
-          }
-        },
+        //     if (accessCodeProperty != null) {
+        //       setState(() {
+        //         addressSplitter(
+        //             accessCodeProperty?.property_address ?? 'failed');
+        //         _province = accessCodeProperty?.province ?? 'ON';
+        //       });
+        //     }
+        //   }
+        // },
       ),
     );
   }
@@ -389,8 +403,9 @@ class NewUserState extends State<NewUser> {
     return Container(
       height: 40,
       padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-      child: ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: secondaryColor),
+      child: GradientButton(
+          borderRadius: BorderRadius.circular(20),
+          width: 200,
           child: checkifNewUser(widget.user ?? User.def())
               ? Text('Create', style: TextStyle(color: Colors.white))
               : Text('Update', style: TextStyle(color: Colors.white)),

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,6 +44,7 @@ class InitialState extends State<Initial> {
   var _plateProvince = 'ON';
   var _city = 'Choose a City';
   final _focusNode = FocusNode();
+  String? masterAccessCode;
 
   List<String> streetAddresses = [];
 
@@ -78,6 +80,22 @@ class InitialState extends State<Initial> {
   void initState() {
     super.initState();
     getPreferences();
+    // var url = Uri.parse('r2park.ca/c/H65263');
+    var url = Uri.parse(Uri.base.origin);
+    print(url);
+    WidgetsBinding.instance.addPostFrameCallback((_) => checkIfEmployee(url));
+  }
+
+  void checkIfEmployee(Uri url) {
+    // print(url);
+    if (url.pathSegments.length > 2) {
+      var urlType = url.pathSegments[1];
+      masterAccessCode = url.pathSegments[2];
+      print("MASTER ACCESS CODE: $masterAccessCode");
+      if (urlType == 'c') {
+        _employeePressed();
+      }
+    }
   }
 
   void getPreferences() async {
@@ -832,6 +850,7 @@ class InitialState extends State<Initial> {
     Navigator.of(context)
         .push(MaterialPageRoute(
           builder: (context) => EmployeeRegistrationScreen(
+            employeeAccessCode: masterAccessCode,
             sessionCubit: sessionCubit,
           ),
         ))

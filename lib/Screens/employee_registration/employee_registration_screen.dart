@@ -10,7 +10,6 @@ import 'package:r2park_flutter_dev/Screens/Initial/initial.dart';
 import 'package:r2park_flutter_dev/Screens/Initial/terms_and_conditions.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Screens/auth/login/login.dart';
-import 'package:r2park_flutter_dev/models/database_response_message.dart';
 import 'package:r2park_flutter_dev/models/employee_registration.dart';
 import 'package:r2park_flutter_dev/models/registration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,17 +17,20 @@ import 'package:url_launcher/url_launcher.dart';
 
 class EmployeeRegistrationScreen extends StatefulWidget {
   final SessionCubit sessionCubit;
+  final String? employeeAccessCode;
   @override
   // ignore: no_logic_in_create_state
   EmployeeRegistrationScreenState createState() =>
-      EmployeeRegistrationScreenState(sessionCubit: sessionCubit);
+      EmployeeRegistrationScreenState(sessionCubit: sessionCubit, employeeAccessCode: employeeAccessCode);
 
-  const EmployeeRegistrationScreen({super.key, required this.sessionCubit});
+  const EmployeeRegistrationScreen(
+      {super.key, required this.sessionCubit, this.employeeAccessCode});
 }
 
 class EmployeeRegistrationScreenState
     extends State<EmployeeRegistrationScreen> {
   final SessionCubit sessionCubit;
+  final String? employeeAccessCode;
 
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -58,12 +60,24 @@ class EmployeeRegistrationScreenState
   var databaseManager = DatabaseManager();
   SharedPreferences? _prefs;
 
-  EmployeeRegistrationScreenState({required this.sessionCubit});
+  EmployeeRegistrationScreenState(
+      {required this.sessionCubit, this.employeeAccessCode});
 
   @override
   void initState() {
     super.initState();
     getPreferences();
+    print(employeeAccessCode);
+    if (employeeAccessCode != null) {
+      populateFieldsForPropertyID(employeeAccessCode!);
+    }
+  }
+
+  void populateFieldsForPropertyID(String eac) {
+    print("Populate called");
+    setState(() {
+      accessCodeController.text = eac;
+    });
   }
 
   void getPreferences() async {
