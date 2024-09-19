@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:r2park_flutter_dev/Screens/Initial/initial.dart';
 import 'package:r2park_flutter_dev/Screens/Session/generate_code_view.dart';
+import 'package:r2park_flutter_dev/Screens/Session/session_account_view.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import '../../models/user.dart';
 import '../auth/sign_up/new_user.dart';
-import 'manager_session_view.dart';
+import 'registrations_view.dart';
 
 class TabSessionView extends StatefulWidget {
   final User user;
@@ -59,7 +60,7 @@ class TabSessionScreen extends State<TabSessionView>
             children: [
               Padding(
                 padding: const EdgeInsets.all(0.0),
-                child: Initial(sessionCubit: sessionCubit),
+                child: Initial(showAppBar: false, sessionCubit: sessionCubit),
               ),
               Padding(
                 padding: const EdgeInsets.all(0.0),
@@ -68,14 +69,14 @@ class TabSessionScreen extends State<TabSessionView>
               Padding(
                 padding: const EdgeInsets.all(0.0),
                 child:
-                    ManagerSessionView(user: user, sessionCubit: sessionCubit),
+                    RegistrationsView(user: user, sessionCubit: sessionCubit),
               ),
               Padding(
                 padding: const EdgeInsets.all(0.0),
-                child: NewUser(
-                    isManagerScreen: false,
-                    user: user,
-                    sessionCubit: sessionCubit),
+                child: SessionAccountView(
+                  sessionCubit: sessionCubit,
+                  user: user,
+                ),
               ),
             ],
           ),

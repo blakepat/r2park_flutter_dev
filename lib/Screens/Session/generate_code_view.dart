@@ -34,24 +34,17 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
   final _purposeController = TextEditingController();
   final _durationController = TextEditingController();
 
-  List<AccessCode> access_codes = [];
+  List<AccessCode> accessCodes = [];
 
   @override
   void initState() {
     super.initState();
 
-    final testCode = AccessCode(
-        user_id: '1455',
-        access_code: 'H65253',
-        description: 'TEST',
-        duration: '4',
-        expiry: 'Sept 4, 2023',
-        created_at: 'Sept 1, 2034',
-        last_increment: 'TEST');
+    getAccessCodes();
+  }
 
-    for (int i = 0; i < 10; i++) {
-      access_codes.add(testCode);
-    }
+  void getAccessCodes() async {
+    accessCodes = await databaseManager.getAccessCodes(user.userId ?? "");
   }
 
   @override
@@ -146,7 +139,7 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
     );
   }
 
-  void _generateCodes() {
+  void _generateCodes() async {
     final accessCodeRequest = AccessCodeRequest(
       user_id: user.userId ?? '',
       description: _purposeController.text,
@@ -155,6 +148,10 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
     );
 
     databaseManager.generateAccessCodes(accessCodeRequest);
+    var newCodes = await databaseManager.getAccessCodes(user.userId ?? "");
+    setState(() {
+      accessCodes = newCodes;
+    });
   }
 
   //------------------------------------------------------
@@ -191,16 +188,17 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
                 borderRadius: BorderRadius.circular(12),
                 color: tertiaryColor,
                 border: Border.all(color: Colors.white)),
-            child: Column(
-                    children: [ListView(
-                            scrollDirection: Axis.vertical,
-                            shrinkWrap: true,
-                            physics: ClampingScrollPhysics(),
-                            children: _createListObjects())])));
+            child: Column(children: [
+              ListView(
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  physics: ClampingScrollPhysics(),
+                  children: _createListObjects())
+            ])));
   }
 
   List<Widget> _createListObjects() {
-    return access_codes
+    return accessCodes
         .map((code) => Padding(
             padding: const EdgeInsets.all(8.0),
             child: Container(

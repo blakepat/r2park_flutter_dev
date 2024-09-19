@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:r2park_flutter_dev/Screens/employee_registration/employee_registration_screen.dart';
+import 'package:r2park_flutter_dev/models/access_code.dart';
 import 'package:r2park_flutter_dev/models/access_code_property.dart';
 import 'package:r2park_flutter_dev/models/access_code_request.dart';
 import 'package:r2park_flutter_dev/models/city.dart';
@@ -19,19 +20,6 @@ class DatabaseManager {
   final Future<SharedPreferences> preferences = SharedPreferences.getInstance();
   // var baseUrl = 'r2park.biz';
   var baseUrl = 'dev.r2p.live';
-
-  // Future<List<User>> getUsersFromJson() async {
-  //   List<User> users = [];
-
-  //   final String response =
-  //       await rootBundle.loadString('assets/r2park_table.json');
-  //   final data = await json.decode(response);
-  //   List jsonUsers = data["users"];
-
-  //   users = jsonUsers.map((entry) => User.convertFromJson(entry)).toList();
-
-  //   return users;
-  // }
 
   Future<List<User>> getUsersFromDevelopment() async {
     List<User> users = [];
@@ -111,12 +99,6 @@ class DatabaseManager {
     return streetAddress;
   }
 
-  // Future<void> getDataFromPostman() async {
-  //   var url = Uri.https(baseUrl, '/services/registry_index');
-  //   // var response = await http.get(url);
-  //   // print(json.decode(response.body));
-  // }
-
   Future<List<Property>> getPropertiesFromJson() async {
     List<Property> properties = [];
 
@@ -132,52 +114,6 @@ class DatabaseManager {
         jsonProperties.map((entry) => Property.convertFromJson(entry)).toList();
 
     return properties;
-  }
-
-  Future<List<String>> getBlacklistLicencePlates() async {
-    List<String> blacklistPlates = [];
-
-    final String response =
-        await rootBundle.loadString('assets/r2park_table.json');
-    final data = await json.decode(response);
-    List jsonProperties = data["blacklistPlates"];
-
-    blacklistPlates = jsonProperties.map((entry) => '').toList();
-
-    return blacklistPlates;
-  }
-
-  // Future<void> createUser(User user) async {
-  //   var jsonUser = user.toJson();
-
-  //   print("New User: ${jsonUser}");
-  // }
-
-  Future<User?> login(String email, String password) async {
-    var loginUser = LoginUser(email: email.trim(), password: password.trim());
-    final jsonUser = loginUser.toJson();
-
-    print(jsonUser);
-
-    var url = Uri.https(baseUrl, '/services/LoginPortal/');
-    final response = await http.post(
-      url,
-      // headers: {"Content-Type": "application/json"},
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(jsonUser),
-    );
-
-    final data = await json.decode(response.body);
-    final userJSON = data['user_data'];
-
-    final user = User.convertFromJson(userJSON);
-    print(user.userId);
-
-    // print("DATA: $data");
-
-    return user;
   }
 
   Future<String> generateAccessCodes(
@@ -200,6 +136,104 @@ class DatabaseManager {
     final responseString = data['message'];
 
     print("DATA: $data");
+
+    return responseString;
+  }
+
+  Future<List<AccessCode>> getAccessCodes(String userId) async {
+    List<AccessCode> accessCodes = [];
+
+    final Map<String, dynamic> userIdData = <String, dynamic>{};
+
+    userIdData['user_id'] = userId;
+
+    var url = Uri.https(baseUrl, '/services/GetAccessCodes/');
+    final response = await http.post(url,
+        // headers: {"Content-Type": "application/json"},
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(userIdData));
+
+    final data = await json.decode(response.body);
+    List accessCodesJSON = data["access_codes"];
+
+    accessCodes = accessCodesJSON
+        .map((entry) => AccessCode.convertFromJson(entry))
+        .toList();
+
+    return accessCodes;
+  }
+
+  Future<User?> login(String email, String password) async {
+    var loginUser = LoginUser(email: email.trim(), password: password.trim());
+    final jsonUser = loginUser.toJson();
+
+    print(jsonUser);
+
+    var url = Uri.https(baseUrl, '/services/LoginPortal/');
+    final response = await http.post(
+      url,
+      // headers: {"Content-Type": "application/json"},
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(jsonUser),
+    );
+
+    final data = await json.decode(response.body);
+    final userJSON = data['user_data'];
+
+    print(userJSON);
+
+    final user = User.convertFromJson(userJSON);
+    // print(user.userId);
+
+    return user;
+  }
+
+  Future<void> sendPasswordCode(String email, String masterAccessCode) async {
+    final Map<String, dynamic> userData = <String, dynamic>{};
+
+    userData['email'] = email;
+    userData['master_access_code'] = masterAccessCode;
+
+    var url = Uri.https(baseUrl, '/services/ForgetPasswordCodePortal');
+    final response = await http.post(
+      url,
+      // headers: {"Content-Type": "application/json"},
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(userData),
+    );
+
+    final data = await json.decode(response.body);
+    print(response.body);
+
+    // print(responseString);
+
+  }
+
+  Future<String> changePassword(String code, String newPassword) async {
+     final Map<String, dynamic> userData = <String, dynamic>{};
+
+    userData['forgot_code'] = code;
+    userData['new_password'] = newPassword;
+
+    var url = Uri.https(baseUrl, '/services/ForgetPasswordPortal');
+    final response = await http.post(
+      url,
+      // headers: {"Content-Type": "application/json"},
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(userData),
+    );
+
+    final data = await json.decode(response.body);
+    print(response.body);
+    final responseString = data['message'];
 
     return responseString;
   }

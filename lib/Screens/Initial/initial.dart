@@ -22,15 +22,17 @@ import 'package:url_launcher/url_launcher.dart';
 
 class Initial extends StatefulWidget {
   final SessionCubit sessionCubit;
+  final bool showAppBar;
   @override
   // ignore: no_logic_in_create_state
-  InitialState createState() => InitialState(sessionCubit: sessionCubit);
+  InitialState createState() => InitialState(sessionCubit: sessionCubit, showAppBar: showAppBar);
 
-  const Initial({super.key, required this.sessionCubit});
+  const Initial({super.key, required this.sessionCubit, required this.showAppBar});
 }
 
 class InitialState extends State<Initial> {
   final SessionCubit sessionCubit;
+  final bool showAppBar;
 
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -73,7 +75,7 @@ class InitialState extends State<Initial> {
   var databaseManager = DatabaseManager();
   SharedPreferences? _prefs;
 
-  InitialState({required this.sessionCubit});
+  InitialState({required this.sessionCubit, required this.showAppBar});
 
   @override
   void initState() {
@@ -117,7 +119,8 @@ class InitialState extends State<Initial> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-        appBar: AppBar(
+        appBar: 
+        (showAppBar ? AppBar(
           systemOverlayStyle: statusBarStyle,
           leadingWidth: 180,
           toolbarHeight: 80,
@@ -150,7 +153,7 @@ class InitialState extends State<Initial> {
                   style: TextStyle(color: Colors.white, fontSize: 18),
                 ))
           ],
-        ),
+        ): null),
         body: SafeArea(
           child: Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),

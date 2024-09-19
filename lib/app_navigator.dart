@@ -63,6 +63,7 @@ class AppNavigator extends StatelessWidget {
                               primary: Color.fromARGB(220, 160, 245, 107))),
                       home: Initial(
                         // Login(
+                          showAppBar: true,
                         sessionCubit: context.read<SessionCubit>(),
                       ),
                     )),

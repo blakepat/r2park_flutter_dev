@@ -515,6 +515,7 @@ class EmployeeRegistrationScreenState
     Navigator.of(context)
         .push(MaterialPageRoute(
           builder: (context) => Initial(
+            showAppBar: true,
             sessionCubit: sessionCubit,
           ),
         ))

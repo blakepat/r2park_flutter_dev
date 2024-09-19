@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'dart:convert';
 import 'package:toast/toast.dart';
 
@@ -14,105 +15,16 @@ class ForgotPassword extends StatefulWidget {
 
 class ForgotPasswordScreen extends State<ForgotPassword> {
   TextEditingController userEmailTextField = TextEditingController();
+  TextEditingController masterAccessCodeTextField = TextEditingController();
   TextEditingController resetCodeTextField = TextEditingController();
   TextEditingController newPasswordTextField = TextEditingController();
+
+  final databaseManager = DatabaseManager();
 
   String? accountEmail;
   String? verifyLink;
   bool showCodeTextField = false;
   bool showNewPasswordTextField = false;
-  Future checkUser() async {
-    // var url = Uri.http('localhost', 'check.php');
-    var url = Uri.parse('http://localhost/check.php');
-    var response = await http.post(url, body: {
-      'email': userEmailTextField.text,
-    });
-    var link = json.decode(response.body);
-    if (link == 'INVALIDUSER') {
-      showToast('This user does not exist, please double check and try again!',
-          duration: 3, gravity: Toast.bottom);
-    } else {
-      setState(() {
-        verifyLink = link;
-        showCodeTextField = true;
-        verfiyAndGetCode(verifyLink ?? '');
-      });
-      //   showToast('Click Verify Button to Reset Password',
-      //       duration: 3, gravity: Toast.bottom);
-    }
-  }
-
-  String newPass = '0';
-
-  Future verfiyAndGetCode(String changePassLink) async {
-    var url = Uri.parse(changePassLink);
-    var response = await http.post(url);
-    var link = json.decode(response.body);
-    setState(() {
-      newPass = link;
-      accountEmail = userEmailTextField.text;
-      sendEmail(email: userEmailTextField.text);
-    });
-
-    showToast(
-        'Your password reset email has been sent, please check your email',
-        duration: 3,
-        gravity: Toast.bottom);
-  }
-
-  Future changePassword() async {
-    // var url = Uri.http('localhost', 'check.php');
-    var url = Uri.parse('http://localhost/changepass.php');
-    var response = await http.post(url, body: {
-      'email': userEmailTextField.text,
-      'newPassword': newPasswordTextField.text
-    });
-    var link = json.decode(response.body);
-    if (link == 'COUNT3') {
-      showToast('This user does not exist, please double check and try again!',
-          duration: 3, gravity: Toast.bottom);
-    } else {
-      setState(() {
-        Navigator.of(context)
-            .pop(([userEmailTextField.text, newPasswordTextField.text]));
-      });
-      //   showToast('Click Verify Button to Reset Password',
-      //       duration: 3, gravity: Toast.bottom);
-    }
-  }
-
-  sendEmail({
-    required String email,
-  }) async {
-    const subject = 'Password Reset for R2Park';
-    final message =
-        'Thank you for using R2Park!\n\n Your reset Password code is: $newPass \n\n';
-
-    const serviceId = 'service_r92qfro';
-    const templateId = 'template_3bcglw2';
-    const userId = 'O3E-2XbChA0kAiyXd';
-
-    final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
-    final _ = await http.post(url,
-        headers: {
-          'origin': 'http://localhost',
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-          'service_id': serviceId,
-          'template_id': templateId,
-          'user_id': userId,
-          'template_params': {
-            // 'user_name': name,
-            'user_email': email,
-            // 'to_email': email,
-            'user_subject': subject,
-            'user_message': message,
-          }
-        }));
-
-    // print(response.body);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,12 +33,22 @@ class ForgotPasswordScreen extends State<ForgotPassword> {
         appBar: AppBar(title: Text('Password Recovery')),
         body: SafeArea(
           child: showNewPasswordTextField
+          //---------------------------------------------
+          //These are widgets for reseting password
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
                       alignment: Alignment.center,
                       child: _createLogoView(),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(80, 8, 80, 8),
+                      child: TextField(
+                          controller: resetCodeTextField,
+                          decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              hintText: 'Enter code')),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8),
@@ -141,14 +63,15 @@ class ForgotPasswordScreen extends State<ForgotPassword> {
                       child: MaterialButton(
                         color: secondaryColor,
                         onPressed: () {
-                          //change password
-                          changePassword();
+                          _changePassword();
                         },
                         child: Text('Change Password'),
                       ),
                     ),
                   ],
                 )
+              //-----------------------------------------------
+              //These are widgets for sending reset code to email
               : Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -165,64 +88,56 @@ class ForgotPasswordScreen extends State<ForgotPassword> {
                                   fontSize: 24, fontWeight: FontWeight.w600),
                             ),
                           )
-                        : Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextField(
-                                controller: userEmailTextField,
-                                decoration: InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    hintText: 'User Email')),
+                        : Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TextField(
+                                    controller: userEmailTextField,
+                                    decoration: InputDecoration(
+                                        border: OutlineInputBorder(),
+                                        hintText: 'User Email')),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TextField(
+                                    controller: masterAccessCodeTextField,
+                                    decoration: InputDecoration(
+                                        border: OutlineInputBorder(),
+                                        hintText: 'Master Access Code')),
+                              ),
+                            ],
                           ),
-                    showCodeTextField
-                        ? Padding(
-                            padding: const EdgeInsets.fromLTRB(80, 8, 80, 8),
-                            child: TextField(
-                                controller: resetCodeTextField,
-                                decoration: InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    hintText: 'Enter code')),
-                          )
-                        : Container(),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: MaterialButton(
                         color:
-                            showCodeTextField ? Colors.purple : secondaryColor,
+                            Colors.purple,
                         onPressed: () {
-                          checkUser();
+                          _sendCodeToEmail();
                         },
-                        child: Text(showCodeTextField
-                            ? 'Resend Recovery Email'
-                            : 'Recover Password'),
+                        child: Text('Recover Password'),
                       ),
                     ),
-                    showCodeTextField
-                        ? Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: MaterialButton(
-                              color: secondaryColor,
-                              onPressed: () {
-                                //show change password screen
-                                if (newPass == resetCodeTextField.text.trim()) {
-                                  setState(() {
-                                    showNewPasswordTextField = true;
-                                  });
-                                } else {
-                                  showToast('Reset Code does not match',
-                                      duration: 3, gravity: Toast.bottom);
-                                }
-                              },
-                              child: Text('Reset Password'),
-                            ),
-                          )
-                        : Container()
                   ],
                 ),
         ));
   }
 
-  showToast(String msg, {required int duration, required int gravity}) {
-    Toast.show(msg, duration: duration, gravity: gravity);
+  void _changePassword() async {
+    print("CHANGE PASSWORD CALLED");
+    await databaseManager.changePassword(
+        resetCodeTextField.text.trim(), newPasswordTextField.text.trim());
+  }
+
+  void _sendCodeToEmail() async {
+    print("SEND CODE CALLED");
+    await databaseManager.sendPasswordCode(
+        userEmailTextField.text.trim(), masterAccessCodeTextField.text.trim());
+    setState(() {
+      showCodeTextField = true;
+      showNewPasswordTextField = true;
+    });
   }
 
   Widget _createLogoView() {
