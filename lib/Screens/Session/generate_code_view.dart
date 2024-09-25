@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
+import 'package:r2park_flutter_dev/Screens/CustomViews/bottom_sheet_widget.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/models/access_code.dart';
@@ -44,7 +46,13 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
   }
 
   void getAccessCodes() async {
-    accessCodes = await databaseManager.getAccessCodes(user.userId ?? "");
+    final acArray = await databaseManager.getAccessCodes(user.userId ?? "");
+    acArray.sort((a, b) => DateTime.parse(b.created_at ?? "")
+        .compareTo(DateTime.parse(a.created_at ?? "")));
+
+    setState(() {
+      accessCodes = acArray;
+    });
   }
 
   @override
@@ -234,10 +242,61 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
                             Text('EXPIRY DATE: ${code.expiry ?? ''}'),
                           ],
                         ),
+                        Row(
+                          children: [
+                            Text(
+                                'STATUS: ${code.status == "1" ? "Active" : "Deactive"}'),
+                            Spacer(),
+                            Text('USER ID: ${code.user_id ?? ''}'),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            GradientButton(
+                                borderRadius: BorderRadius.circular(20),
+                                onPressed: () => {
+                                      _activateAccessCode(
+                                          code.access_code ?? "")
+                                    },
+                                child: Text(
+                                  code.access_code == "1"
+                                      ? "DEACTIVATE"
+                                      : "ACTIVATE",
+                                  style: TextStyle(color: Colors.white),
+                                )),
+                            Spacer(),
+                            GradientButton(
+                                borderRadius: BorderRadius.circular(20),
+                                onPressed: () =>
+                                    {_showAssignSheet(code.access_code ?? "")},
+                                child: Text(
+                                  "ASSIGN",
+                                  style: TextStyle(color: Colors.white),
+                                )),
+                          ],
+                        )
                       ],
                     ),
                   ),
                 ))))
         .toList();
+  }
+
+  void _activateAccessCode(String code) {
+    print("Activate access code called");
+    databaseManager.activateAccessCode(code, user.userId ?? "");
+    getAccessCodes();
+  }
+
+  void _showAssignSheet(String code) async {
+    showModalBottomSheet(
+        context: context, builder: (context) => BottomSheetWidget()).then(
+      (value) async {
+        if (value != null) {
+          await databaseManager.assignAccessCode(code, user.userId ?? "", value[1], value[0]);
+        }
+        getAccessCodes();
+      },
+    );
   }
 }

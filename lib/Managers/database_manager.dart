@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
-import 'package:r2park_flutter_dev/Screens/employee_registration/employee_registration_screen.dart';
 import 'package:r2park_flutter_dev/models/access_code.dart';
 import 'package:r2park_flutter_dev/models/access_code_property.dart';
 import 'package:r2park_flutter_dev/models/access_code_request.dart';
@@ -184,10 +183,10 @@ class DatabaseManager {
     final data = await json.decode(response.body);
     final userJSON = data['user_data'];
 
-    print(userJSON);
+    // print(userJSON);
 
     final user = User.convertFromJson(userJSON);
-    // print(user.userId);
+    print(user.userId);
 
     return user;
   }
@@ -212,11 +211,10 @@ class DatabaseManager {
     print(response.body);
 
     // print(responseString);
-
   }
 
   Future<String> changePassword(String code, String newPassword) async {
-     final Map<String, dynamic> userData = <String, dynamic>{};
+    final Map<String, dynamic> userData = <String, dynamic>{};
 
     userData['forgot_code'] = code;
     userData['new_password'] = newPassword;
@@ -279,6 +277,55 @@ class DatabaseManager {
     }
 
     return accessCodeProperty;
+  }
+
+  Future<void> activateAccessCode(String accessCode, String userId) async {
+    final Map<String, dynamic> accessCodeData = <String, dynamic>{};
+
+    accessCodeData['access_code'] = accessCode;
+    accessCodeData['user_id'] = userId;
+
+    var url = Uri.https(baseUrl, '/services/AccessCodeStatus');
+    final response = await http.post(
+      url,
+      // headers: {"Content-Type": "application/json"},
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(accessCodeData),
+    );
+
+    final data = await json.decode(response.body);
+    print(response.body);
+    final responseString = data['message'];
+    print(responseString);
+  }
+
+  Future<void> assignAccessCode(
+      String accessCode, String userId, String email, String name) async {
+    final Map<String, dynamic> accessCodeData = <String, dynamic>{};
+
+    accessCodeData['access_code'] = accessCode;
+    accessCodeData['user_id'] = userId;
+    accessCodeData['email'] = email;
+    accessCodeData['name'] = name;
+
+    print(accessCodeData);
+
+    var url = Uri.https(baseUrl, '/services/AssignAccessCode');
+    final response = await http.post(
+      url,
+      // headers: {"Content-Type": "application/json"},
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(accessCodeData),
+    );
+
+    final data = await json.decode(response.body);
+    print(response.body);
+    final responseString = data['message'];
+    print(responseString);
   }
 
   Future<void> updateUser(User user) async {
