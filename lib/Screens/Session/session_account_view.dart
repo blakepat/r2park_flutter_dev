@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
 import "package:r2park_flutter_dev/Managers/constants.dart";
+import "package:r2park_flutter_dev/Managers/database_manager.dart";
+import "package:r2park_flutter_dev/Managers/helper_functions.dart";
 import "package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart";
 import "package:r2park_flutter_dev/Screens/Session/session_cubit.dart";
 import "package:r2park_flutter_dev/models/user.dart";
@@ -21,8 +23,12 @@ class SessionAccountScreen extends State<SessionAccountView> {
   final User user;
   final SessionCubit sessionCubit;
 
+  final databaseManager = DatabaseManager();
+
   final _password1Controller = TextEditingController();
   final _password2Controller = TextEditingController();
+
+  final _resetCodeController = TextEditingController();
 
   SessionAccountScreen({required this.user, required this.sessionCubit});
 
@@ -205,12 +211,26 @@ class SessionAccountScreen extends State<SessionAccountView> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(32, 8, 32, 8),
       child: GradientButton(
-        borderRadius: BorderRadius.circular(20),
-          onPressed: _changePassword, child: Text("Change Password")),
+          borderRadius: BorderRadius.circular(20),
+          onPressed: _changePassword,
+          child: Text("Change Password")),
     );
   }
 
-  void _changePassword() {}
+  void _changePassword() async {
+    print("NEED RESET CODE OR NEW API!");
+    if (_password1Controller.text.length > 5 &&
+        _password1Controller.text == _password2Controller.text) {
+      await databaseManager.changePassword(
+          _resetCodeController.text.trim(), _password1Controller.text.trim());
+    } else {
+      openDialog(
+          context,
+          "Password Invalid",
+          "Please ensure password is at least 6 characters long and matches",
+          "Please ensure password is at least 6 characters long and matches");
+    }
+  }
 
   Widget _footerTextView() {
     return Column(

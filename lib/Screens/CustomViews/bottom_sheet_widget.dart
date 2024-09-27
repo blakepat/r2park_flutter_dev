@@ -16,7 +16,7 @@ class _BottomSheetWidgetState extends State<BottomSheetWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 255,
+      height: 305,
       decoration: BoxDecoration(
         color: backgroundBlueGreyColor,
         borderRadius: BorderRadius.circular(15),

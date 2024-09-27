@@ -191,7 +191,7 @@ class DatabaseManager {
     return user;
   }
 
-  Future<void> sendPasswordCode(String email, String masterAccessCode) async {
+  Future<(String, String)> sendPasswordCode(String email, String masterAccessCode) async {
     final Map<String, dynamic> userData = <String, dynamic>{};
 
     userData['email'] = email;
@@ -209,7 +209,7 @@ class DatabaseManager {
 
     final data = await json.decode(response.body);
     print(response.body);
-
+    return (data["message"].toString(), data["status"].toString());
     // print(responseString);
   }
 

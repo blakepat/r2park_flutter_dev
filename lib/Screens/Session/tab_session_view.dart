@@ -53,6 +53,7 @@ class TabSessionScreen extends State<TabSessionView>
       backgroundColor: Color(0xff121212),
       appBar: _createAppBar(width),
       body: SafeArea(
+        bottom: false,
         child: SizedBox(
           width: width,
           child: TabBarView(
@@ -93,11 +94,11 @@ class TabSessionScreen extends State<TabSessionView>
       if (_activeIndex == 0) {
         title = 'Register To Park';
       } else if (_activeIndex == 1) {
-        title = 'Generate Access Codes';
+        title = 'Access Codes';
       } else if (_activeIndex == 2) {
         title = 'Registrations';
       } else {
-        title = 'Update Password';
+        title = 'Account';
       }
     });
 
@@ -113,7 +114,7 @@ class TabSessionScreen extends State<TabSessionView>
               icon: Icon(Icons.home, color: Colors.white),
             ),
             Tab(
-              icon: Icon(Icons.numbers, color: Colors.white),
+              icon: Icon(Icons.add_circle_rounded, color: Colors.white),
             ),
             Tab(
               icon: Icon(Icons.checklist, color: Colors.white),

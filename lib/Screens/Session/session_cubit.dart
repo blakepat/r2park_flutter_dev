@@ -23,8 +23,8 @@ class SessionCubit extends Cubit<SessionState> {
       this.properties,
       this.cities,
       this.roles})
-      : super(UnknownSessionState()) {
-    attemptAutoLogin();
+      : super(Unauthenticated()) {
+    // attemptAutoLogin();
   }
 
   //MARK: - Visitor Methods
@@ -168,6 +168,7 @@ class SessionCubit extends Cubit<SessionState> {
         emit(Authenticated(user: user));
       }
     } catch (e) {
+      print(e);
       emit(Unauthenticated());
     }
   }

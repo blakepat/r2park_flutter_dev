@@ -1,6 +1,5 @@
 import 'dart:math';
-import 'dart:ui';
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -25,9 +24,11 @@ class Initial extends StatefulWidget {
   final bool showAppBar;
   @override
   // ignore: no_logic_in_create_state
-  InitialState createState() => InitialState(sessionCubit: sessionCubit, showAppBar: showAppBar);
+  InitialState createState() =>
+      InitialState(sessionCubit: sessionCubit, showAppBar: showAppBar);
 
-  const Initial({super.key, required this.sessionCubit, required this.showAppBar});
+  const Initial(
+      {super.key, required this.sessionCubit, required this.showAppBar});
 }
 
 class InitialState extends State<Initial> {
@@ -81,9 +82,11 @@ class InitialState extends State<Initial> {
   void initState() {
     super.initState();
     getPreferences();
-    // var url = Uri.parse('r2park.ca/c/H65263');
-    var url = Uri.parse(Uri.base.origin);
-    WidgetsBinding.instance.addPostFrameCallback((_) => checkIfEmployee(url));
+
+    if (kIsWeb) {
+      var url = Uri.parse(Uri.base.origin);
+      WidgetsBinding.instance.addPostFrameCallback((_) => checkIfEmployee(url));
+    } 
   }
 
   void checkIfEmployee(Uri url) {
@@ -119,41 +122,42 @@ class InitialState extends State<Initial> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-        appBar: 
-        (showAppBar ? AppBar(
-          systemOverlayStyle: statusBarStyle,
-          leadingWidth: 180,
-          toolbarHeight: 80,
-          leading: Transform.scale(
-            scale: 1.6,
-            child: Hero(
-              tag: 'logo',
-              child: Padding(
-                padding: const EdgeInsets.only(left: 28),
-                child: Image.asset(
-                  'assets/images/3DLogo.png',
-                  fit: BoxFit.contain,
-                  height: 180,
-                  alignment: Alignment.centerLeft,
+        appBar: (showAppBar
+            ? AppBar(
+                systemOverlayStyle: statusBarStyle,
+                leadingWidth: 180,
+                toolbarHeight: 80,
+                leading: Transform.scale(
+                  scale: 1.6,
+                  child: Hero(
+                    tag: 'logo',
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 28),
+                      child: Image.asset(
+                        'assets/images/3DLogo.png',
+                        fit: BoxFit.contain,
+                        height: 180,
+                        alignment: Alignment.centerLeft,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-                onPressed: _employeePressed,
-                child: Text(
-                  'Employee',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
-                )),
-            TextButton(
-                onPressed: _loginPressed,
-                child: Text(
-                  'Login',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
-                ))
-          ],
-        ): null),
+                actions: [
+                  TextButton(
+                      onPressed: _employeePressed,
+                      child: Text(
+                        'Employee',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      )),
+                  TextButton(
+                      onPressed: _loginPressed,
+                      child: Text(
+                        'Login',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ))
+                ],
+              )
+            : null),
         body: SafeArea(
           child: Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),

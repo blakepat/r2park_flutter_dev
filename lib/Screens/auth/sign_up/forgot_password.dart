@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
+import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
 import 'dart:convert';
 import 'package:toast/toast.dart';
 
@@ -33,8 +34,8 @@ class ForgotPasswordScreen extends State<ForgotPassword> {
         appBar: AppBar(title: Text('Password Recovery')),
         body: SafeArea(
           child: showNewPasswordTextField
-          //---------------------------------------------
-          //These are widgets for reseting password
+              //---------------------------------------------
+              //These are widgets for reseting password
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -66,6 +67,16 @@ class ForgotPasswordScreen extends State<ForgotPassword> {
                           _changePassword();
                         },
                         child: Text('Change Password'),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: MaterialButton(
+                        color: Colors.purple,
+                        onPressed: () {
+                          _sendCodeToEmail();
+                        },
+                        child: Text('Resend Reset Code'),
                       ),
                     ),
                   ],
@@ -111,12 +122,11 @@ class ForgotPasswordScreen extends State<ForgotPassword> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: MaterialButton(
-                        color:
-                            Colors.purple,
+                        color: Colors.purple,
                         onPressed: () {
                           _sendCodeToEmail();
                         },
-                        child: Text('Recover Password'),
+                        child: Text('Send Reset Code to Email'),
                       ),
                     ),
                   ],
@@ -125,18 +135,33 @@ class ForgotPasswordScreen extends State<ForgotPassword> {
   }
 
   void _changePassword() async {
-    print("CHANGE PASSWORD CALLED");
-    await databaseManager.changePassword(
-        resetCodeTextField.text.trim(), newPasswordTextField.text.trim());
+    if (newPasswordTextField.text.length > 5) {
+      print("CHANGE PASSWORD CALLED");
+      await databaseManager.changePassword(
+          resetCodeTextField.text.trim(), newPasswordTextField.text.trim());
+    } else {
+      openDialog(
+          context,
+          "Password Invalid",
+          "Please ensure password is at least 6 characters long",
+          "Please ensure password is at least 6 characters long");
+    }
   }
 
   void _sendCodeToEmail() async {
     print("SEND CODE CALLED");
-    await databaseManager.sendPasswordCode(
+    var apiResponse = ("", "");
+    apiResponse = await databaseManager.sendPasswordCode(
         userEmailTextField.text.trim(), masterAccessCodeTextField.text.trim());
+
     setState(() {
-      showCodeTextField = true;
-      showNewPasswordTextField = true;
+      if (apiResponse.$2 == "1") {
+        showCodeTextField = true;
+        showNewPasswordTextField = true;
+      }
+
+      openDialog(context, apiResponse.$2 == "1" ? "Reset Code sent" : "Error",
+          apiResponse.$1, apiResponse.$1);
     });
   }
 

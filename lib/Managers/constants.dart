@@ -28,7 +28,7 @@ TextStyle kAccessCodeListStyle = TextStyle(
 TextStyle kButtonTextStyle =
     TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white);
 
-InputDecoration textFieldDecoration({icon: Icons, labelName: String}) {
+InputDecoration textFieldDecoration({icon = Icons, labelName = String}) {
   return InputDecoration(
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       // borderSide: BorderSide(width: 0, style: BorderStyle.none)),

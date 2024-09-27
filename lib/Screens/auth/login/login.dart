@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
+import 'package:r2park_flutter_dev/Screens/Session/session_state.dart';
 import 'package:r2park_flutter_dev/Screens/auth/sign_up/forgot_password.dart';
 import '../../../models/user.dart';
 import '../../Session/session_cubit.dart';
@@ -139,26 +140,15 @@ class LoginState extends State<Login> {
                     onPressed: () async {
                       final user = await databaseManager.login(
                           usernameController.text, passwordController.text);
-                      // if (users != null) {
-                      //   if (users!.any((element) =>
-                      //       element.email == usernameController.text)) {
-                      //     User user = users!.firstWhere((element) =>
-                      //         element.email == usernameController.text);
+
                       if (user != null) {
+                        print(user.email);
                         sessionCubit.showSession(user);
                         Navigator.of(context).pop(widget);
                       } else {
                         openDialog(context, 'Invalid Data', 'invalid password',
                             'Make sure your username and password are correct');
                       }
-                      // } else {
-                      //   openDialog(
-                      //       context,
-                      //       'Invalid Credentials',
-                      //       'Make sure your username and password are correct',
-                      //       'Make sure your username and password are correct');
-                      // }
-                      // }
                     },
                     child: Text(
                       'Login',
