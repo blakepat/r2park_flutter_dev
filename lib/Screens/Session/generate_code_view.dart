@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
-import 'package:r2park_flutter_dev/Screens/CustomViews/bottom_sheet_widget.dart';
+import 'package:r2park_flutter_dev/Screens/CustomViews/bottom_assign_sheet.dart';
+import 'package:r2park_flutter_dev/Screens/CustomViews/bottom_edit_sheet.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/models/access_code.dart';
@@ -164,10 +165,19 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
           numberOfCodes > 0 &&
           duration > 0 &&
           duration < 5) {
-        databaseManager.generateAccessCodes(accessCodeRequest);
+        print("😈${accessCodes.length}");
+        final response =
+            await databaseManager.generateAccessCodes(accessCodeRequest);
+
+        openDialog(context, "Response from Server", response, response);
         var newCodes = await databaseManager.getAccessCodes(user.userId ?? "");
         setState(() {
+          _purposeController.text = "";
+          _durationController.text = "";
+          _numberOfCodesController.text = "";
+          print("🤡${newCodes.length}");
           accessCodes = newCodes;
+          getAccessCodes();
         });
       } else {
         openDialog(
@@ -250,32 +260,24 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
                           children: [
                             Text('ACCESS CODE: ${code.access_code ?? ''}'),
                             Spacer(),
-                            Text('USER_ID: ${code.user_id ?? ''}'),
-                          ],
-                        ),
-                        Row(children: [
-                          Text('DESCRIPTION: ${code.description ?? ''}'),
-                          Spacer(),
-                          Text('DURATION: ${code.duration ?? ''}'),
-                        ]),
-                        Row(
-                          children: [
-                            Text(
-                                'STATUS: ${code.status == "1" ? "Active" : "Deactive"}'),
-                            Spacer(),
                             Text('USER ID: ${code.user_id ?? ''}'),
                           ],
                         ),
+                        Row(children: [
+                          Text(
+                              'STATUS: ${code.status == "1" ? "Active" : "Deactive"}'),
+                          Spacer(),
+                          Text('DURATION: ${code.duration ?? ''}'),
+                        ]),
                         Text('CREATED AT: ${code.created_at ?? ''}'),
                         Text('EXPIRY DATE: ${code.expiry ?? ''}'),
-                        // Row(
-                        //   children: [
-
-                        //     Spacer(),
-
-                        //   ],
-                        // ),
-
+                        ConstrainedBox(
+                            constraints: BoxConstraints(
+                                maxWidth:
+                                    MediaQuery.of(context).size.width * 0.8),
+                            child: Text(
+                              'DESCRIPTION: ${code.description ?? ''}',
+                            )),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Row(
@@ -287,12 +289,22 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
                                             code.access_code ?? "")
                                       },
                                   child: Text(
-                                    code.access_code == "1"
+                                    code.status == "1"
                                         ? "DEACTIVATE"
                                         : "ACTIVATE",
                                     style: TextStyle(color: Colors.white),
                                   )),
                               Spacer(),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 4),
+                                child: GradientButton(
+                                    borderRadius: BorderRadius.circular(20),
+                                    onPressed: () => {_showEditSheet(code)},
+                                    child: Text(
+                                      "EDIT",
+                                      style: TextStyle(color: Colors.white),
+                                    )),
+                              ),
                               GradientButton(
                                   borderRadius: BorderRadius.circular(20),
                                   onPressed: () => {
@@ -320,11 +332,28 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
 
   void _showAssignSheet(String code) async {
     showModalBottomSheet(
-        context: context, builder: (context) => BottomSheetWidget()).then(
+        context: context, builder: (context) => BottomAssignSheet()).then(
       (value) async {
         if (value != null) {
           await databaseManager.assignAccessCode(
               code, user.userId ?? "", value[1], value[0]);
+        }
+        getAccessCodes();
+      },
+    );
+  }
+
+  void _showEditSheet(AccessCode code) async {
+    showModalBottomSheet(
+        context: context, builder: (context) => BottomEditSheet()).then(
+      (value) async {
+        if (value != null) {
+          await databaseManager.editAccessCode(
+              accessCode: code.access_code ?? "",
+              userId: code.user_id ?? "",
+              description: value[0],
+              duration: value[1],
+              id: code.id ?? "");
         }
         getAccessCodes();
       },

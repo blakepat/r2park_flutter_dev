@@ -5,7 +5,6 @@ import 'package:r2park_flutter_dev/Screens/Session/generate_code_view.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_account_view.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import '../../models/user.dart';
-import '../auth/sign_up/new_user.dart';
 import 'registrations_view.dart';
 
 class TabSessionView extends StatefulWidget {

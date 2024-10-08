@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:math';
-import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,7 +7,6 @@ import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
 import 'package:r2park_flutter_dev/Screens/Initial/initial.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
 import 'package:r2park_flutter_dev/Managers/helper_functions.dart';
-import 'package:r2park_flutter_dev/Screens/auth/sign_up/confirm_email.dart';
 import 'package:r2park_flutter_dev/models/access_code_property.dart';
 import 'package:r2park_flutter_dev/models/role.dart';
 import '../../../models/user.dart';
@@ -90,9 +86,12 @@ class NewUserState extends State<NewUser> {
     accessCodeFocus.addListener(() async {
       print('🚒🚒');
       if (!accessCodeFocus.hasFocus) {
+        print("INSIDE FOCUS CHECK!");
+        print(_accessCodeTextFieldController.text);
         accessCodeProperty = await databaseManager
             .checkAccessCode(_accessCodeTextFieldController.text);
         if (accessCodeProperty != null) {
+          print("INSIDE ACCESS CODE CHECK");
           setState(() {
             addressSplitter(accessCodeProperty?.property_address ?? 'failed');
             _province = accessCodeProperty?.province ?? 'ON';
@@ -254,8 +253,8 @@ class NewUserState extends State<NewUser> {
         focusNode: accessCodeFocus,
         textCapitalization: TextCapitalization.characters,
         inputFormatters: [UpperCaseTextFormatter()],
-        decoration:
-            textFieldDecoration(icon: Icons.abc_rounded, labelName: 'Access Code'),
+        decoration: textFieldDecoration(
+            icon: Icons.abc_rounded, labelName: 'Access Code'),
         // onChanged: (value) async {
         //   if (value.length == 6) {
         //     accessCodeProperty = await databaseManager.checkAccessCode(value);
@@ -355,8 +354,8 @@ class NewUserState extends State<NewUser> {
         padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
         child: TextField(
           controller: _postalCodeTextFieldController,
-          decoration: textFieldDecoration(
-              icon: Icons.css, labelName: 'Postal Code'),
+          decoration:
+              textFieldDecoration(icon: Icons.css, labelName: 'Postal Code'),
         ),
       ),
     );

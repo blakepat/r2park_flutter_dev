@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
 
-class BottomSheetWidget extends StatefulWidget {
-  const BottomSheetWidget({super.key});
+class BottomEditSheet extends StatefulWidget {
+  const BottomEditSheet({super.key});
 
   @override
-  State<StatefulWidget> createState() => _BottomSheetWidgetState();
+  State<StatefulWidget> createState() => _BottomEditSheetState();
 }
 
-class _BottomSheetWidgetState extends State<BottomSheetWidget> {
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
+class _BottomEditSheetState extends State<BottomEditSheet> {
+  final _descriptionTextField = TextEditingController();
+  final _durationTextField = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class _BottomSheetWidgetState extends State<BottomSheetWidget> {
                 Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Text(
-                    "Assign Access Code To:",
+                    "Edit Access Code:",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -57,26 +57,26 @@ class _BottomSheetWidgetState extends State<BottomSheetWidget> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              controller: _nameController,
+              controller: _descriptionTextField,
               decoration: textFieldDecoration(
-                  icon: Icons.person, labelName: 'Full Name'),
+                  icon: Icons.notes, labelName: 'Description'),
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              controller: _emailController,
-              decoration:
-                  textFieldDecoration(icon: Icons.email, labelName: 'Email'),
+              controller: _durationTextField,
+              decoration: textFieldDecoration(
+                  icon: Icons.punch_clock_rounded, labelName: 'Duration'),
             ),
           ),
           GradientButton(
               borderRadius: BorderRadius.circular(12),
               onPressed: () {
-                _assignAccessCode();
+                _editAccessCode();
               },
               child: Text(
-                "Assign",
+                "Submit",
                 style: TextStyle(color: Colors.white),
               ))
         ],
@@ -84,9 +84,11 @@ class _BottomSheetWidgetState extends State<BottomSheetWidget> {
     );
   }
 
-  void _assignAccessCode() {
-    if (_nameController.text.isNotEmpty && _emailController.text.isNotEmpty) {
-      Navigator.pop(context, [_nameController.text, _emailController.text]);
+  void _editAccessCode() {
+    if (_descriptionTextField.text.isNotEmpty &&
+        _durationTextField.text.isNotEmpty) {
+      Navigator.pop(
+          context, [_descriptionTextField.text, _durationTextField.text]);
     } else {
       print("SHOW POP UP TELLING THEM TO FILL OUT FORMS");
     }

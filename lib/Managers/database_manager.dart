@@ -168,7 +168,7 @@ class DatabaseManager {
     var loginUser = LoginUser(email: email.trim(), password: password.trim());
     final jsonUser = loginUser.toJson();
 
-    print(jsonUser);
+    // print(jsonUser);
 
     var url = Uri.https(baseUrl, '/services/LoginPortal/');
     final response = await http.post(
@@ -180,8 +180,13 @@ class DatabaseManager {
       body: jsonEncode(jsonUser),
     );
 
+    // print(response.body);
     final data = await json.decode(response.body);
     final userJSON = data['user_data'];
+
+    if (data['status'] == 0) {
+      return null;
+    }
 
     // print(userJSON);
 
@@ -191,7 +196,8 @@ class DatabaseManager {
     return user;
   }
 
-  Future<(String, String)> sendPasswordCode(String email, String masterAccessCode) async {
+  Future<(String, String)> sendPasswordCode(
+      String email, String masterAccessCode) async {
     final Map<String, dynamic> userData = <String, dynamic>{};
 
     userData['email'] = email;
@@ -262,21 +268,26 @@ class DatabaseManager {
   }
 
   Future<AccessCodeProperty?> checkAccessCode(String code) async {
+    print("DATABASE CODE CHECK");
     AccessCodeProperty? accessCodeProperty;
 
     var url = Uri.https(baseUrl, 'services/check_accesscode/$code');
-    final response = await http.get(url);
+    // print(url);
+    try {
+      final response = await http.get(url);
+      final data = await json.decode(response.body);
 
-    final data = await json.decode(response.body);
-
-    print("✅✅ACCESS CODE RETURN: ${response.statusCode}: ${response.body}");
-    final accessCodePropertySJSON = data['data'];
-    if (accessCodePropertySJSON != null) {
-      accessCodeProperty =
-          AccessCodeProperty.convertFromJson(accessCodePropertySJSON);
+      print("✅✅ACCESS CODE RETURN: ${response.statusCode}: ${response.body}");
+      final accessCodePropertySJSON = data['data'];
+      if (accessCodePropertySJSON != null) {
+        accessCodeProperty =
+            AccessCodeProperty.convertFromJson(accessCodePropertySJSON);
+        return accessCodeProperty;
+      }
+    } catch (error) {
+      print(error);
+      return null;
     }
-
-    return accessCodeProperty;
   }
 
   Future<void> activateAccessCode(String accessCode, String userId) async {
@@ -300,6 +311,40 @@ class DatabaseManager {
     final responseString = data['message'];
     print(responseString);
   }
+
+  
+  Future<void> editAccessCode(
+      {required String accessCode, 
+      required String userId, 
+      required String description, 
+      required String duration,
+      required String id}) async {
+    final Map<String, dynamic> accessCodeData = <String, dynamic>{};
+
+    accessCodeData['access_code'] = accessCode;
+    accessCodeData['user_id'] = userId;
+    accessCodeData['description'] = description;
+    accessCodeData['duration'] = duration;
+    accessCodeData['id'] = id;
+
+    print(accessCodeData);
+
+    var url = Uri.https(baseUrl, '/services/EditAccessCode');
+    final response = await http.post(
+      url,
+      // headers: {"Content-Type": "application/json"},
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(accessCodeData),
+    );
+
+    final data = await json.decode(response.body);
+    print(response.body);
+    final responseString = data['message'];
+    print(responseString);
+  }
+
 
   Future<void> assignAccessCode(
       String accessCode, String userId, String email, String name) async {

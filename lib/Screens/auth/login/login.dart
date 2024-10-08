@@ -143,8 +143,8 @@ class LoginState extends State<Login> {
 
                       if (user != null) {
                         print(user.email);
-                        sessionCubit.showSession(user);
                         Navigator.of(context).pop(widget);
+                        sessionCubit.showSession(user);
                       } else {
                         openDialog(context, 'Invalid Data', 'invalid password',
                             'Make sure your username and password are correct');
