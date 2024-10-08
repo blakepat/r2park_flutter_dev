@@ -4,6 +4,7 @@ import 'package:r2park_flutter_dev/Screens/Initial/initial.dart';
 import 'package:r2park_flutter_dev/Screens/Session/generate_code_view.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_account_view.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
+import 'package:r2park_flutter_dev/Screens/employee_registration/employee_registration_screen.dart';
 import '../../models/user.dart';
 import 'registrations_view.dart';
 
@@ -34,7 +35,7 @@ class TabSessionScreen extends State<TabSessionView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
   }
 
   @override
@@ -61,6 +62,10 @@ class TabSessionScreen extends State<TabSessionView>
               Padding(
                 padding: const EdgeInsets.all(0.0),
                 child: Initial(showAppBar: false, sessionCubit: sessionCubit),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(0.0),
+                child: EmployeeRegistrationScreen(showAppBar: false, sessionCubit: sessionCubit),
               ),
               Padding(
                 padding: const EdgeInsets.all(0.0),
@@ -93,8 +98,10 @@ class TabSessionScreen extends State<TabSessionView>
       if (_activeIndex == 0) {
         title = 'Register To Park';
       } else if (_activeIndex == 1) {
-        title = 'Access Codes';
+        title = 'Employee Register';
       } else if (_activeIndex == 2) {
+        title = 'Access Codes';
+      } else if (_activeIndex == 3) {
         title = 'Registrations';
       } else {
         title = 'Account';
@@ -106,11 +113,14 @@ class TabSessionScreen extends State<TabSessionView>
       bottom: TabBar(
           controller: _tabController,
           tabAlignment: TabAlignment.center,
-          labelPadding: EdgeInsets.symmetric(horizontal: screenWidth / 8 - 15),
+          labelPadding: EdgeInsets.symmetric(horizontal: screenWidth / 10 - 15),
           isScrollable: true,
           tabs: const [
             Tab(
               icon: Icon(Icons.home, color: Colors.white),
+            ),
+            Tab(
+              icon: Icon(Icons.business, color: Colors.white),
             ),
             Tab(
               icon: Icon(Icons.add_circle_rounded, color: Colors.white),

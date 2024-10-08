@@ -201,7 +201,7 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
     return Column(
       children: [
         _createTitleText(),
-        _createListView(),
+        accessCodes.isEmpty ? _createEmptyView() : _createListView(),
       ],
     );
   }
@@ -238,6 +238,27 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
             ])));
   }
 
+  Widget _createEmptyView() {
+    return Padding(
+        padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+        child: Container(
+            // color: Colors.red,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: tertiaryColor,
+                border: Border.all(color: Colors.white)),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(
+                "No Access Codes found.",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+            )));
+  }
+
   List<Widget> _createListObjects() {
     return accessCodes
         .map((code) => Padding(
@@ -269,6 +290,8 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
                           Spacer(),
                           Text('DURATION: ${code.duration ?? ''}'),
                         ]),
+                        Text('NAME: ${code.name ?? ''}'),
+                        Text('EMAIL: ${code.email ?? ''}'),
                         Text('CREATED AT: ${code.created_at ?? ''}'),
                         Text('EXPIRY DATE: ${code.expiry ?? ''}'),
                         ConstrainedBox(
@@ -307,9 +330,7 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
                               ),
                               GradientButton(
                                   borderRadius: BorderRadius.circular(20),
-                                  onPressed: () => {
-                                        _showAssignSheet(code.access_code ?? "")
-                                      },
+                                  onPressed: () => {_showAssignSheet(code)},
                                   child: Text(
                                     "ASSIGN",
                                     style: TextStyle(color: Colors.white),
@@ -330,13 +351,14 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
     getAccessCodes();
   }
 
-  void _showAssignSheet(String code) async {
+  void _showAssignSheet(AccessCode code) async {
     showModalBottomSheet(
-        context: context, builder: (context) => BottomAssignSheet()).then(
+        context: context,
+        builder: (context) => BottomAssignSheet(accessCode: code)).then(
       (value) async {
         if (value != null) {
           await databaseManager.assignAccessCode(
-              code, user.userId ?? "", value[1], value[0]);
+              code.access_code ?? "", user.userId ?? "", value[1], value[0]);
         }
         getAccessCodes();
       },
@@ -345,7 +367,8 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
 
   void _showEditSheet(AccessCode code) async {
     showModalBottomSheet(
-        context: context, builder: (context) => BottomEditSheet()).then(
+        context: context,
+        builder: (context) => BottomEditSheet(accessCode: code)).then(
       (value) async {
         if (value != null) {
           await databaseManager.editAccessCode(

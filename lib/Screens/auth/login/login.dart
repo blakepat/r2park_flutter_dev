@@ -4,6 +4,7 @@ import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
 import 'package:r2park_flutter_dev/Screens/Session/session_state.dart';
 import 'package:r2park_flutter_dev/Screens/auth/sign_up/forgot_password.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../models/user.dart';
 import '../../Session/session_cubit.dart';
 import '../sign_up/new_user.dart';
@@ -21,9 +22,10 @@ class Login extends StatefulWidget {
 class LoginState extends State<Login> {
   final SessionCubit sessionCubit;
   var databaseManager = DatabaseManager();
+  final Future<SharedPreferences> preferences = SharedPreferences.getInstance();
 
-  TextEditingController usernameController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  final TextEditingController _emailTextField = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool hidePassword = true;
   String? newPassword;
   String? newEmail;
@@ -79,7 +81,7 @@ class LoginState extends State<Login> {
               Container(
                 padding: EdgeInsets.all(10),
                 child: TextField(
-                  controller: usernameController,
+                  controller: _emailTextField,
                   decoration: InputDecoration(
                       border: OutlineInputBorder(), labelText: 'Email'),
                 ),
@@ -88,7 +90,7 @@ class LoginState extends State<Login> {
                 padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
                 child: TextField(
                   obscureText: hidePassword,
-                  controller: passwordController,
+                  controller: _passwordController,
                   decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Password',
@@ -139,10 +141,12 @@ class LoginState extends State<Login> {
                     borderRadius: BorderRadius.circular(30),
                     onPressed: () async {
                       final user = await databaseManager.login(
-                          usernameController.text, passwordController.text);
+                          _emailTextField.text, _passwordController.text);
 
                       if (user != null) {
-                        print(user.email);
+                        final SharedPreferences prefs = await preferences;
+                        prefs.setString("email", _emailTextField.text);
+                        prefs.setString("password", _passwordController.text);
                         Navigator.of(context).pop(widget);
                         sessionCubit.showSession(user);
                       } else {

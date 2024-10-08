@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/models/city.dart';
 import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/role.dart';
@@ -15,6 +16,7 @@ class SessionCubit extends Cubit<SessionState> {
   List<City>? cities;
   List<Role>? roles;
   List<String>? blacklistPlates;
+  final databaseManager = DatabaseManager();
   final Future<SharedPreferences> preferences = SharedPreferences.getInstance();
 
   SessionCubit(
@@ -24,7 +26,7 @@ class SessionCubit extends Cubit<SessionState> {
       this.cities,
       this.roles})
       : super(Unauthenticated()) {
-    // attemptAutoLogin();
+    attemptAutoLogin();
   }
 
   //MARK: - Visitor Methods
@@ -175,29 +177,31 @@ class SessionCubit extends Cubit<SessionState> {
 
   void signOut() async {
     final SharedPreferences prefs = await preferences;
+    prefs.remove('password');
     prefs.remove('email');
     emit(Unauthenticated());
   }
 
   void attemptAutoLogin() async {
+    print("ATTEMPT AUTO LOGIN CALLED");
     final SharedPreferences prefs = await preferences;
     String? userEmail = prefs.getString('email');
+    String? userPassword = prefs.getString('password');
     User? user;
-    try {
-      if (userEmail != null && users != null) {
-        if (users!.isNotEmpty) {
-          user = users?.firstWhere((element) => element.email == userEmail);
+    if (userEmail != null && userPassword != null) {
+      user = await databaseManager.login(userEmail, userPassword);
+      try {
+        if (user == null) {
+          emit(Unauthenticated());
+        } else {
+          showSession(user);
+          emit(Authenticated(user: user));
         }
-      }
-
-      if (user == null) {
+      } on Exception {
         emit(Unauthenticated());
-      } else {
-        showSession(user);
-        emit(Authenticated(user: user));
       }
-    } on Exception {
-      emit(Unauthenticated());
+    } else {
+      return;
     }
   }
 }

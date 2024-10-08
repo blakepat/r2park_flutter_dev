@@ -1,17 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
+import 'package:r2park_flutter_dev/models/access_code.dart';
 
 class BottomAssignSheet extends StatefulWidget {
-  const BottomAssignSheet({super.key});
+  final AccessCode accessCode;
+  const BottomAssignSheet({super.key, required this.accessCode});
 
   @override
-  State<StatefulWidget> createState() => _BottomAssignSheetState();
+  // ignore: no_logic_in_create_state
+  State<StatefulWidget> createState() =>
+      _BottomAssignSheetState(accessCode: accessCode);
 }
 
 class _BottomAssignSheetState extends State<BottomAssignSheet> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+
+  final AccessCode accessCode;
+
+  _BottomAssignSheetState({required this.accessCode});
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController.text = accessCode.name ?? "";
+    _emailController.text = accessCode.email ?? "";
+  }
 
   @override
   Widget build(BuildContext context) {

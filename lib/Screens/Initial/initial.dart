@@ -86,7 +86,7 @@ class InitialState extends State<Initial> {
     if (kIsWeb) {
       var url = Uri.parse(Uri.base.origin);
       WidgetsBinding.instance.addPostFrameCallback((_) => checkIfEmployee(url));
-    } 
+    }
   }
 
   void checkIfEmployee(Uri url) {
@@ -854,6 +854,7 @@ class InitialState extends State<Initial> {
     Navigator.of(context)
         .push(MaterialPageRoute(
           builder: (context) => EmployeeRegistrationScreen(
+            showAppBar: true,
             sessionCubit: sessionCubit,
           ),
         ))

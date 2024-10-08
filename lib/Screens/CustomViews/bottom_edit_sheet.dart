@@ -1,17 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
+import 'package:r2park_flutter_dev/models/access_code.dart';
 
 class BottomEditSheet extends StatefulWidget {
-  const BottomEditSheet({super.key});
+  final AccessCode accessCode;
+  const BottomEditSheet({super.key, required this.accessCode});
 
   @override
-  State<StatefulWidget> createState() => _BottomEditSheetState();
+  // ignore: no_logic_in_create_state
+  State<StatefulWidget> createState() =>
+      _BottomEditSheetState(accessCode: accessCode);
 }
 
 class _BottomEditSheetState extends State<BottomEditSheet> {
   final _descriptionTextField = TextEditingController();
   final _durationTextField = TextEditingController();
+
+  final AccessCode accessCode;
+
+  _BottomEditSheetState({required this.accessCode});
+
+  @override
+  void initState() {
+    super.initState();
+    _descriptionTextField.text = accessCode.description ?? "";
+    _durationTextField.text = accessCode.duration ?? "";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +91,7 @@ class _BottomEditSheetState extends State<BottomEditSheet> {
                 _editAccessCode();
               },
               child: Text(
-                "Submit",
+                "Update",
                 style: TextStyle(color: Colors.white),
               ))
         ],

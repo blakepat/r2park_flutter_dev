@@ -16,18 +16,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class EmployeeRegistrationScreen extends StatefulWidget {
+  final bool showAppBar;
   final SessionCubit sessionCubit;
   @override
   // ignore: no_logic_in_create_state
   EmployeeRegistrationScreenState createState() =>
-      EmployeeRegistrationScreenState(sessionCubit: sessionCubit);
+      EmployeeRegistrationScreenState(
+          sessionCubit: sessionCubit, showAppBar: showAppBar);
 
-  const EmployeeRegistrationScreen({super.key, required this.sessionCubit});
+  const EmployeeRegistrationScreen(
+      {super.key, required this.sessionCubit, required this.showAppBar});
 }
 
 class EmployeeRegistrationScreenState
     extends State<EmployeeRegistrationScreen> {
   final SessionCubit sessionCubit;
+  final bool showAppBar;
 
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -57,7 +61,8 @@ class EmployeeRegistrationScreenState
   var databaseManager = DatabaseManager();
   SharedPreferences? _prefs;
 
-  EmployeeRegistrationScreenState({required this.sessionCubit});
+  EmployeeRegistrationScreenState(
+      {required this.sessionCubit, required this.showAppBar});
 
   @override
   void initState() {
@@ -79,40 +84,42 @@ class EmployeeRegistrationScreenState
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-        appBar: AppBar(
-          systemOverlayStyle: statusBarStyle,
-          leadingWidth: 180,
-          toolbarHeight: 80,
-          leading: Transform.scale(
-            scale: 1.6,
-            child: Hero(
-              tag: 'logo',
-              child: Padding(
-                padding: const EdgeInsets.only(left: 28),
-                child: Image.asset(
-                  'assets/images/3DLogo.png',
-                  fit: BoxFit.contain,
-                  height: 180,
-                  alignment: Alignment.centerLeft,
+        appBar: showAppBar
+            ? AppBar(
+                systemOverlayStyle: statusBarStyle,
+                leadingWidth: 180,
+                toolbarHeight: 80,
+                leading: Transform.scale(
+                  scale: 1.6,
+                  child: Hero(
+                    tag: 'logo',
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 28),
+                      child: Image.asset(
+                        'assets/images/3DLogo.png',
+                        fit: BoxFit.contain,
+                        height: 180,
+                        alignment: Alignment.centerLeft,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-                onPressed: _visitorPressed,
-                child: Text(
-                  'Visitor',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
-                )),
-            TextButton(
-                onPressed: _loginPressed,
-                child: Text(
-                  'Login',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
-                ))
-          ],
-        ),
+                actions: [
+                  TextButton(
+                      onPressed: _visitorPressed,
+                      child: Text(
+                        'Visitor',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      )),
+                  TextButton(
+                      onPressed: _loginPressed,
+                      child: Text(
+                        'Login',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ))
+                ],
+              )
+            : null,
         body: SafeArea(
           child: Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),

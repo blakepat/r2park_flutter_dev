@@ -164,6 +164,8 @@ class DatabaseManager {
     return accessCodes;
   }
 
+
+  // LOGIN ---
   Future<User?> login(String email, String password) async {
     var loginUser = LoginUser(email: email.trim(), password: password.trim());
     final jsonUser = loginUser.toJson();
@@ -195,6 +197,8 @@ class DatabaseManager {
 
     return user;
   }
+  //------
+
 
   Future<(String, String)> sendPasswordCode(
       String email, String masterAccessCode) async {
