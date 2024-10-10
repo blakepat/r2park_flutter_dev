@@ -23,9 +23,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   var databaseManager = DatabaseManager();
-
-  List<User> _users = [];
-  List<Property> _properties = [];
   List<City> _cities = [];
   List<Role> _roles = [];
 
@@ -36,7 +33,7 @@ class _MyAppState extends State<MyApp> {
         home: StreamBuilder(
             stream: Stream.fromFuture(getData()),
             builder: (context, snapshot) {
-              if (_users.isEmpty) {
+              if (_cities.isEmpty) {
                 return Center(
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -50,9 +47,7 @@ class _MyAppState extends State<MyApp> {
                   ],
                   child: BlocProvider(
                     create: (context) => SessionCubit(
-                        properties: _properties,
                         authRepo: context.read<AuthRepo>(),
-                        users: _users,
                         cities: _cities,
                         roles: _roles),
                     child: AppNavigator(),
@@ -63,25 +58,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> getData() async {
-    // var users = await databaseManager.getUsersFromJson();
-    var properties = await databaseManager.getPropertiesFromJson();
-    var users = await databaseManager.getUsersFromDevelopment();
     var cities = await databaseManager.getCities();
     var roles = await databaseManager.getRoles();
-
-    // print(testUsers.length);
-
-    if (_users.isEmpty) {
-      setState(() {
-        _users = users;
-      });
-    }
-
-    if (_properties.isEmpty) {
-      setState(() {
-        _properties = properties;
-      });
-    }
 
     if (_cities.isEmpty) {
       setState(() {

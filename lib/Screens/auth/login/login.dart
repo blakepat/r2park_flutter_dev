@@ -60,11 +60,6 @@ class LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    users = sessionCubit.users;
-    if (sessionCubit.users == null) {
-      sessionCubit.users = users;
-      sessionCubit.attemptAutoLogin();
-    }
 
     return Scaffold(
       appBar: AppBar(title: Text('Login')),

@@ -1,789 +1,789 @@
-import 'package:flutter/material.dart';
-import 'package:r2park_flutter_dev/Managers/constants.dart';
-import 'package:r2park_flutter_dev/Managers/database_manager.dart';
-import 'package:r2park_flutter_dev/Managers/validation_manager.dart';
-import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
-import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
-import 'package:r2park_flutter_dev/models/property.dart';
-import 'package:r2park_flutter_dev/models/registration.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../Managers/helper_functions.dart';
-import '../../models/user.dart';
+// import 'package:flutter/material.dart';
+// import 'package:r2park_flutter_dev/Managers/constants.dart';
+// import 'package:r2park_flutter_dev/Managers/database_manager.dart';
+// import 'package:r2park_flutter_dev/Managers/validation_manager.dart';
+// import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
+// import 'package:r2park_flutter_dev/Screens/Session/session_cubit.dart';
+// import 'package:r2park_flutter_dev/models/property.dart';
+// import 'package:r2park_flutter_dev/models/registration.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
+// import '../../Managers/helper_functions.dart';
+// import '../../models/user.dart';
 
-class VisitorSessionView extends StatefulWidget {
-  final User user;
-  final SessionCubit sessionCubit;
+// class VisitorSessionView extends StatefulWidget {
+//   final User user;
+//   final SessionCubit sessionCubit;
 
-  const VisitorSessionView(
-      {super.key, required this.user, required this.sessionCubit});
-  @override
-  State<StatefulWidget> createState() =>
-      // ignore: no_logic_in_create_state
-      VisitorSessionScreen(user: user, sessionCubit: sessionCubit);
-}
+//   const VisitorSessionView(
+//       {super.key, required this.user, required this.sessionCubit});
+//   @override
+//   State<StatefulWidget> createState() =>
+//       // ignore: no_logic_in_create_state
+//       VisitorSessionScreen(user: user, sessionCubit: sessionCubit);
+// }
 
-class VisitorSessionScreen extends State<VisitorSessionView>
-    with SingleTickerProviderStateMixin {
-  final User user;
-  final SessionCubit sessionCubit;
+// class VisitorSessionScreen extends State<VisitorSessionView>
+//     with SingleTickerProviderStateMixin {
+//   final User user;
+//   final SessionCubit sessionCubit;
 
-  final plateController = TextEditingController();
-  final cityController = TextEditingController();
-  final unitController = TextEditingController();
-  final streetController = TextEditingController();
+//   final plateController = TextEditingController();
+//   final cityController = TextEditingController();
+//   final unitController = TextEditingController();
+//   final streetController = TextEditingController();
 
-  late Future<List<String>> licensePlates;
-  late Future<List<String>> previousProperties;
-  List<Property>? properties;
+//   late Future<List<String>> licensePlates;
+//   late Future<List<String>> previousProperties;
+//   List<Property>? properties;
 
-  Property? _selectedproperty;
-  String _selectedAddressID = '';
-  String _selectedLicensePlate = '';
-  int _selectedDuration = 1;
-  final Future<SharedPreferences> prefs = SharedPreferences.getInstance();
-  String? unauthorizedPlateMessage;
+//   Property? _selectedproperty;
+//   String _selectedAddressID = '';
+//   String _selectedLicensePlate = '';
+//   int _selectedDuration = 1;
+//   final Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+//   String? unauthorizedPlateMessage;
 
-  // var userManager = UserManager();
-  // var exemptionManager = ExemptionRequestManager();
-  var databaseManager = DatabaseManager();
+//   // var userManager = UserManager();
+//   // var exemptionManager = ExemptionRequestManager();
+//   var databaseManager = DatabaseManager();
 
-  @override
-  void initState() {
-    super.initState();
+//   @override
+//   void initState() {
+//     super.initState();
 
-    licensePlates = sessionCubit.preferences.then((SharedPreferences prefs) {
-      var plates = prefs.getStringList('${user.email}plates') ?? [];
-      if (plates.isNotEmpty) {
-        _selectedLicensePlate = plates[0];
-      }
-      return plates;
-    });
-    setState(() {
-      previousProperties =
-          sessionCubit.preferences.then((SharedPreferences prefs) {
-        var locations = prefs.getStringList('${user.email}locations') ?? [];
-        if (locations.isNotEmpty) {
-          _selectedAddressID = locations[0];
-          _selectedproperty = sessionCubit.properties
-              ?.firstWhere((element) => element.propertyID == locations[0]);
-        }
-        return locations;
-      });
-    });
-  }
+//     // licensePlates = sessionCubit.preferences.then((SharedPreferences prefs) {
+//     //   var plates = prefs.getStringList('${user.email}plates') ?? [];
+//     //   if (plates.isNotEmpty) {
+//     //     _selectedLicensePlate = plates[0];
+//     //   }
+//     //   return plates;
+//     // });
+//     // setState(() {
+//     //   previousProperties =
+//     //       sessionCubit.preferences.then((SharedPreferences prefs) {
+//     //     var locations = prefs.getStringList('${user.email}locations') ?? [];
+//     //     if (locations.isNotEmpty) {
+//     //       _selectedAddressID = locations[0];
+//     //       _selectedproperty = sessionCubit.properties
+//     //           ?.firstWhere((element) => element.propertyID == locations[0]);
+//     //     }
+//     //     return locations;
+//     //   });
+//     // });
+//   }
 
-  VisitorSessionScreen({required this.user, required this.sessionCubit});
+//   VisitorSessionScreen({required this.user, required this.sessionCubit});
 
-  @override
-  Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+//   @override
+//   Widget build(BuildContext context) {
+//     double screenWidth = MediaQuery.of(context).size.width;
+//     double screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-        body: SingleChildScrollView(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-          child: Column(
-            children: [
-              _addPlateTitle(),
-              _licencePlateSeciton(),
-              _addLocationTitle(),
-              _locationSection(),
-              _durationInput(height: screenHeight, width: screenWidth),
-              _submitButton(),
+//     return Scaffold(
+//         body: SingleChildScrollView(
+//       child: Center(
+//         child: Padding(
+//           padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+//           child: Column(
+//             children: [
+//               _addPlateTitle(),
+//               _licencePlateSeciton(),
+//               _addLocationTitle(),
+//               _locationSection(),
+//               _durationInput(height: screenHeight, width: screenWidth),
+//               _submitButton(),
 
-              // _footerView()
-            ],
-          ),
-        ),
-      ),
-    ));
-  }
+//               // _footerView()
+//             ],
+//           ),
+//         ),
+//       ),
+//     ));
+//   }
 
-  Widget _addPlateTitle() {
-    return SizedBox(
-      width: double.infinity,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 12, 4, 0),
-        child: Text(
-          'Licence Plates',
-          textAlign: TextAlign.left,
-          style: TextStyle(
-              fontSize: 18, fontWeight: FontWeight.w400, color: Colors.white),
-        ),
-      ),
-    );
-  }
+//   Widget _addPlateTitle() {
+//     return SizedBox(
+//       width: double.infinity,
+//       child: Padding(
+//         padding: const EdgeInsets.fromLTRB(8, 12, 4, 0),
+//         child: Text(
+//           'Licence Plates',
+//           textAlign: TextAlign.left,
+//           style: TextStyle(
+//               fontSize: 18, fontWeight: FontWeight.w400, color: Colors.white),
+//         ),
+//       ),
+//     );
+//   }
 
-  Widget _licencePlateSeciton() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-          width: MediaQuery.of(context).size.width - 16,
-          decoration: BoxDecoration(
-              color: Colors.black26,
-              border: Border.all(color: Colors.white30),
-              borderRadius: BorderRadius.all(Radius.circular(8))),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                _licensePlateList(),
-                _licencePlateForm(),
-              ],
-            ),
-          )),
-    );
-  }
+//   Widget _licencePlateSeciton() {
+//     return Padding(
+//       padding: const EdgeInsets.all(8.0),
+//       child: Container(
+//           width: MediaQuery.of(context).size.width - 16,
+//           decoration: BoxDecoration(
+//               color: Colors.black26,
+//               border: Border.all(color: Colors.white30),
+//               borderRadius: BorderRadius.all(Radius.circular(8))),
+//           child: Padding(
+//             padding: const EdgeInsets.all(8.0),
+//             child: Column(
+//               children: [
+//                 _licensePlateList(),
+//                 _licencePlateForm(),
+//               ],
+//             ),
+//           )),
+//     );
+//   }
 
-  Widget _licencePlateForm() {
-    double screenWidth = MediaQuery.of(context).size.width;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
-      child: FittedBox(
-        child: Row(
-          children: [
-            SizedBox(
-              width: screenWidth < 700 ? 260 : 360,
-              child: TextFormField(
-                  style: TextStyle(color: Colors.white),
-                  controller: plateController,
-                  decoration: InputDecoration(
-                    icon: Icon(
-                      Icons.rectangle_rounded,
-                      color: Colors.white,
-                    ),
-                    hintText: 'Add License Plate',
-                    hintStyle: TextStyle(color: Colors.white),
-                    labelStyle: TextStyle(color: Colors.white),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                  )),
-            ),
-            IconButton(
-                onPressed: () {
-                  _addNewLicensePlate(
-                      plateController.text.toUpperCase().replaceAll(' ', ''));
-                  plateController.text = '';
-                },
-                icon: Icon(
-                  Icons.add,
-                  color: Colors.white,
-                ))
-          ],
-        ),
-      ),
-    );
-  }
+//   Widget _licencePlateForm() {
+//     double screenWidth = MediaQuery.of(context).size.width;
+//     return Padding(
+//       padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+//       child: FittedBox(
+//         child: Row(
+//           children: [
+//             SizedBox(
+//               width: screenWidth < 700 ? 260 : 360,
+//               child: TextFormField(
+//                   style: TextStyle(color: Colors.white),
+//                   controller: plateController,
+//                   decoration: InputDecoration(
+//                     icon: Icon(
+//                       Icons.rectangle_rounded,
+//                       color: Colors.white,
+//                     ),
+//                     hintText: 'Add License Plate',
+//                     hintStyle: TextStyle(color: Colors.white),
+//                     labelStyle: TextStyle(color: Colors.white),
+//                     enabledBorder: UnderlineInputBorder(
+//                       borderSide: BorderSide(color: Colors.white),
+//                     ),
+//                   )),
+//             ),
+//             IconButton(
+//                 onPressed: () {
+//                   _addNewLicensePlate(
+//                       plateController.text.toUpperCase().replaceAll(' ', ''));
+//                   plateController.text = '';
+//                 },
+//                 icon: Icon(
+//                   Icons.add,
+//                   color: Colors.white,
+//                 ))
+//           ],
+//         ),
+//       ),
+//     );
+//   }
 
-  void _addNewLicensePlate(String plate) async {
-    List<String> updatedPlates = List.empty(growable: true);
-    //validate plate
-    if (plate.isNotEmpty && isValidPlate(plate)) {
-      // updatedPlates.addAll(licensePlates);
-      await sessionCubit.preferences.then((SharedPreferences prefs) {
-        updatedPlates = prefs.getStringList('${user.email}plates') ?? [];
-      });
+//   void _addNewLicensePlate(String plate) async {
+//     List<String> updatedPlates = List.empty(growable: true);
+//     //validate plate
+//     if (plate.isNotEmpty && isValidPlate(plate)) {
+//       // updatedPlates.addAll(licensePlates);
+//       await sessionCubit.preferences.then((SharedPreferences prefs) {
+//         updatedPlates = prefs.getStringList('${user.email}plates') ?? [];
+//       });
 
-      if (updatedPlates.contains(plate)) {
-        updatedPlates.remove(plate);
-      }
-      updatedPlates.insert(0, plate.toUpperCase());
-      sessionCubit.updateLicensePlates(plates: updatedPlates, user: user);
+//       if (updatedPlates.contains(plate)) {
+//         updatedPlates.remove(plate);
+//       }
+//       updatedPlates.insert(0, plate.toUpperCase());
+//       sessionCubit.updateLicensePlates(plates: updatedPlates, user: user);
 
-      final sharedPrefs = await prefs;
+//       final sharedPrefs = await prefs;
 
-      setState(() {
-        licensePlates = sharedPrefs
-            .setStringList('plates', updatedPlates)
-            .then((bool success) {
-          return updatedPlates;
-        });
-      });
+//       setState(() {
+//         licensePlates = sharedPrefs
+//             .setStringList('plates', updatedPlates)
+//             .then((bool success) {
+//           return updatedPlates;
+//         });
+//       });
 
-      setState(() {});
-    } else {
-      openDialog(
-          context,
-          'Licence Plate invalid',
-          'Please double check licence plate and try again',
-          'Please double check licence plate and try again');
-    }
-  }
+//       setState(() {});
+//     } else {
+//       openDialog(
+//           context,
+//           'Licence Plate invalid',
+//           'Please double check licence plate and try again',
+//           'Please double check licence plate and try again');
+//     }
+//   }
 
-  Widget _licensePlateList() {
-    return FutureBuilder<List<String>>(
-        future: licensePlates,
-        builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-            case ConnectionState.waiting:
-              return const CircularProgressIndicator();
-            case ConnectionState.active:
-            case ConnectionState.done:
-              if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                if (snapshot.data != null) {
-                  var listOfPlates = snapshot.data!
-                      .map((plate) => Dismissible(
-                            background: Container(color: Colors.red),
-                            key: Key(plate),
-                            onDismissed: (direction) {
-                              setState(() {
-                                snapshot.data!
-                                    .removeWhere((element) => element == plate);
-                                sessionCubit.updateLicensePlates(
-                                    plates: snapshot.data!, user: user);
-                              });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: CheckboxListTile(
-                                tileColor: secondaryColor,
-                                checkboxShape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8)),
-                                title: Text(
-                                  plate,
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 20),
-                                ),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8)),
-                                value: _selectedLicensePlate == plate,
-                                onChanged: (newValue) {
-                                  if (newValue != null) {
-                                    newValue
-                                        ? setState(
-                                            () => _selectedLicensePlate = plate)
-                                        : setState(
-                                            () => _selectedLicensePlate = '');
-                                  }
-                                },
-                              ),
-                            ),
-                          ))
-                      .toList();
+//   Widget _licensePlateList() {
+//     return FutureBuilder<List<String>>(
+//         future: licensePlates,
+//         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+//           switch (snapshot.connectionState) {
+//             case ConnectionState.none:
+//             case ConnectionState.waiting:
+//               return const CircularProgressIndicator();
+//             case ConnectionState.active:
+//             case ConnectionState.done:
+//               if (snapshot.hasError) {
+//                 return Text('Error: ${snapshot.error}');
+//               } else {
+//                 if (snapshot.data != null) {
+//                   var listOfPlates = snapshot.data!
+//                       .map((plate) => Dismissible(
+//                             background: Container(color: Colors.red),
+//                             key: Key(plate),
+//                             onDismissed: (direction) {
+//                               setState(() {
+//                                 snapshot.data!
+//                                     .removeWhere((element) => element == plate);
+//                                 sessionCubit.updateLicensePlates(
+//                                     plates: snapshot.data!, user: user);
+//                               });
+//                             },
+//                             child: Padding(
+//                               padding: const EdgeInsets.all(4.0),
+//                               child: CheckboxListTile(
+//                                 tileColor: secondaryColor,
+//                                 checkboxShape: RoundedRectangleBorder(
+//                                     borderRadius: BorderRadius.circular(8)),
+//                                 title: Text(
+//                                   plate,
+//                                   style: TextStyle(
+//                                       color: Colors.white, fontSize: 20),
+//                                 ),
+//                                 shape: RoundedRectangleBorder(
+//                                     borderRadius: BorderRadius.circular(8)),
+//                                 value: _selectedLicensePlate == plate,
+//                                 onChanged: (newValue) {
+//                                   if (newValue != null) {
+//                                     newValue
+//                                         ? setState(
+//                                             () => _selectedLicensePlate = plate)
+//                                         : setState(
+//                                             () => _selectedLicensePlate = '');
+//                                   }
+//                                 },
+//                               ),
+//                             ),
+//                           ))
+//                       .toList();
 
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        // SizedBox(
-                        //   width: double.infinity,
-                        //   child: Padding(
-                        //     padding: const EdgeInsets.all(4.0),
-                        //     child: Text(
-                        //       'License Plate:',
-                        //       // ${_selectedLicensePlate.toUpperCase().trim()}',
-                        //       textAlign: TextAlign.left,
-                        //       style: TextStyle(
-                        //           fontSize: 22,
-                        //           fontWeight: FontWeight.w400,
-                        //           color: Colors.white),
-                        //     ),
-                        //   ),
-                        // ),
-                        SizedBox(
-                          height: 120,
-                          child:
-                              Material(child: ListView(children: listOfPlates)),
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  return SizedBox();
-                }
-              }
-          }
-        });
-  }
+//                   return Padding(
+//                     padding: const EdgeInsets.all(8.0),
+//                     child: Column(
+//                       children: [
+//                         // SizedBox(
+//                         //   width: double.infinity,
+//                         //   child: Padding(
+//                         //     padding: const EdgeInsets.all(4.0),
+//                         //     child: Text(
+//                         //       'License Plate:',
+//                         //       // ${_selectedLicensePlate.toUpperCase().trim()}',
+//                         //       textAlign: TextAlign.left,
+//                         //       style: TextStyle(
+//                         //           fontSize: 22,
+//                         //           fontWeight: FontWeight.w400,
+//                         //           color: Colors.white),
+//                         //     ),
+//                         //   ),
+//                         // ),
+//                         SizedBox(
+//                           height: 120,
+//                           child:
+//                               Material(child: ListView(children: listOfPlates)),
+//                         ),
+//                       ],
+//                     ),
+//                   );
+//                 } else {
+//                   return SizedBox();
+//                 }
+//               }
+//           }
+//         });
+//   }
 
-  Widget _addLocationTitle() {
-    return SizedBox(
-      width: double.infinity,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 12, 4, 0),
-        child: Text(
-          'Locations',
-          textAlign: TextAlign.left,
-          style: TextStyle(
-              fontSize: 18, fontWeight: FontWeight.w400, color: Colors.white),
-        ),
-      ),
-    );
-  }
+//   Widget _addLocationTitle() {
+//     return SizedBox(
+//       width: double.infinity,
+//       child: Padding(
+//         padding: const EdgeInsets.fromLTRB(8, 12, 4, 0),
+//         child: Text(
+//           'Locations',
+//           textAlign: TextAlign.left,
+//           style: TextStyle(
+//               fontSize: 18, fontWeight: FontWeight.w400, color: Colors.white),
+//         ),
+//       ),
+//     );
+//   }
 
-  Widget _locationSection() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-          width: MediaQuery.of(context).size.width - 16,
-          decoration: BoxDecoration(
-              color: Colors.black26,
-              border: Border.all(color: Colors.white30),
-              borderRadius: BorderRadius.all(Radius.circular(8))),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                _previousLocationList(),
-                FittedBox(
-                  child: Row(
-                    children: [_unitNumberInput(), _streetInput()],
-                  ),
-                ),
-                FittedBox(
-                  child: Row(
-                    children: [_cityInput(), _addLocationButton()],
-                  ),
-                ),
-              ],
-            ),
-          )),
-    );
-  }
+//   Widget _locationSection() {
+//     return Padding(
+//       padding: const EdgeInsets.all(8.0),
+//       child: Container(
+//           width: MediaQuery.of(context).size.width - 16,
+//           decoration: BoxDecoration(
+//               color: Colors.black26,
+//               border: Border.all(color: Colors.white30),
+//               borderRadius: BorderRadius.all(Radius.circular(8))),
+//           child: Padding(
+//             padding: const EdgeInsets.all(8.0),
+//             child: Column(
+//               children: [
+//                 _previousLocationList(),
+//                 FittedBox(
+//                   child: Row(
+//                     children: [_unitNumberInput(), _streetInput()],
+//                   ),
+//                 ),
+//                 FittedBox(
+//                   child: Row(
+//                     children: [_cityInput(), _addLocationButton()],
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           )),
+//     );
+//   }
 
-  Widget _streetInput() {
-    double screenWidth = MediaQuery.of(context).size.width;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: screenWidth < 700 ? 200 : 280,
-            child: TextFormField(
-              style: TextStyle(color: Colors.white),
-              controller: streetController,
-              decoration: InputDecoration(
-                  // icon: Icon(
-                  //   Icons.home_work,
-                  //   color: Colors.white,
-                  // ),
-                  hintText: 'Street Number and Name',
-                  hintStyle: TextStyle(color: Colors.white),
-                  labelStyle: TextStyle(color: Colors.white),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  )),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+//   Widget _streetInput() {
+//     double screenWidth = MediaQuery.of(context).size.width;
+//     return Padding(
+//       padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+//       child: Row(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           SizedBox(
+//             width: screenWidth < 700 ? 200 : 280,
+//             child: TextFormField(
+//               style: TextStyle(color: Colors.white),
+//               controller: streetController,
+//               decoration: InputDecoration(
+//                   // icon: Icon(
+//                   //   Icons.home_work,
+//                   //   color: Colors.white,
+//                   // ),
+//                   hintText: 'Street Number and Name',
+//                   hintStyle: TextStyle(color: Colors.white),
+//                   labelStyle: TextStyle(color: Colors.white),
+//                   enabledBorder: UnderlineInputBorder(
+//                     borderSide: BorderSide(color: Colors.white),
+//                   )),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
 
-  Widget _unitNumberInput() {
-    double screenWidth = MediaQuery.of(context).size.width;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: screenWidth < 700 ? 100 : 120,
-            child: TextFormField(
-              style: TextStyle(color: Colors.white),
-              controller: unitController,
-              decoration: InputDecoration(
-                  icon: Icon(
-                    Icons.home_work,
-                    color: Colors.white,
-                  ),
-                  hintText: 'Unit #',
-                  hintStyle: TextStyle(color: Colors.white),
-                  labelStyle: TextStyle(color: Colors.white),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  )),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+//   Widget _unitNumberInput() {
+//     double screenWidth = MediaQuery.of(context).size.width;
+//     return Padding(
+//       padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+//       child: Row(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           SizedBox(
+//             width: screenWidth < 700 ? 100 : 120,
+//             child: TextFormField(
+//               style: TextStyle(color: Colors.white),
+//               controller: unitController,
+//               decoration: InputDecoration(
+//                   icon: Icon(
+//                     Icons.home_work,
+//                     color: Colors.white,
+//                   ),
+//                   hintText: 'Unit #',
+//                   hintStyle: TextStyle(color: Colors.white),
+//                   labelStyle: TextStyle(color: Colors.white),
+//                   enabledBorder: UnderlineInputBorder(
+//                     borderSide: BorderSide(color: Colors.white),
+//                   )),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
 
-  Widget _cityInput() {
-    double screenWidth = MediaQuery.of(context).size.width;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: screenWidth < 700 ? 260 : 360,
-            child: TextFormField(
-              style: TextStyle(color: Colors.white),
-              controller: cityController,
-              decoration: InputDecoration(
-                  icon: Icon(
-                    Icons.place,
-                    color: Colors.white,
-                  ),
-                  hintText: 'City Name...',
-                  hintStyle: TextStyle(color: Colors.white),
-                  labelStyle: TextStyle(color: Colors.white),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  )),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+//   Widget _cityInput() {
+//     double screenWidth = MediaQuery.of(context).size.width;
+//     return Padding(
+//       padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+//       child: Row(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           SizedBox(
+//             width: screenWidth < 700 ? 260 : 360,
+//             child: TextFormField(
+//               style: TextStyle(color: Colors.white),
+//               controller: cityController,
+//               decoration: InputDecoration(
+//                   icon: Icon(
+//                     Icons.place,
+//                     color: Colors.white,
+//                   ),
+//                   hintText: 'City Name...',
+//                   hintStyle: TextStyle(color: Colors.white),
+//                   labelStyle: TextStyle(color: Colors.white),
+//                   enabledBorder: UnderlineInputBorder(
+//                     borderSide: BorderSide(color: Colors.white),
+//                   )),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
 
-  Widget _addLocationButton() {
-    return IconButton(
-        onPressed: () {
-          setState(() {
-            var propertyID = sessionCubit.checkIfValidProperty(
-                cityController.text.toLowerCase(),
-                streetController.text.toLowerCase());
+//   Widget _addLocationButton() {
+//     return IconButton(
+//         onPressed: () {
+//           setState(() {
+//             var propertyID = sessionCubit.checkIfValidProperty(
+//                 cityController.text.toLowerCase(),
+//                 streetController.text.toLowerCase());
 
-            if (propertyID != null) {
-              sessionCubit.addLocation(locationID: propertyID, user: user);
+//             if (propertyID != null) {
+//               sessionCubit.addLocation(locationID: propertyID, user: user);
 
-              previousProperties =
-                  sessionCubit.preferences.then((SharedPreferences prefs) {
-                var locations =
-                    prefs.getStringList('${user.email}locations') ?? [];
-                if (locations.isNotEmpty) {
-                  _selectedAddressID = locations[0];
-                  _selectedproperty = sessionCubit.properties?.firstWhere(
-                      (element) => element.propertyID == locations[0]);
-                }
-                return locations;
-              });
+//               previousProperties =
+//                   sessionCubit.preferences.then((SharedPreferences prefs) {
+//                 var locations =
+//                     prefs.getStringList('${user.email}locations') ?? [];
+//                 if (locations.isNotEmpty) {
+//                   _selectedAddressID = locations[0];
+//                   _selectedproperty = sessionCubit.properties?.firstWhere(
+//                       (element) => element.propertyID == locations[0]);
+//                 }
+//                 return locations;
+//               });
 
-              _selectedAddressID = propertyID;
-            } else {
-              openDialog(
-                  context,
-                  'Incorrect Address',
-                  'please double check the address and try again',
-                  'please double check the address and try again');
-            }
-          });
-        },
-        icon: Icon(
-          Icons.add,
-          color: Colors.white,
-        ));
-  }
+//               _selectedAddressID = propertyID;
+//             } else {
+//               openDialog(
+//                   context,
+//                   'Incorrect Address',
+//                   'please double check the address and try again',
+//                   'please double check the address and try again');
+//             }
+//           });
+//         },
+//         icon: Icon(
+//           Icons.add,
+//           color: Colors.white,
+//         ));
+//   }
 
-  Widget _previousLocationList() {
-    return FutureBuilder<List<String>>(
-        future: previousProperties,
-        builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-            case ConnectionState.waiting:
-              return const CircularProgressIndicator();
-            case ConnectionState.active:
-            case ConnectionState.done:
-              if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                if (snapshot.data != null) {
-                  final listOfaddressIds = snapshot.data;
-                  List<Property>? listOfAddress;
-                  try {
-                    listOfAddress = sessionCubit.properties
-                        ?.where((element) =>
-                            listOfaddressIds!.contains(element.propertyID))
-                        .toList();
-                  } catch (e) {
-                    // ignore: avoid_print
-                    print('error gettings list of address: $e');
-                  }
+//   Widget _previousLocationList() {
+//     return FutureBuilder<List<String>>(
+//         future: previousProperties,
+//         builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+//           switch (snapshot.connectionState) {
+//             case ConnectionState.none:
+//             case ConnectionState.waiting:
+//               return const CircularProgressIndicator();
+//             case ConnectionState.active:
+//             case ConnectionState.done:
+//               if (snapshot.hasError) {
+//                 return Text('Error: ${snapshot.error}');
+//               } else {
+//                 if (snapshot.data != null) {
+//                   final listOfaddressIds = snapshot.data;
+//                   List<Property>? listOfAddress;
+//                   try {
+//                     listOfAddress = sessionCubit.properties
+//                         ?.where((element) =>
+//                             listOfaddressIds!.contains(element.propertyID))
+//                         .toList();
+//                   } catch (e) {
+//                     // ignore: avoid_print
+//                     print('error gettings list of address: $e');
+//                   }
 
-                  if (snapshot.data != null && listOfAddress != null) {
-                    if (listOfAddress.isNotEmpty) {
-                      var listOfAddressTiles = listOfAddress
-                          .map(
-                            (address) => Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: CheckboxListTile(
-                                tileColor: secondaryColor,
-                                checkboxShape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8)),
-                                title: Text(
-                                  address.propertyAddress!,
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 18),
-                                ),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8)),
-                                value:
-                                    _selectedAddressID == address.propertyID2,
-                                onChanged: (newValue) {
-                                  if (newValue != null) {
-                                    newValue
-                                        ? setState(() {
-                                            _selectedAddressID =
-                                                address.propertyID2!;
-                                            _selectedproperty = address;
-                                          })
-                                        : setState(() {
-                                            _selectedAddressID = '';
-                                            _selectedproperty = null;
-                                          });
-                                  }
-                                },
-                              ),
-                            ),
-                          )
-                          .toList();
+//                   if (snapshot.data != null && listOfAddress != null) {
+//                     if (listOfAddress.isNotEmpty) {
+//                       var listOfAddressTiles = listOfAddress
+//                           .map(
+//                             (address) => Padding(
+//                               padding: const EdgeInsets.all(4.0),
+//                               child: CheckboxListTile(
+//                                 tileColor: secondaryColor,
+//                                 checkboxShape: RoundedRectangleBorder(
+//                                     borderRadius: BorderRadius.circular(8)),
+//                                 title: Text(
+//                                   address.propertyAddress!,
+//                                   style: TextStyle(
+//                                       color: Colors.white, fontSize: 18),
+//                                 ),
+//                                 shape: RoundedRectangleBorder(
+//                                     borderRadius: BorderRadius.circular(8)),
+//                                 value:
+//                                     _selectedAddressID == address.propertyID2,
+//                                 onChanged: (newValue) {
+//                                   if (newValue != null) {
+//                                     newValue
+//                                         ? setState(() {
+//                                             _selectedAddressID =
+//                                                 address.propertyID2!;
+//                                             _selectedproperty = address;
+//                                           })
+//                                         : setState(() {
+//                                             _selectedAddressID = '';
+//                                             _selectedproperty = null;
+//                                           });
+//                                   }
+//                                 },
+//                               ),
+//                             ),
+//                           )
+//                           .toList();
 
-                      return Padding(
-                        padding: const EdgeInsets.all(0.0),
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              height: 120,
-                              child: Material(
-                                child: ListView(
-                                  children: listOfAddressTiles,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    } else {
-                      return SizedBox(
-                        height: 120,
-                        child: Center(
-                          child: Text('No Locations Added.'),
-                        ),
-                      );
-                    }
-                  } else {
-                    return SizedBox(
-                      height: 120,
-                    );
-                  }
-                } else {
-                  return SizedBox(
-                    height: 120,
-                  );
-                }
-              }
-          }
-        });
-  }
+//                       return Padding(
+//                         padding: const EdgeInsets.all(0.0),
+//                         child: Column(
+//                           children: [
+//                             SizedBox(
+//                               height: 120,
+//                               child: Material(
+//                                 child: ListView(
+//                                   children: listOfAddressTiles,
+//                                 ),
+//                               ),
+//                             ),
+//                           ],
+//                         ),
+//                       );
+//                     } else {
+//                       return SizedBox(
+//                         height: 120,
+//                         child: Center(
+//                           child: Text('No Locations Added.'),
+//                         ),
+//                       );
+//                     }
+//                   } else {
+//                     return SizedBox(
+//                       height: 120,
+//                     );
+//                   }
+//                 } else {
+//                   return SizedBox(
+//                     height: 120,
+//                   );
+//                 }
+//               }
+//           }
+//         });
+//   }
 
-  Widget _durationInput({required double height, required double width}) {
-    final durationsList = [1, 2, 3, 4]
-        .map(
-          (duration) => SizedBox(
-            height: 64,
-            width: width < 700 ? width / 4 : 90,
-            child: Container(
-              alignment: Alignment.centerLeft,
-              child: CheckboxListTile(
-                checkColor: Colors.red,
-                activeColor: Colors.white,
-                title: Text(
-                  duration.toString(),
-                  style: TextStyle(color: Colors.white),
-                ),
-                value: duration == _selectedDuration,
-                onChanged: (newValue) => setState(() {
-                  if (newValue != null) {
-                    _selectedDuration = duration;
-                  }
-                }),
-              ),
-            ),
-          ),
-        )
-        .toList();
-    return Padding(
-        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-        child: Container(
-          decoration: BoxDecoration(
-              color: Colors.black26,
-              border: Border.all(color: Colors.white30),
-              borderRadius: BorderRadius.all(Radius.circular(8))),
-          child: Column(
-            children: [
-              SizedBox(
-                width: double.infinity,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Days Requested:',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w300,
-                        color: Colors.white),
-                  ),
-                ),
-              ),
-              FittedBox(
-                  child: Row(
-                      mainAxisSize: MainAxisSize.min, children: durationsList)),
-            ],
-          ),
-        ));
-  }
+//   Widget _durationInput({required double height, required double width}) {
+//     final durationsList = [1, 2, 3, 4]
+//         .map(
+//           (duration) => SizedBox(
+//             height: 64,
+//             width: width < 700 ? width / 4 : 90,
+//             child: Container(
+//               alignment: Alignment.centerLeft,
+//               child: CheckboxListTile(
+//                 checkColor: Colors.red,
+//                 activeColor: Colors.white,
+//                 title: Text(
+//                   duration.toString(),
+//                   style: TextStyle(color: Colors.white),
+//                 ),
+//                 value: duration == _selectedDuration,
+//                 onChanged: (newValue) => setState(() {
+//                   if (newValue != null) {
+//                     _selectedDuration = duration;
+//                   }
+//                 }),
+//               ),
+//             ),
+//           ),
+//         )
+//         .toList();
+//     return Padding(
+//         padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+//         child: Container(
+//           decoration: BoxDecoration(
+//               color: Colors.black26,
+//               border: Border.all(color: Colors.white30),
+//               borderRadius: BorderRadius.all(Radius.circular(8))),
+//           child: Column(
+//             children: [
+//               SizedBox(
+//                 width: double.infinity,
+//                 child: Padding(
+//                   padding: const EdgeInsets.all(8.0),
+//                   child: Text(
+//                     'Days Requested:',
+//                     textAlign: TextAlign.left,
+//                     style: TextStyle(
+//                         fontSize: 16,
+//                         fontWeight: FontWeight.w300,
+//                         color: Colors.white),
+//                   ),
+//                 ),
+//               ),
+//               FittedBox(
+//                   child: Row(
+//                       mainAxisSize: MainAxisSize.min, children: durationsList)),
+//             ],
+//           ),
+//         ));
+//   }
 
-  // Widget _durationInput() {
-  //   final durationsList = [1, 2, 3, 4]
-  //       .map(
-  //         (duration) => SizedBox(
-  //           height: 64,
-  //           width: 90,
-  //           child: CheckboxListTile(
-  //             checkColor: Colors.red,
-  //             activeColor: Colors.white,
-  //             title: Text(
-  //               duration.toString(),
-  //               style: TextStyle(color: Colors.white),
-  //             ),
-  //             value: duration == _selectedDuration,
-  //             onChanged: (newValue) => setState(() {
-  //               if (newValue != null) {
-  //                 _selectedDuration = duration;
-  //               }
-  //             }),
-  //           ),
-  //         ),
-  //       )
-  //       .toList();
-  //   return Padding(
-  //     padding: const EdgeInsets.fromLTRB(6, 10, 6, 10),
-  //     child: Column(
-  //       children: [
-  //         SizedBox(
-  //           width: double.infinity,
-  //           child: Padding(
-  //             padding: const EdgeInsets.all(4.0),
-  //             child: Text(
-  //               'Days Requested:',
-  //               textAlign: TextAlign.left,
-  //               style: TextStyle(
-  //                   fontSize: 18,
-  //                   fontWeight: FontWeight.w400,
-  //                   color: Colors.white),
-  //             ),
-  //           ),
-  //         ),
-  //         Row(children: durationsList),
-  //       ],
-  //     ),
-  //   );
-  // }
+//   // Widget _durationInput() {
+//   //   final durationsList = [1, 2, 3, 4]
+//   //       .map(
+//   //         (duration) => SizedBox(
+//   //           height: 64,
+//   //           width: 90,
+//   //           child: CheckboxListTile(
+//   //             checkColor: Colors.red,
+//   //             activeColor: Colors.white,
+//   //             title: Text(
+//   //               duration.toString(),
+//   //               style: TextStyle(color: Colors.white),
+//   //             ),
+//   //             value: duration == _selectedDuration,
+//   //             onChanged: (newValue) => setState(() {
+//   //               if (newValue != null) {
+//   //                 _selectedDuration = duration;
+//   //               }
+//   //             }),
+//   //           ),
+//   //         ),
+//   //       )
+//   //       .toList();
+//   //   return Padding(
+//   //     padding: const EdgeInsets.fromLTRB(6, 10, 6, 10),
+//   //     child: Column(
+//   //       children: [
+//   //         SizedBox(
+//   //           width: double.infinity,
+//   //           child: Padding(
+//   //             padding: const EdgeInsets.all(4.0),
+//   //             child: Text(
+//   //               'Days Requested:',
+//   //               textAlign: TextAlign.left,
+//   //               style: TextStyle(
+//   //                   fontSize: 18,
+//   //                   fontWeight: FontWeight.w400,
+//   //                   color: Colors.white),
+//   //             ),
+//   //           ),
+//   //         ),
+//   //         Row(children: durationsList),
+//   //       ],
+//   //     ),
+//   //   );
+//   // }
 
-  Widget _submitButton() {
-    return GradientButton(
-        borderRadius: BorderRadius.circular(30),
-        onPressed: () => _submitPressed(),
-        child: Text(
-          'Submit',
-          style: kButtonTextStyle,
-        ));
-  }
+//   Widget _submitButton() {
+//     return GradientButton(
+//         borderRadius: BorderRadius.circular(30),
+//         onPressed: () => _submitPressed(),
+//         child: Text(
+//           'Submit',
+//           style: kButtonTextStyle,
+//         ));
+//   }
 
-  Registration createRegistration() {
-    var registration = Registration.def();
+//   Registration createRegistration() {
+//     var registration = Registration.def();
 
-    registration.userType = 'Visitor';
-    registration.name = user.name;
-    registration.email = user.name;
-    registration.phone = user.mobile;
-    registration.streetNumber = '';
-    registration.streetName =
-        _selectedproperty?.propertyAddress ?? 'Error selecting address';
-    registration.city = cityController.text;
-    registration.plateNumber = plateController.text;
-    registration.province = '';
-    registration.unitNumber = unitController.text;
-    registration.duration = _selectedDuration.toString();
-    registration.createdAt = DateTime.now().toUtc();
+//     registration.userType = 'Visitor';
+//     registration.name = user.name;
+//     registration.email = user.name;
+//     registration.phone = user.mobile;
+//     registration.streetNumber = '';
+//     registration.streetName =
+//         _selectedproperty?.propertyAddress ?? 'Error selecting address';
+//     registration.city = cityController.text;
+//     registration.plateNumber = plateController.text;
+//     registration.province = '';
+//     registration.unitNumber = unitController.text;
+//     registration.duration = _selectedDuration.toString();
+//     registration.createdAt = DateTime.now().toUtc();
 
-    return registration;
-  }
+//     return registration;
+//   }
 
-  // Exemption createExemption() {
-  //   var selfRegistration = Exemption.def();
-  //   selfRegistration.regDate = DateTime.now().toUtc();
-  //   selfRegistration.plateID = _selectedLicensePlate;
-  //   selfRegistration.propertyID = _selectedAddressID;
-  //   selfRegistration.startDate = DateTime.now().toUtc();
-  //   selfRegistration.endDate =
-  //       DateTime.now().add(Duration(days: _selectedDuration)).toUtc();
-  //   selfRegistration.unitNumber = '';
-  //   selfRegistration.email = user.email;
-  //   selfRegistration.phone = user.mobileNumber;
-  //   selfRegistration.name = '${user.fullName}';
-  //   selfRegistration.makeModel = '';
-  //   selfRegistration.numberOfDays = '$_selectedDuration';
-  //   selfRegistration.reason = 'guests';
-  //   selfRegistration.notes = '';
-  //   selfRegistration.authBy = '';
-  //   selfRegistration.isArchived = '';
+//   // Exemption createExemption() {
+//   //   var selfRegistration = Exemption.def();
+//   //   selfRegistration.regDate = DateTime.now().toUtc();
+//   //   selfRegistration.plateID = _selectedLicensePlate;
+//   //   selfRegistration.propertyID = _selectedAddressID;
+//   //   selfRegistration.startDate = DateTime.now().toUtc();
+//   //   selfRegistration.endDate =
+//   //       DateTime.now().add(Duration(days: _selectedDuration)).toUtc();
+//   //   selfRegistration.unitNumber = '';
+//   //   selfRegistration.email = user.email;
+//   //   selfRegistration.phone = user.mobileNumber;
+//   //   selfRegistration.name = '${user.fullName}';
+//   //   selfRegistration.makeModel = '';
+//   //   selfRegistration.numberOfDays = '$_selectedDuration';
+//   //   selfRegistration.reason = 'guests';
+//   //   selfRegistration.notes = '';
+//   //   selfRegistration.authBy = '';
+//   //   selfRegistration.isArchived = '';
 
-  //   var splitAddress = _selectedproperty?.propertyAddress?.split(',');
+//   //   var splitAddress = _selectedproperty?.propertyAddress?.split(',');
 
-  //   selfRegistration.streetNumber = splitAddress?[0] ?? '0';
-  //   selfRegistration.streetName = 'test';
-  //   selfRegistration.streetSuffix = '';
-  //   selfRegistration.address =
-  //       _selectedproperty?.propertyAddress ?? 'Error getting addresss';
+//   //   selfRegistration.streetNumber = splitAddress?[0] ?? '0';
+//   //   selfRegistration.streetName = 'test';
+//   //   selfRegistration.streetSuffix = '';
+//   //   selfRegistration.address =
+//   //       _selectedproperty?.propertyAddress ?? 'Error getting addresss';
 
-  //   return selfRegistration;
-  // }
+//   //   return selfRegistration;
+//   // }
 
-  _verifyLicencePlate() async {
-    unauthorizedPlateMessage =
-        sessionCubit.isPlateBlacklisted(licencePlate: _selectedLicensePlate);
-  }
+//   _verifyLicencePlate() async {
+//     unauthorizedPlateMessage =
+//         sessionCubit.isPlateBlacklisted(licencePlate: _selectedLicensePlate);
+//   }
 
-  _submitPressed() {
-    _verifyLicencePlate();
-    // _addNewLicensePlate(_selectedLicensePlate);
+//   _submitPressed() {
+//     _verifyLicencePlate();
+//     // _addNewLicensePlate(_selectedLicensePlate);
 
-    if (unauthorizedPlateMessage != null) {
-      openDialog(context, 'Request Unsuccessful', '$unauthorizedPlateMessage',
-          '$unauthorizedPlateMessage');
-    } else {
-      final registration = createRegistration();
+//     if (unauthorizedPlateMessage != null) {
+//       openDialog(context, 'Request Unsuccessful', '$unauthorizedPlateMessage',
+//           '$unauthorizedPlateMessage');
+//     } else {
+//       final registration = createRegistration();
 
-      if (_selectedAddressID != '' && _selectedLicensePlate != '') {
-        databaseManager.createExemption(registration);
+//       if (_selectedAddressID != '' && _selectedLicensePlate != '') {
+//         databaseManager.createExemption(registration);
 
-        openDialog(
-            context,
-            'Requested Submitted Successfully',
-            'Thank you for using R2Park! Enjoy your visit!',
-            'Thank you for using R2Park! Enjoy your visit!');
-      } else {
-        openDialog(
-            context,
-            'Please select Plate and Location',
-            'Please ensure you have selected an address and licence plate',
-            'Please ensure you have selected an address and licence plate');
-      }
-    }
-  }
+//         openDialog(
+//             context,
+//             'Requested Submitted Successfully',
+//             'Thank you for using R2Park! Enjoy your visit!',
+//             'Thank you for using R2Park! Enjoy your visit!');
+//       } else {
+//         openDialog(
+//             context,
+//             'Please select Plate and Location',
+//             'Please ensure you have selected an address and licence plate',
+//             'Please ensure you have selected an address and licence plate');
+//       }
+//     }
+//   }
 
-  // ignore: unused_element
-  Widget _footerView() {
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: Text(
-        user.email ?? 'no email found',
-        style: TextStyle(
-            color: Colors.white, fontSize: 12, overflow: TextOverflow.ellipsis),
-      ),
-    );
-  }
-}
+//   // ignore: unused_element
+//   Widget _footerView() {
+//     return Padding(
+//       padding: const EdgeInsets.all(4.0),
+//       child: Text(
+//         user.email ?? 'no email found',
+//         style: TextStyle(
+//             color: Colors.white, fontSize: 12, overflow: TextOverflow.ellipsis),
+//       ),
+//     );
+//   }
+// }

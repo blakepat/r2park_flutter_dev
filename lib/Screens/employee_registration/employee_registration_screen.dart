@@ -580,18 +580,10 @@ class EmployeeRegistrationScreenState
   }
 
   _verifyLicencePlate() {
-    if (plateController.text == '') {
-      return;
+    if (isValidPlate(plateController.text.toUpperCase().replaceAll(' ', ''))) {
     } else {
-      if (isValidPlate(
-          plateController.text.toUpperCase().replaceAll(' ', ''))) {
-        formFailedValidationMessage = sessionCubit.isPlateBlacklisted(
-                licencePlate: plateController.text) ??
-            '';
-      } else {
-        formFailedValidationMessage +=
-            "Licence Plate contains invalid characters";
-      }
+      formFailedValidationMessage +=
+          "Licence Plate contains invalid characters";
     }
   }
 

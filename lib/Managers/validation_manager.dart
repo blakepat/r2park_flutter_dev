@@ -2,7 +2,8 @@ import 'package:email_validator/email_validator.dart';
 
 bool isValidPlate(String licencePlate) {
   return RegExp(r'^[A-Za-z0-9_.]+$').hasMatch(licencePlate) &&
-      licencePlate.length < 10;
+      licencePlate.length < 10 &&
+      licencePlate.length > 1;
 }
 
 bool isValidLocationCityOrProvince(String location) {

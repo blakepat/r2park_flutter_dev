@@ -112,7 +112,7 @@ class InitialState extends State<Initial> {
     final propertyID = _prefs?.getString(_propertyIDKey);
     if (propertyID != null) {
       setState(() {
-        _previousProperty = sessionCubit.getPropertyFromID(propertyID);
+        // _previousProperty = sessionCubit.getPropertyFromID(propertyID);
       });
     }
   }
@@ -966,18 +966,11 @@ class InitialState extends State<Initial> {
   // }
 
   _verifyLicencePlate() {
-    if (plateController.text == '') {
-      return;
+    if (isValidPlate(
+        plateController.text.toUpperCase().replaceAll(' ', ''))) {
     } else {
-      if (isValidPlate(
-          plateController.text.toUpperCase().replaceAll(' ', ''))) {
-        formFailedValidationMessage = sessionCubit.isPlateBlacklisted(
-                licencePlate: plateController.text) ??
-            '';
-      } else {
-        formFailedValidationMessage +=
-            "Licence Plate contains invalid characters";
-      }
+      formFailedValidationMessage +=
+          "Licence Plate contains invalid characters";
     }
   }
 
