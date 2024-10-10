@@ -134,7 +134,6 @@ class ForgotPasswordScreen extends State<ForgotPassword> {
 
   void _changePassword() async {
     if (newPasswordTextField.text.length > 5) {
-      print("CHANGE PASSWORD CALLED");
       await databaseManager.changePassword(
           resetCodeTextField.text.trim(), newPasswordTextField.text.trim());
     } else {
@@ -147,7 +146,6 @@ class ForgotPasswordScreen extends State<ForgotPassword> {
   }
 
   void _sendCodeToEmail() async {
-    print("SEND CODE CALLED");
     var apiResponse = ("", "");
     apiResponse = await databaseManager.sendPasswordCode(
         userEmailTextField.text.trim(), masterAccessCodeTextField.text.trim());

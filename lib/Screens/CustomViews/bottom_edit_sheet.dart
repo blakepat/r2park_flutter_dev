@@ -9,8 +9,7 @@ class BottomEditSheet extends StatefulWidget {
 
   @override
   // ignore: no_logic_in_create_state
-  State<StatefulWidget> createState() =>
-      _BottomEditSheetState(accessCode: accessCode);
+  State<StatefulWidget> createState() => _BottomEditSheetState(accessCode: accessCode);
 }
 
 class _BottomEditSheetState extends State<BottomEditSheet> {
@@ -105,7 +104,7 @@ class _BottomEditSheetState extends State<BottomEditSheet> {
       Navigator.pop(
           context, [_descriptionTextField.text, _durationTextField.text]);
     } else {
-      print("SHOW POP UP TELLING THEM TO FILL OUT FORMS");
+      //TODO: SHOW POP UP TELLING THEM TO FILL OUT FORMS
     }
   }
 

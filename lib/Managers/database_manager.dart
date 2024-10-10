@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:r2park_flutter_dev/models/access_code.dart';
 import 'package:r2park_flutter_dev/models/access_code_property.dart';
 import 'package:r2park_flutter_dev/models/access_code_request.dart';
@@ -7,7 +6,6 @@ import 'package:r2park_flutter_dev/models/city.dart';
 import 'package:r2park_flutter_dev/models/database_response_message.dart';
 import 'package:r2park_flutter_dev/models/employee_registration.dart';
 import 'package:r2park_flutter_dev/models/login_user.dart';
-import 'package:r2park_flutter_dev/models/property.dart';
 import 'package:r2park_flutter_dev/models/registration.dart';
 import 'package:r2park_flutter_dev/models/registration_list_item.dart';
 import 'package:r2park_flutter_dev/models/role.dart';
@@ -53,7 +51,7 @@ class DatabaseManager {
         .map((entry) => StreetAddress.convertFromJson(entry))
         .toList();
     final List<String> streetAddress =
-        addresses.map((address) => address.street_address ?? '').toList();
+        addresses.map((address) => address.streetAddress ?? '').toList();
 
     return streetAddress;
   }
@@ -120,7 +118,7 @@ class DatabaseManager {
     final data = await json.decode(response.body);
     final responseString = data['message'];
 
-    print("DATA: $data");
+    // print("DATA: $data");
 
     return responseString;
   }
@@ -142,8 +140,8 @@ class DatabaseManager {
     );
 
     final data = await json.decode(response.body);
-    final responseString = data['message'];
-    print(responseString);
+    final _ = data['message'];
+    // print(responseString);
   }
 
   //EDIT ACCESS CODE
@@ -161,10 +159,10 @@ class DatabaseManager {
     accessCodeData['duration'] = duration;
     accessCodeData['id'] = id;
 
-    print(accessCodeData);
+    // print(accessCodeData);
 
     var url = Uri.https(baseUrl, '/services/EditAccessCode');
-    final response = await http.post(
+    final _ = await http.post(
       url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -172,9 +170,9 @@ class DatabaseManager {
       body: jsonEncode(accessCodeData),
     );
 
-    final data = await json.decode(response.body);
-    final responseString = data['message'];
-    print(responseString);
+    // final data = await json.decode(response.body);
+    // final responseString = data['message'];
+    // print(responseString);
   }
 
   //ASSIGN ACCESS CODE
@@ -187,10 +185,10 @@ class DatabaseManager {
     accessCodeData['email'] = email;
     accessCodeData['name'] = name;
 
-    print(accessCodeData);
+    // print(accessCodeData);
 
     var url = Uri.https(baseUrl, '/services/AssignAccessCode');
-    final response = await http.post(
+    final _ = await http.post(
       url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -198,10 +196,10 @@ class DatabaseManager {
       body: jsonEncode(accessCodeData),
     );
 
-    final data = await json.decode(response.body);
-    print(response.body);
-    final responseString = data['message'];
-    print(responseString);
+    // final data = await json.decode(response.body);
+    // print(response.body);
+    // final responseString = data['message'];
+    // print(responseString);
   }
 
   Future<AccessCodeProperty?> checkAccessCode(String code) async {
@@ -219,7 +217,7 @@ class DatabaseManager {
         return accessCodeProperty;
       }
     } catch (error) {
-      print(error);
+      // print(error);
       return null;
     }
     return accessCodeProperty;
@@ -288,7 +286,7 @@ class DatabaseManager {
     );
 
     final data = await json.decode(response.body);
-    print(response.body);
+    // print(response.body);
     final responseString = data['message'];
 
     return responseString;
@@ -298,7 +296,7 @@ class DatabaseManager {
   //***************************************************** */
   //CREATE USER
   Future<String> createUser(User user) async {
-    user.register_as = 'resident';
+    user.registerAs = 'resident';
     var url = Uri.https(baseUrl, '/services/PortalRegisterations/');
 
     final response = await http.post(
@@ -320,14 +318,14 @@ class DatabaseManager {
     var userId = user.userId!;
     var url = Uri.https(baseUrl, '/services/registry_index/$userId');
 
-    final response = await http.put(
+    final _ = await http.put(
       url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(user),
     );
-    print("UPDATE RESPONSE ${response.body}");
+    // print("UPDATE RESPONSE ${response.body}");
   }
 
   //DELETE USER
@@ -336,13 +334,13 @@ class DatabaseManager {
     deleteUserPreferences(user: user);
     var url = Uri.https(baseUrl, '/services/registry_index/$userId');
 
-    final response = await http.delete(
+    final _ = await http.delete(
       url,
       // headers: <String, String>{
       //   'Content-Type': 'application/json; charset=UTF-8',
       // },
     );
-    print('${response.statusCode} ${response.body}');
+    // print('${response.statusCode} ${response.body}');
   }
 
   //DELETED USER LOCAL STORED PREFERENCES -- CURRENTLY NOT IN USE
@@ -370,7 +368,7 @@ class DatabaseManager {
         body: jsonEncode(userIdData));
 
     final data = await json.decode(response.body);
-    print(data);
+    // print(data);
     List registrationsJSON = data["registrations"];
 
     registrations = registrationsJSON
@@ -383,7 +381,7 @@ class DatabaseManager {
   //CREATE EMPLOYEE REGISTRATION
   Future<String> createEmployeeRegistration(
       EmployeeRegistration employeeRegistration) async {
-    print(employeeRegistration.toJson());
+    // print(employeeRegistration.toJson());
 
     var url = Uri.https(baseUrl, '/services/registerVehicle/');
     final response = await http.post(
@@ -398,7 +396,7 @@ class DatabaseManager {
     final data = await json.decode(response.body);
     final responseString = data['message'];
 
-    print(responseString);
+    // print(responseString);
 
     return responseString;
   }
@@ -427,7 +425,7 @@ class DatabaseManager {
   Future<void> createLog(Registration registration) async {
     var url = Uri.https(baseUrl, '/services/registry_log/');
 
-    final response = await http.post(
+    final _ = await http.post(
       url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',

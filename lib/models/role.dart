@@ -4,7 +4,7 @@ class Role {
   String? type;
   String? key;
   String? status;
-  String? show_on_emp_portal;
+  String? showOnEmpPortal;
   String? created;
 
   Role(
@@ -13,7 +13,7 @@ class Role {
       this.type,
       this.key,
       this.status,
-      this.show_on_emp_portal,
+      this.showOnEmpPortal,
       this.created});
 
   Role.def() {
@@ -22,7 +22,7 @@ class Role {
     type = '';
     key = '';
     status = '';
-    show_on_emp_portal = '';
+    showOnEmpPortal = '';
     created = '';
   }
 
@@ -33,7 +33,7 @@ class Role {
     role.type = json['type'];
     role.key = json['key'];
     role.status = json['status'];
-    role.show_on_emp_portal = json['show_on_emp_portal'];
+    role.showOnEmpPortal = json['show_on_emp_portal'];
     role.created = json['created'];
 
     return role;

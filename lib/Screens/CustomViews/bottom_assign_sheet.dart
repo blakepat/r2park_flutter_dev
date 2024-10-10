@@ -9,8 +9,7 @@ class BottomAssignSheet extends StatefulWidget {
 
   @override
   // ignore: no_logic_in_create_state
-  State<StatefulWidget> createState() =>
-      _BottomAssignSheetState(accessCode: accessCode);
+  State<StatefulWidget> createState() => _BottomAssignSheetState(accessCode: accessCode);
 }
 
 class _BottomAssignSheetState extends State<BottomAssignSheet> {
@@ -103,7 +102,7 @@ class _BottomAssignSheetState extends State<BottomAssignSheet> {
     if (_nameController.text.isNotEmpty && _emailController.text.isNotEmpty) {
       Navigator.pop(context, [_nameController.text, _emailController.text]);
     } else {
-      print("SHOW POP UP TELLING THEM TO FILL OUT FORMS");
+      //TODO: SHOW POP UP TELLING THEM TO FILL OUT FORMS
     }
   }
 

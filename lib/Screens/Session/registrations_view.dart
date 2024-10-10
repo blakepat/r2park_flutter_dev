@@ -25,6 +25,7 @@ class RegistrationsScreen extends State<RegistrationsView> {
 
   String searchValue = '';
   List<RegistrationListItem> registrations = [];
+  List<RegistrationListItem> registrationsToShow = [];
 
   RegistrationsScreen({required this.user, required this.sessionCubit});
 
@@ -39,6 +40,7 @@ class RegistrationsScreen extends State<RegistrationsView> {
         await databaseManager.getRegistrations(user.userId ?? "");
     setState(() {
       registrations = registrationsFromDatabase;
+      registrationsToShow = registrationsFromDatabase;
     });
   }
 
@@ -55,8 +57,12 @@ class RegistrationsScreen extends State<RegistrationsView> {
   PreferredSizeWidget _addSearchBar() {
     return EasySearchBar(
       title: const Text('Search Registrations'),
-      onSearch: (value) => setState(() => searchValue = value.toLowerCase()),
-      // suggestions: registrations,
+      onSearch: (value) => setState(() {
+        searchValue = value.toLowerCase();
+        registrationsToShow =
+            registrations.where((item) => item.id!.contains(value)).toList();
+      }),
+      suggestions: registrations.map((item) => (item.id ?? "")).toList(),
       backgroundColor: Colors.black26,
     );
   }
@@ -126,7 +132,7 @@ class RegistrationsScreen extends State<RegistrationsView> {
   }
 
   List<Widget> _createListObjects() {
-    return registrations
+    return registrationsToShow
         .map((registration) => Padding(
             padding: const EdgeInsets.all(8.0),
             child: Container(
@@ -148,23 +154,23 @@ class RegistrationsScreen extends State<RegistrationsView> {
                             Text('Registration ID: ${registration.id ?? ''}'),
                             Spacer(),
                             Text(
-                                'Master Access Code: ${registration.master_access_code ?? ''}'),
+                                'Master Access Code: ${registration.masterAccessCode ?? ''}'),
                           ],
                         ),
                         Row(children: [
                           Text(
-                              'Employee Access Code: ${registration.employee_access_code}'),
+                              'Employee Access Code: ${registration.employeeAccessCode}'),
                           Spacer(),
                           Text(
-                              'Location ID: ${registration.fk_location_id ?? ''}'),
+                              'Location ID: ${registration.fkLocationId ?? ''}'),
                         ]),
                         Row(children: [
-                          Text('Licence Plate: ${registration.fk_plate_id}'),
+                          Text('Licence Plate: ${registration.fkPlateId}'),
                           Spacer(),
                           Text('Province: ${registration.prov ?? ''}'),
                         ]),
-                        Text('Start Date: ${registration.start_date ?? ''}'),
-                        Text('End Date: ${registration.end_date ?? ''}'),
+                        Text('Start Date: ${registration.startDate ?? ''}'),
+                        Text('End Date: ${registration.endDate ?? ''}'),
                       ],
                     ),
                   ),

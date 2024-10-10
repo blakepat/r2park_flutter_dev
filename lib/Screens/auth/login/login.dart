@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
-import 'package:r2park_flutter_dev/Screens/Session/session_state.dart';
 import 'package:r2park_flutter_dev/Screens/auth/sign_up/forgot_password.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../models/user.dart';
@@ -60,7 +59,6 @@ class LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(title: Text('Login')),
       body: SafeArea(
@@ -142,10 +140,10 @@ class LoginState extends State<Login> {
                         final SharedPreferences prefs = await preferences;
                         prefs.setString("email", _emailTextField.text);
                         prefs.setString("password", _passwordController.text);
-                        Navigator.of(context).pop(widget);
+                        if (context.mounted) Navigator.of(context).pop();
                         sessionCubit.showSession(user);
                       } else {
-                        openDialog(context, 'Invalid Data', 'invalid password',
+                        openDialog((context.mounted) ? context : context, 'Invalid Data', 'invalid password',
                             'Make sure your username and password are correct');
                       }
                     },

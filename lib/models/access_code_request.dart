@@ -1,22 +1,22 @@
 class AccessCodeRequest {
-  String user_id;
+  String userId;
   String description;
   String duration;
-  String number_of_codes;
+  String numberOfCodes;
 
   AccessCodeRequest(
-      {required this.user_id,
+      {required this.userId,
       required this.description,
       required this.duration,
-      required this.number_of_codes});
+      required this.numberOfCodes});
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
 
-    data['user_id'] = user_id;
+    data['user_id'] = userId;
     data['description'] = description;
     data['duration'] = duration;
-    data['number_of_codes'] = number_of_codes;
+    data['number_of_codes'] = numberOfCodes;
 
     return data;
   }

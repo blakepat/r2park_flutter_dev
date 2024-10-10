@@ -4,6 +4,8 @@ import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
 
 // ignore: must_be_immutable
 class TermsAndConditionsPage extends StatefulWidget {
+  const TermsAndConditionsPage({super.key});
+
   @override
   TermsAndConditionsState createState() => TermsAndConditionsState();
   // ignore: no_logic_in_create_state
@@ -49,7 +51,7 @@ class TermsAndConditionsState extends State<TermsAndConditionsPage> {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: GradientButton(
-                              onPressed: ExitTermsAndConditions,
+                              onPressed: exitTermsAndConditions,
                               borderRadius: BorderRadius.circular(20),
                               child: Text(
                                 'Close',
@@ -62,7 +64,7 @@ class TermsAndConditionsState extends State<TermsAndConditionsPage> {
                 ))));
   }
 
-  void ExitTermsAndConditions() {
+  void exitTermsAndConditions() {
     Navigator.of(context).pop();
   }
 }

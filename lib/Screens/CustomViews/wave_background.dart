@@ -5,11 +5,10 @@ class WaveBackground extends StatelessWidget {
   final Color secondColor;
   final Widget? child;
   const WaveBackground(
-      {Key? key,
+      {super.key,
       required this.firstColor,
       required this.secondColor,
-      this.child})
-      : super(key: key);
+      this.child});
 
   @override
   Widget build(BuildContext context) {

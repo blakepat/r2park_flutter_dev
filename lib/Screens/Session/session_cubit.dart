@@ -30,7 +30,6 @@ class SessionCubit extends Cubit<SessionState> {
         emit(Authenticated(user: user));
       }
     } catch (e) {
-      print(e);
       emit(Unauthenticated());
     }
   }
@@ -43,7 +42,6 @@ class SessionCubit extends Cubit<SessionState> {
   }
 
   void attemptAutoLogin() async {
-    print("ATTEMPT AUTO LOGIN CALLED");
     final SharedPreferences prefs = await preferences;
     String? userEmail = prefs.getString('email');
     String? userPassword = prefs.getString('password');

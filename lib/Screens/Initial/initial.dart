@@ -25,6 +25,7 @@ class Initial extends StatefulWidget {
   @override
   // ignore: no_logic_in_create_state
   InitialState createState() =>
+      // ignore: no_logic_in_create_state
       InitialState(sessionCubit: sessionCubit, showAppBar: showAppBar);
 
   const Initial(
@@ -93,7 +94,6 @@ class InitialState extends State<Initial> {
     // print(url);
     if (url.pathSegments.length > 2) {
       var urlType = url.pathSegments[1];
-      print('URL TYPE: $urlType');
       if (urlType == 'c') {
         _employeePressed();
       }
@@ -348,17 +348,6 @@ class InitialState extends State<Initial> {
     );
   }
 
-  Widget _createCityField() {
-    return Expanded(
-      flex: 4,
-      child: TextField(
-        controller: cityController,
-        decoration: textFieldDecoration(
-            icon: Icons.location_city_rounded, labelName: 'City'),
-      ),
-    );
-  }
-
   Widget _createCityDropDownMenu() {
     return Expanded(
         flex: 4,
@@ -386,7 +375,7 @@ class InitialState extends State<Initial> {
           dropdownColor: Colors.blueGrey,
           items: sessionCubit.cities?.map((city) {
             return DropdownMenuItem(
-                child: Text(city.description ?? ''), value: city);
+                value: city, child: Text(city.description ?? ''));
           }).toList(),
           onChanged: cityDropdownCallback,
         ));
@@ -966,8 +955,7 @@ class InitialState extends State<Initial> {
   // }
 
   _verifyLicencePlate() {
-    if (isValidPlate(
-        plateController.text.toUpperCase().replaceAll(' ', ''))) {
+    if (isValidPlate(plateController.text.toUpperCase().replaceAll(' ', ''))) {
     } else {
       formFailedValidationMessage +=
           "Licence Plate contains invalid characters";
@@ -1006,8 +994,8 @@ class InitialState extends State<Initial> {
           context,
           'Request Unsuccessful',
           // ignore: unnecessary_string_interpolations
-          '$formFailedValidationMessage',
-          '$formFailedValidationMessage');
+          formFailedValidationMessage,
+          formFailedValidationMessage);
     } else {
       if (nameController.text != '' &&
               emailController.text != '' &&
@@ -1018,14 +1006,14 @@ class InitialState extends State<Initial> {
           // _exemptionRequestProperty != null
           ) {
         if (addressController.text != '') {
-          Iterable<String> fill_address =
+          Iterable<String> fillAddress =
               streetAddresses.where((String option) {
             return option
                 .toLowerCase()
                 .contains(addressController.text.toLowerCase());
           });
-          if (fill_address.length == 1) {
-            addressController.text = fill_address.first.toString();
+          if (fillAddress.length == 1) {
+            addressController.text = fillAddress.first.toString();
             selectedFromList = true;
           }
 
@@ -1039,6 +1027,7 @@ class InitialState extends State<Initial> {
                 await databaseManager.createExemption(exemption);
 
             openDialog(
+                // ignore: use_build_context_synchronously
                 context,
                 '✅ ${databaseResponseMessage.message ?? ''}',
                 databaseResponseMessage.description,

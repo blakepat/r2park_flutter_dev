@@ -12,10 +12,10 @@ bool isValidLocationCityOrProvince(String location) {
 
 String validateMobile(String value) {
   String pattern = r'(^(?:[+0]9)?[0-9]{10}$)';
-  RegExp regExp = new RegExp(pattern);
+  RegExp regExp = RegExp(pattern);
   String errorMessage = '';
 
-  if (value.length == 0) {
+  if (value.isEmpty) {
     errorMessage = '• Please enter mobile number\n';
   } else if (!regExp.hasMatch(value)) {
     errorMessage = '• Please enter valid mobile number\n';

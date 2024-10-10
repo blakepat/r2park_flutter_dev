@@ -1,7 +1,7 @@
 class User {
   String? userId;
-  String? register_as;
-  String? master_access_code;
+  String? registerAs;
+  String? masterAccessCode;
   String? email;
   String? name;
   String? mobile;
@@ -10,14 +10,14 @@ class User {
   String? city;
   String? province;
   String? postalCode;
-  String? auth_level;
+  String? authLevel;
   String? status;
   String? password;
 
   User(
       {required this.userId,
-      this.register_as,
-      this.master_access_code,
+      this.registerAs,
+      this.masterAccessCode,
       this.email,
       this.name,
       this.mobile,
@@ -26,14 +26,14 @@ class User {
       this.city,
       this.province,
       this.postalCode,
-      this.auth_level,
+      this.authLevel,
       this.status,
       this.password});
 
   User.def() {
     userId = null;
-    register_as = "";
-    master_access_code = "";
+    registerAs = "";
+    masterAccessCode = "";
     email = "";
     name = "";
     mobile = "";
@@ -42,7 +42,7 @@ class User {
     city = "";
     province = "";
     postalCode = "";
-    auth_level = "";
+    authLevel = "";
     status = "";
     password = "";
   }
@@ -51,8 +51,8 @@ class User {
     final user = User.def();
 
     user.userId = json['user_id'];
-    user.register_as = json['register_as'];
-    user.master_access_code = json['master_access_code'];
+    user.registerAs = json['register_as'];
+    user.masterAccessCode = json['master_access_code'];
     user.email = json['email'];
     user.name = json['name'];
     user.mobile = json['mobile'];
@@ -61,7 +61,7 @@ class User {
     user.city = json['city'];
     user.province = json['province'];
     user.postalCode = json['postal_code'];
-    user.auth_level = json['auth_level'];
+    user.authLevel = json['auth_level'];
     user.status = json['status'];
     return user;
   }
@@ -70,17 +70,17 @@ class User {
     final Map<String, dynamic> data = <String, dynamic>{};
 
     // data['user_id'] = userId;
-    data['register_as'] = register_as;
+    data['register_as'] = registerAs;
     data['email'] = email;
     data['name'] = name;
     data['mobile'] = mobile;
-    data['master_access_code'] = master_access_code;
+    data['master_access_code'] = masterAccessCode;
     // data['unit_number'] = unitNumber;
     data['city'] = city;
     data['postal_code'] = postalCode;
     data['address1'] = address1;
     data['province'] = province;
-    data['auth_level'] = auth_level;
+    data['auth_level'] = authLevel;
     data['status'] = status;
 
     return data;

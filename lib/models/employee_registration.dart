@@ -1,35 +1,35 @@
 class EmployeeRegistration {
-  String? full_name;
+  String? fullName;
   String? email;
   String? phone;
-  String? access_code;
-  String? plate_number;
+  String? accessCode;
+  String? plateNumber;
   String? province;
 
   EmployeeRegistration(
       {this.email,
-      this.full_name,
+      this.fullName,
       this.phone,
-      this.access_code,
-      this.plate_number,
+      this.accessCode,
+      this.plateNumber,
       this.province});
 
   EmployeeRegistration.def() {
     email = '';
-    full_name = '';
+    fullName = '';
     phone = '';
-    access_code = '';
-    plate_number = '';
+    accessCode = '';
+    plateNumber = '';
     province = '';
   }
 
   factory EmployeeRegistration.convertFromJson(dynamic json) {
     final employeeRegistration = EmployeeRegistration.def();
-    employeeRegistration.full_name = json['full_name'];
+    employeeRegistration.fullName = json['full_name'];
     employeeRegistration.email = json['email'];
     employeeRegistration.phone = json['phone'];
-    employeeRegistration.access_code = json['access_code'];
-    employeeRegistration.plate_number = json['plate_number'];
+    employeeRegistration.accessCode = json['access_code'];
+    employeeRegistration.plateNumber = json['plate_number'];
     employeeRegistration.province = json['province'];
 
     return employeeRegistration;
@@ -38,11 +38,11 @@ class EmployeeRegistration {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
 
-    data['full_name'] = full_name;
+    data['full_name'] = fullName;
     data['email'] = email;
     data['phone'] = phone;
-    data['access_code'] = access_code;
-    data['plate_number'] = plate_number;
+    data['access_code'] = accessCode;
+    data['plate_number'] = plateNumber;
     data['province'] = province;
 
     return data;

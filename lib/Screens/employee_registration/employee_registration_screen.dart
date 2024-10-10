@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
@@ -21,6 +20,7 @@ class EmployeeRegistrationScreen extends StatefulWidget {
   @override
   // ignore: no_logic_in_create_state
   EmployeeRegistrationScreenState createState() =>
+      // ignore: no_logic_in_create_state
       EmployeeRegistrationScreenState(
           sessionCubit: sessionCubit, showAppBar: showAppBar);
 
@@ -550,12 +550,12 @@ class EmployeeRegistrationScreenState
   EmployeeRegistration createRegistration() {
     var registration = EmployeeRegistration.def();
 
-    registration.full_name = nameController.text.trim();
+    registration.fullName = nameController.text.trim();
     registration.email = emailController.text.trim();
     registration.phone =
         phoneController.text.trim().replaceAll('-', '').replaceAll(' ', '');
-    registration.access_code = accessCodeController.text.trim();
-    registration.plate_number = plateController.text.trim();
+    registration.accessCode = accessCodeController.text.trim();
+    registration.plateNumber = plateController.text.trim();
     registration.province = _plateProvince;
 
     return registration;
@@ -616,8 +616,8 @@ class EmployeeRegistrationScreenState
           context,
           'Request Unsuccessful',
           // ignore: unnecessary_string_interpolations
-          '$formFailedValidationMessage',
-          '$formFailedValidationMessage');
+          formFailedValidationMessage,
+          formFailedValidationMessage);
     } else {
       if (nameController.text != '' &&
               emailController.text != '' &&
@@ -632,6 +632,7 @@ class EmployeeRegistrationScreenState
           final response =
               await databaseManager.createEmployeeRegistration(exemption);
 
+          // ignore: use_build_context_synchronously
           openDialog(context, '✅ Response', response, response);
 
           // if (databaseResponseMessage.message ==

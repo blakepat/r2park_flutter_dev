@@ -8,6 +8,7 @@ class GradientButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final Widget child;
 
+  // ignore: use_super_parameters
   const GradientButton({
     Key? key,
     required this.onPressed,

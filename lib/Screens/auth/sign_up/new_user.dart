@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/Screens/CustomViews/gradient_button.dart';
@@ -13,24 +11,19 @@ import '../../../models/user.dart';
 
 // ignore: must_be_immutable
 class NewUser extends StatefulWidget {
-  User? user;
   SessionCubit? sessionCubit;
   bool isManagerScreen;
 
-  NewUser(
-      {super.key, required this.isManagerScreen, this.user, this.sessionCubit});
+  NewUser({super.key, required this.isManagerScreen, this.sessionCubit});
 
   @override
   NewUserState createState() =>
       // ignore: no_logic_in_create_state
       NewUserState(
-          isManagerScreen: isManagerScreen,
-          loggedInUser: user,
-          sessionCubit: sessionCubit);
+          isManagerScreen: isManagerScreen, sessionCubit: sessionCubit);
 }
 
 class NewUserState extends State<NewUser> {
-  User? loggedInUser;
   SessionCubit? sessionCubit;
   bool isManagerScreen;
 
@@ -63,37 +56,19 @@ class NewUserState extends State<NewUser> {
   AccessCodeProperty? accessCodeProperty;
   FocusNode accessCodeFocus = FocusNode();
 
-  NewUserState(
-      {required this.isManagerScreen, this.loggedInUser, this.sessionCubit});
+  NewUserState({required this.isManagerScreen, this.sessionCubit});
 
   @override
   void initState() {
     super.initState();
 
-    isNewUser = checkifNewUser(widget.user ?? User.def());
-    widget.user ??= User.def();
-
-    _emailTextFieldController.text = widget.user?.email ?? '';
-    _fullNameTextFieldController.text = widget.user?.name ?? '';
-    _mobileNumberTextFieldController.text = widget.user?.mobile ?? '';
-    _address1TextFieldController.text = widget.user?.address1 ?? '';
-    _unitNumberTextFieldController.text = widget.user?.unitNumber ?? '';
-    _cityTextFieldController.text = widget.user?.city ?? '';
-    _province = widget.user?.province?.toUpperCase() ?? 'ON';
-    _province.isEmpty ? {_province = 'ON'} : '';
-    _postalCodeTextFieldController.text = widget.user?.postalCode ?? '';
-
     accessCodeFocus.addListener(() async {
-      print('🚒🚒');
       if (!accessCodeFocus.hasFocus) {
-        print("INSIDE FOCUS CHECK!");
-        print(_accessCodeTextFieldController.text);
         accessCodeProperty = await databaseManager
             .checkAccessCode(_accessCodeTextFieldController.text);
         if (accessCodeProperty != null) {
-          print("INSIDE ACCESS CODE CHECK");
           setState(() {
-            addressSplitter(accessCodeProperty?.property_address ?? 'failed');
+            addressSplitter(accessCodeProperty?.propertyAddress ?? 'failed');
             _province = accessCodeProperty?.province ?? 'ON';
           });
         }
@@ -118,13 +93,7 @@ class NewUserState extends State<NewUser> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: loggedInUser == null
-          ? AppBar(
-              title: checkifNewUser(widget.user ?? User.def())
-                  ? Text('Create an Account')
-                  : Text('Update User'),
-            )
-          : null,
+      appBar: AppBar(title: Text('Create an Account')),
       body: Column(
         children: [
           Expanded(
@@ -134,16 +103,7 @@ class NewUserState extends State<NewUser> {
               children: [
                 _createRoleDropdown(),
                 _createAccessCodeField(),
-                isNewUser
-                    ? _createEmailField()
-                    : Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-                        child: Text(
-                          '${widget.user?.email}',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 22),
-                        ),
-                      ),
+                _createEmailField(),
                 _createNameField(),
                 _createPhoneField(),
                 Padding(
@@ -164,17 +124,8 @@ class NewUserState extends State<NewUser> {
                   ),
                 ),
                 SizedBox(height: 32),
-                _createUpdateButton(),
+                _createAccountButton(),
                 SizedBox(height: 12),
-                if (isNewUser == false)
-                  TextButton(
-                      onPressed: () => isManagerScreen
-                          ? _showActionSheetForRemoveResident(context)
-                          : _showActionSheetForDelete(context),
-                      child: Text(
-                        isManagerScreen ? 'Remove Resident' : 'Delete Profile',
-                        style: TextStyle(color: Colors.red),
-                      ))
               ],
             ),
           )
@@ -182,29 +133,6 @@ class NewUserState extends State<NewUser> {
       ),
     );
   }
-
-  // Widget _textField(
-  //     String labelText, TextEditingController? controller, bool validate,
-  //     {bool passwordConfirmField = false,
-  //     bool hideText = false,
-  //     int? maxLength,
-  //     String errorText = ""}) {
-  //   return TextField(
-  //     maxLength: maxLength,
-  //     obscureText: hideText,
-  //     decoration: InputDecoration(
-  //         counterText: '',
-  //         labelText: labelText,
-  //         errorText: errorText.isEmpty
-  //             ? validate
-  //                 ? null
-  //                 : passwordConfirmField
-  //                     ? "Passwords do not match"
-  //                     : 'Field Can\'t be empty'
-  //             : errorText),
-  //     controller: controller,
-  //   );
-  // }
 
   Widget _createRoleDropdown() {
     return Padding(
@@ -255,19 +183,6 @@ class NewUserState extends State<NewUser> {
         inputFormatters: [UpperCaseTextFormatter()],
         decoration: textFieldDecoration(
             icon: Icons.abc_rounded, labelName: 'Access Code'),
-        // onChanged: (value) async {
-        //   if (value.length == 6) {
-        //     accessCodeProperty = await databaseManager.checkAccessCode(value);
-
-        //     if (accessCodeProperty != null) {
-        //       setState(() {
-        //         addressSplitter(
-        //             accessCodeProperty?.property_address ?? 'failed');
-        //         _province = accessCodeProperty?.province ?? 'ON';
-        //       });
-        //     }
-        //   }
-        // },
       ),
     );
   }
@@ -398,50 +313,43 @@ class NewUserState extends State<NewUser> {
     }
   }
 
-  Widget _createUpdateButton() {
+  Widget _createAccountButton() {
     return Container(
       height: 40,
       padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
       child: GradientButton(
           borderRadius: BorderRadius.circular(20),
           width: 200,
-          child: checkifNewUser(widget.user ?? User.def())
-              ? Text('Create', style: TextStyle(color: Colors.white))
-              : Text('Update', style: TextStyle(color: Colors.white)),
+          child: Text('Create', style: TextStyle(color: Colors.white)),
           onPressed: () async {
             _validateTextFields();
 
             if (_textFieldsAreAllValid()) {
-              if (loggedInUser == null) {
-                widget.user = User.def();
-                widget.user?.email = _emailTextFieldController.text;
-              }
-              widget.user?.name = _fullNameTextFieldController.text;
-              widget.user?.register_as = _role;
-              widget.user?.master_access_code =
+              final user = User.def();
+              user.email = _emailTextFieldController.text;
+
+              user.name = _fullNameTextFieldController.text;
+              user.registerAs = _role;
+              user.masterAccessCode =
                   _accessCodeTextFieldController.text.trim();
-              widget.user?.mobile = _mobileNumberTextFieldController.text;
-              widget.user?.address1 = _address1TextFieldController.text;
-              widget.user?.unitNumber = _unitNumberTextFieldController.text;
-              widget.user?.city = _cityTextFieldController.text;
-              widget.user?.province = _province;
-              widget.user?.postalCode = _postalCodeTextFieldController.text;
-              widget.user?.auth_level = '13';
-              widget.user?.status = '1';
+              user.mobile = _mobileNumberTextFieldController.text;
+              user.address1 = _address1TextFieldController.text;
+              user.unitNumber = _unitNumberTextFieldController.text;
+              user.city = _cityTextFieldController.text;
+              user.province = _province;
+              user.postalCode = _postalCodeTextFieldController.text;
+              user.authLevel = '13';
+              user.status = '1';
 
-              final response = await databaseManager.createUser(widget.user!);
-
+              final response = await databaseManager.createUser(user);
+              // ignore: use_build_context_synchronously
+              if (context.mounted) Navigator.of(context).pop();
+              // ignore: use_build_context_synchronously
               openDialog(context, '✅ User Created!', response, response);
+              
             }
           }),
     );
-  }
-
-  checkifNewUser(User user) {
-    if (user.name == '') {
-      return true;
-    }
-    return false;
   }
 
   _textFieldsAreAllValid() {
@@ -476,113 +384,4 @@ class NewUserState extends State<NewUser> {
           : postalCodeValidate = true;
     });
   }
-
-  void _showActionSheetForDelete(BuildContext context) {
-    showCupertinoModalPopup<void>(
-        context: context,
-        builder: (BuildContext modalContext) => CupertinoActionSheet(
-              title: Text(
-                'Delete User?',
-                style: TextStyle(fontSize: 20, color: Colors.red),
-              ),
-              message: Text(
-                'Are you sure you want to delete your profile and logout?',
-                style: TextStyle(fontSize: 16),
-              ),
-              actions: [
-                CupertinoActionSheetAction(
-                  onPressed: () async {
-                    databaseManager.deleteUser(loggedInUser!);
-                    widget.user = null;
-                    Navigator.of(modalContext).pop();
-                    BlocProvider.of<SessionCubit>(context).signOut();
-                    // Navigator.of(context).pop();
-                  },
-                  isDestructiveAction: true,
-                  child: Text('Delete'),
-                )
-              ],
-              cancelButton: CupertinoActionSheetAction(
-                onPressed: (() {
-                  Navigator.pop(modalContext);
-                }),
-                child: Text('Cancel'),
-              ),
-            ));
-  }
-
-  void _showActionSheetForRemoveResident(BuildContext context) {
-    showCupertinoModalPopup<void>(
-        context: context,
-        builder: (BuildContext modalContext) => CupertinoActionSheet(
-              title: Text(
-                'Remove Resident From Property?',
-                style: TextStyle(fontSize: 20, color: Colors.red),
-              ),
-              message: Text(
-                'Are you sure you want to remove this resident from the property',
-                style: TextStyle(fontSize: 16),
-              ),
-              actions: [
-                CupertinoActionSheetAction(
-                  onPressed: () async {
-                    User residentToRemove = loggedInUser!;
-                    residentToRemove.master_access_code = "";
-                    residentToRemove.register_as = "Visitor";
-                    residentToRemove.address1 = "";
-                    residentToRemove.unitNumber = "";
-
-                    databaseManager.updateUser(residentToRemove);
-                    widget.user = null;
-                    Navigator.of(modalContext).pop();
-                    Navigator.of(context).pop();
-                  },
-                  isDestructiveAction: true,
-                  child: Text('Remove'),
-                )
-              ],
-              cancelButton: CupertinoActionSheetAction(
-                onPressed: (() {
-                  Navigator.pop(modalContext);
-                }),
-                child: Text('Cancel'),
-              ),
-            ));
-  }
-
-  // final _random = Random();
-  // String randomIntString(int min, int max) =>
-  //     '${min + _random.nextInt(max - min)}';
-
-  // sendEmail({
-  //   required String email,
-  // }) async {
-  //   int min = 111111, max = 999999;
-  //   newPass = randomIntString(min, max);
-
-  //   const subject = 'Password Reset for R2Park';
-  //   final message =
-  //       'Thank you for using R2Park!\n\n the code to confirm your email is: $newPass \n\n';
-
-  //   const serviceId = 'service_r92qfro';
-  //   const templateId = 'template_3bcglw2';
-  //   const userId = 'O3E-2XbChA0kAiyXd';
-
-  //   final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
-  //   final _ = await http.post(url,
-  //       headers: {
-  //         'origin': 'http://localhost',
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: json.encode({
-  //         'service_id': serviceId,
-  //         'template_id': templateId,
-  //         'user_id': userId,
-  //         'template_params': {
-  //           'user_email': email,
-  //           'user_subject': subject,
-  //           'user_message': message,
-  //         }
-  //       }));
-  // }
 }

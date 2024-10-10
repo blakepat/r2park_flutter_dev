@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:r2park_flutter_dev/Managers/constants.dart';
 import 'package:r2park_flutter_dev/Managers/database_manager.dart';
@@ -49,8 +48,8 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
 
   void getAccessCodes() async {
     final acArray = await databaseManager.getAccessCodes(user.userId ?? "");
-    acArray.sort((a, b) => DateTime.parse(b.created_at ?? "")
-        .compareTo(DateTime.parse(a.created_at ?? "")));
+    acArray.sort((a, b) => DateTime.parse(b.createdAt ?? "")
+        .compareTo(DateTime.parse(a.createdAt ?? "")));
 
     setState(() {
       accessCodes = acArray;
@@ -151,10 +150,10 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
 
   void _generateCodes() async {
     final accessCodeRequest = AccessCodeRequest(
-      user_id: user.userId ?? '',
+      userId: user.userId ?? '',
       description: _purposeController.text,
       duration: _durationController.text,
-      number_of_codes: _numberOfCodesController.text,
+      numberOfCodes: _numberOfCodesController.text,
     );
 
     var numberOfCodes = int.tryParse(_numberOfCodesController.text);
@@ -165,17 +164,16 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
           numberOfCodes > 0 &&
           duration > 0 &&
           duration < 5) {
-        print("😈${accessCodes.length}");
         final response =
             await databaseManager.generateAccessCodes(accessCodeRequest);
 
+        // ignore: use_build_context_synchronously
         openDialog(context, "Response from Server", response, response);
         var newCodes = await databaseManager.getAccessCodes(user.userId ?? "");
         setState(() {
           _purposeController.text = "";
           _durationController.text = "";
           _numberOfCodesController.text = "";
-          print("🤡${newCodes.length}");
           accessCodes = newCodes;
           getAccessCodes();
         });
@@ -279,9 +277,9 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
                       children: [
                         Row(
                           children: [
-                            Text('ACCESS CODE: ${code.access_code ?? ''}'),
+                            Text('ACCESS CODE: ${code.accessCode ?? ''}'),
                             Spacer(),
-                            Text('USER ID: ${code.user_id ?? ''}'),
+                            Text('USER ID: ${code.userId ?? ''}'),
                           ],
                         ),
                         Row(children: [
@@ -292,7 +290,7 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
                         ]),
                         Text('NAME: ${code.name ?? ''}'),
                         Text('EMAIL: ${code.email ?? ''}'),
-                        Text('CREATED AT: ${code.created_at ?? ''}'),
+                        Text('CREATED AT: ${code.createdAt ?? ''}'),
                         Text('EXPIRY DATE: ${code.expiry ?? ''}'),
                         ConstrainedBox(
                             constraints: BoxConstraints(
@@ -309,7 +307,7 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
                                   borderRadius: BorderRadius.circular(20),
                                   onPressed: () => {
                                         _activateAccessCode(
-                                            code.access_code ?? "")
+                                            code.accessCode ?? "")
                                       },
                                   child: Text(
                                     code.status == "1"
@@ -346,7 +344,6 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
   }
 
   void _activateAccessCode(String code) async {
-    print("Activate access code called");
     await databaseManager.activateAccessCode(code, user.userId ?? "");
     getAccessCodes();
   }
@@ -358,7 +355,7 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
       (value) async {
         if (value != null) {
           await databaseManager.assignAccessCode(
-              code.access_code ?? "", user.userId ?? "", value[1], value[0]);
+              code.accessCode ?? "", user.userId ?? "", value[1], value[0]);
         }
         getAccessCodes();
       },
@@ -372,8 +369,8 @@ class ResidentSessionScreen extends State<GenerateCodeView> {
       (value) async {
         if (value != null) {
           await databaseManager.editAccessCode(
-              accessCode: code.access_code ?? "",
-              userId: code.user_id ?? "",
+              accessCode: code.accessCode ?? "",
+              userId: code.userId ?? "",
               description: value[0],
               duration: value[1],
               id: code.id ?? "");

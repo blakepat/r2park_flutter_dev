@@ -63,7 +63,7 @@ class AppNavigator extends StatelessWidget {
                               primary: Color.fromARGB(220, 160, 245, 107))),
                       home: Initial(
                         // Login(
-                          showAppBar: true,
+                        showAppBar: true,
                         sessionCubit: context.read<SessionCubit>(),
                       ),
                     )),
@@ -108,6 +108,7 @@ class AppNavigator extends StatelessWidget {
                       ),
                     )
                 ],
+                // ignore: deprecated_member_use
                 onPopPage: (route, result) {
                   return route.didPop(result);
                 }),

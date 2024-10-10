@@ -4,10 +4,8 @@ import 'package:r2park_flutter_dev/Managers/database_manager.dart';
 import 'package:r2park_flutter_dev/app_navigator.dart';
 import 'package:r2park_flutter_dev/models/city.dart';
 import 'package:r2park_flutter_dev/models/role.dart';
-import 'package:r2park_flutter_dev/models/user.dart';
 import 'Screens/Session/session_cubit.dart';
 import 'Screens/auth/auth_utilities/auth_repo.dart';
-import 'models/property.dart';
 
 void main() {
   runApp(MyApp());

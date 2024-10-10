@@ -1,15 +1,15 @@
 class StreetAddress {
-  String? street_address;
+  String? streetAddress;
 
-  StreetAddress({this.street_address});
+  StreetAddress({this.streetAddress});
 
   StreetAddress.def() {
-    street_address = '';
+    streetAddress = '';
   }
 
   factory StreetAddress.convertFromJson(dynamic json) {
     final streetAddress = StreetAddress.def();
-    streetAddress.street_address = json['street_address'];
+    streetAddress.streetAddress = json['street_address'];
 
     return streetAddress;
   }
